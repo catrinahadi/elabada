@@ -9,47 +9,89 @@
 export function calculateTopsis(shops, weights) {
     if (!shops || shops.length === 0) return [];
 
-    // Define criteria: key, weight (as provided), and whether it's a benefit (true) or cost (false)
+    const totalWeight =
+        (weights.price || 0) +
+        (weights.time || 0) +
+        (weights.rating || 0) +
+        (weights.distance || 0) || 1;
+
+    const normalizedWeights = {
+        price: (weights.price || 0.1) / totalWeight,
+        time: (weights.time || 0.1) / totalWeight,
+        rating: (weights.rating || 0.1) / totalWeight,
+        distance: (weights.distance || 0.1) / totalWeight
+    };
+
     const criteria = [
-        { key: 'price', weight: weights.price || 0.1, isBenefit: false },
-        { key: 'turnaroundTime', weight: weights.time || 0.1, isBenefit: false },
-        { key: 'rating', weight: weights.rating || 0.1, isBenefit: true },
-        { key: 'distance', weight: weights.distance || 0.1, isBenefit: false }
+        { key: 'price', weight: normalizedWeights.price, isBenefit: false },
+        { key: 'turnaroundTime', weight: normalizedWeights.time, isBenefit: false },
+        { key: 'rating', weight: normalizedWeights.rating, isBenefit: true },
+        { key: 'distance', weight: normalizedWeights.distance, isBenefit: false }
     ];
 
-    // 1. Calculate the column norms once (Vector Normalization)
     const columnNorms = criteria.map(c => {
-        const sumSq = shops.reduce((sum, s) => sum + Math.pow(s[c.key] || 0, 2), 0);
+        const sumSq = shops.reduce((sum, s) => {
+            const val = typeof s[c.key] === "number" ? s[c.key] : 0;
+            return sum + Math.pow(val, 2);
+        }, 0);
         return Math.sqrt(sumSq) || 1;
     });
 
-    // 2. Calculate the weighted normalized decision matrix
     const weighted = shops.map(shop => {
         const vals = criteria.map((c, i) => {
-            const normalized = (shop[c.key] || 0) / columnNorms[i];
+            const val = typeof shop[c.key] === "number" ? shop[c.key] : 0;
+            const normalized = val / columnNorms[i];
             return normalized * c.weight;
         });
         return { id: shop.id, vals };
     });
 
-    // 3. Determine the Ideal (V+) and Anti-Ideal (V-) solutions
     const ideal = criteria.map((c, i) => {
         const columnVals = weighted.map(w => w.vals[i]);
-        return c.isBenefit ? Math.max(...columnVals) : Math.min(...columnVals);
+        return c.isBenefit
+            ? Math.max(...columnVals)
+            : Math.min(...columnVals);
     });
 
     const antiIdeal = criteria.map((c, i) => {
         const columnVals = weighted.map(w => w.vals[i]);
-        return c.isBenefit ? Math.min(...columnVals) : Math.max(...columnVals);
+        return c.isBenefit
+            ? Math.min(...columnVals)
+            : Math.max(...columnVals);
     });
 
-    // 4. Calculate separation and relative closeness
-    return weighted.map(w => {
-        const distIdeal = Math.sqrt(w.vals.reduce((sum, v, i) => sum + Math.pow(v - ideal[i], 2), 0));
-        const distAntiIdeal = Math.sqrt(w.vals.reduce((sum, v, i) => sum + Math.pow(v - antiIdeal[i], 2), 0));
+    return weighted.map((w, shopIdx) => {
+        const distIdeal = Math.sqrt(
+            w.vals.reduce((sum, v, i) => sum + Math.pow(v - ideal[i], 2), 0)
+        );
 
-        // Closer to 1 means better performance
-        const score = distAntiIdeal / (distIdeal + distAntiIdeal || 1);
-        return { id: w.id, score };
+        const distAntiIdeal = Math.sqrt(
+            w.vals.reduce((sum, v, i) => sum + Math.pow(v - antiIdeal[i], 2), 0)
+        );
+
+        const score =
+            distAntiIdeal / (distIdeal + distAntiIdeal || 1);
+
+        const shopData = shops[shopIdx];
+
+        return {
+            id: w.id,
+            score,
+            details: criteria.map((c, i) => ({
+                criterion: c.key,
+                weight: c.weight,
+                actualValue: shopData[c.key],
+                weightedValue: w.vals[i],
+                idealValue: ideal[i],
+                antiIdealValue: antiIdeal[i],
+                isBenefit: c.isBenefit,
+                // Simple percentage of how good this shop is in this specific criterion
+                // For benefit: (val - min) / (max - min)
+                // For cost: (max - val) / (max - min)
+                rating: c.isBenefit
+                    ? (w.vals[i] - antiIdeal[i]) / (ideal[i] - antiIdeal[i] || 1)
+                    : (antiIdeal[i] - w.vals[i]) / (antiIdeal[i] - ideal[i] || 1)
+            }))
+        };
     });
 }

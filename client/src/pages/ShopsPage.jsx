@@ -104,11 +104,17 @@ function ShopDetailModal({ shop, onClose }) {
               <h2 className="text-4xl font-black text-white tracking-tighter leading-none">{shop.name}</h2>
               {shop.score && (
                 <button
-                  onClick={() => setShowComputation(shop)}
-                  className="bg-[#1D1D1F] text-white px-4 py-3 rounded-2xl flex flex-col items-center gap-0.5 border border-white/10 hover:bg-black transition-all"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowComputation(shop);
+                  }}
+                  className="bg-[#1D1D1F] text-white px-5 py-3 rounded-2xl flex flex-col items-center gap-0.5 border border-white/10 hover:bg-black transition-all hover:scale-105 active:scale-95 group shadow-xl"
                 >
-                  <span className="text-[10px] font-bold text-white/50 lowercase leading-none">Match Score</span>
-                  <span className="text-xl font-black leading-none">{(shop.score * 100).toFixed(0)}%</span>
+                  <span className="text-[10px] font-bold text-white/50 lowercase leading-none group-hover:text-white/80 transition-colors">Match Score</span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-2xl font-black leading-none">{(shop.score * 100).toFixed(0)}%</span>
+                    <Info className="w-3.5 h-3.5 text-white/30 group-hover:text-white" />
+                  </div>
                 </button>
               )}
             </div>
@@ -191,44 +197,127 @@ function ShopDetailModal({ shop, onClose }) {
 }
 
 function ComputationDetailsModal({ shop, weights, onClose }) {
-  const metrics = [
-    { label: 'Price (per kg)', value: `₱${shop.price}`, weight: weights.price, icon: DollarSign },
-    { label: 'Turnaround Time', value: `${shop.turnaroundTime}hr`, weight: weights.time, icon: Timer },
-    { label: 'Rating', value: `${shop.rating}`, weight: weights.rating, icon: Star },
-    { label: 'Distance (km)', value: `${shop.distance}km`, weight: weights.distance, icon: MapPin },
-  ];
+  const getExplanation = (detail) => {
+    const { criterion, rating, actualValue, isBenefit } = detail;
+    const labels = {
+      price: 'Price',
+      turnaroundTime: 'Wait Time',
+      rating: 'Rating',
+      distance: 'Location'
+    };
+
+    const percentage = Math.round(rating * 100);
+    let quality = '';
+    if (percentage > 80) quality = 'Excellent';
+    else if (percentage > 60) quality = 'Very Good';
+    else if (percentage > 40) quality = 'Good';
+    else quality = 'Average';
+
+    const desc = isBenefit
+      ? `Higher is better. This shop's ${labels[criterion]} of ${actualValue} ranks as "${quality}" compared to others.`
+      : `Lower is better. This shop's ${labels[criterion]} of ${actualValue} ranks as "${quality}" compared to others.`;
+
+    return { label: labels[criterion], quality, percentage, desc };
+  };
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-4 z-[400]">
-      <div className="bg-white rounded-[40px] w-full max-w-[500px] shadow-2xl animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
-        <div className="p-8 border-b border-black/[0.03] flex items-center justify-between">
-          <div className="space-y-1">
-            <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em]">Computation breakdown</p>
-            <h3 className="text-2xl font-black text-[#1D1D1F] tracking-tighter">{shop.name}</h3>
+    <div className="modal-overlay flex items-center justify-center p-4 z-[400] backdrop-blur-md">
+      <div className="bg-white rounded-[48px] w-full max-w-[1000px] shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
+        <div className="p-10 border-b border-black/[0.03] flex items-center justify-between bg-gradient-to-r from-white to-[#F8F9FA]">
+          <div className="space-y-2">
+            <div className="flex items-center gap-3">
+              <div className="bg-[#014421] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Analysis</div>
+              <p className="text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.3em]">How we calculated your match</p>
+            </div>
+            <h3 className="text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking Breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
           </div>
-          <button onClick={onClose} className="w-10 h-10 rounded-full bg-[#F3F4F6] flex items-center justify-center hover:bg-black/5 transition-all"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="w-14 h-14 rounded-full bg-[#F3F4F6] flex items-center justify-center hover:bg-black hover:text-white transition-all shadow-sm"><X className="w-6 h-6" /></button>
         </div>
-        <div className="p-8 space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            {metrics.map((m) => (
-              <div key={m.label} className="bg-[#F8F9FA] p-5 rounded-[24px] border border-black/[0.02] space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center shadow-sm text-[#014421]"><m.icon className="w-4 h-4" /></div>
-                  <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-widest">{m.label}</p>
+
+        <div className="p-10">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+            {/* Simple Explanation Side */}
+            <div className="space-y-8">
+              <div className="bg-[#014421] p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
+                <div className="relative z-10 flex items-center justify-between">
+                  <div className="space-y-2">
+                    <p className="text-white/60 text-xs font-black uppercase tracking-widest">Overall Match Score</p>
+                    <h4 className="text-6xl font-[900] tracking-tighter">{(shop.score * 100).toFixed(1)}%</h4>
+                  </div>
+                  <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md">
+                    <Target className="w-10 h-10 text-green-400" />
+                  </div>
                 </div>
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="text-lg font-black text-[#1D1D1F]">{m.value}</p>
-                  <p className="text-[10px] font-black text-[#014421] tracking-tighter">({m.weight}%)</p>
+                <p className="mt-6 text-white/70 text-sm font-medium leading-relaxed">
+                  This score tells you how close this shop is to your "Perfect Match" based on your priorities.
+                  100% would be a shop that has the best price, best rating, shortest wait, and is closest to you.
+                </p>
+                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700" />
+              </div>
+
+              <div className="space-y-4">
+                <h5 className="text-sm font-black text-[#1D1D1F] uppercase tracking-widest px-2">Better for You?</h5>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-green-50 p-6 rounded-[32px] border border-green-100 space-y-2">
+                    <div className="flex items-center gap-2 text-[#014421]">
+                      <ArrowUp className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Pros</span>
+                    </div>
+                    <p className="text-xs font-bold text-[#014421]/70">Higher scores here mean this shop excels in these areas compared to others.</p>
+                  </div>
+                  <div className="bg-red-50 p-6 rounded-[32px] border border-red-100 space-y-2">
+                    <div className="flex items-center gap-2 text-[#7B1113]">
+                      <ArrowDown className="w-4 h-4" />
+                      <span className="text-[10px] font-black uppercase tracking-widest">Cons</span>
+                    </div>
+                    <p className="text-xs font-bold text-[#7B1113]/70">Lower scores suggest there might be better options if this factor is vital.</p>
+                  </div>
                 </div>
               </div>
-            ))}
-          </div>
-          <div className="bg-[#1D1D1F] p-6 rounded-[32px] text-white flex items-center justify-between">
-            <div className="flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center"><Activity className="w-5 h-5 text-green-400" /></div>
-              <div>
-                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">TOPSIS Score</p>
-                <p className="text-xl font-black">{(shop.score * 100).toFixed(1)}%</p>
+            </div>
+
+            {/* Metrics Side */}
+            <div className="space-y-4">
+              <h5 className="text-sm font-black text-[#1D1D1F] uppercase tracking-widest px-2">Criterion Performance</h5>
+              <div className="space-y-4">
+                {shop.details?.map((detail) => {
+                  const info = getExplanation(detail);
+                  const Icon = detail.criterion === 'price' ? DollarSign :
+                    detail.criterion === 'turnaroundTime' ? Timer :
+                      detail.criterion === 'rating' ? Star : MapPin;
+
+                  return (
+                    <div key={detail.criterion} className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03] hover:bg-white hover:shadow-xl transition-all group">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-4">
+                          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
+                            <Icon className={`w-6 h-6 ${info.percentage > 50 ? 'text-[#014421]' : 'text-[#7B1113]'}`} />
+                          </div>
+                          <div>
+                            <p className="text-sm font-black text-[#1D1D1F]">{info.label}</p>
+                            <p className="text-[10px] font-bold text-[#8E8E93]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <span className={`text-lg font-black ${info.percentage > 70 ? 'text-[#014421]' : info.percentage > 40 ? 'text-orange-500' : 'text-[#7B1113]'}`}>
+                            {info.percentage}%
+                          </span>
+                        </div>
+                      </div>
+                      <div className="space-y-3">
+                        <div className="h-2 bg-black/5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full transition-all duration-1000 ${info.percentage > 70 ? 'bg-[#014421]' : info.percentage > 40 ? 'bg-orange-500' : 'bg-[#7B1113]'}`}
+                            style={{ width: `${info.percentage}%` }}
+                          />
+                        </div>
+                        <p className="text-[10px] font-medium text-[#8E8E93] leading-relaxed italic">
+                          {info.desc} Your priority weight: <span className="font-bold text-[#1D1D1F]">{(detail.weight * 100).toFixed(0)}%</span>
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -288,7 +377,14 @@ export default function ShopsPage() {
 
   const rankedShops = useMemo(() => {
     const scores = calculateTopsis(initialShops, weights);
-    return initialShops.map(shop => ({ ...shop, score: scores.find(s => s.id === shop.id)?.score ?? 0 })).sort((a, b) => b.score - a.score);
+    return initialShops.map(shop => {
+      const scoreData = scores.find(s => s.id === shop.id);
+      return {
+        ...shop,
+        score: scoreData?.score ?? 0,
+        details: scoreData?.details ?? []
+      };
+    }).sort((a, b) => b.score - a.score);
   }, [weights]);
 
   const nearbyShops = useMemo(() => [...initialShops].sort((a, b) => a.distance - b.distance).slice(0, 3), []);
@@ -301,7 +397,7 @@ export default function ShopsPage() {
 
   return (
     <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden">
-      <aside className="w-72 bg-[#E6FCE6] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="w-72 bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-4 mb-16 px-2">
           <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#014421]/20">E</div>
           <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter font-outfit">ELaBada</span>
@@ -326,7 +422,7 @@ export default function ShopsPage() {
         </nav>
 
         <div className="mt-auto pt-8 border-t border-[#F3F4F6]">
-          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-[10px] font-black capitalize tracking-widest">
+          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-sm font-black">
             <LogOut className="w-5 h-5" />
             Log out
           </button>
@@ -389,6 +485,18 @@ export default function ShopsPage() {
                           <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-[#8E8E93]'}`} />
                           <span className={`text-[9px] font-black capitalize tracking-widest ${s.status === 'open' ? 'text-[#228B22]' : 'text-[#8E8E93]'}`}>{s.status}</span>
                         </div>
+                        {s.score > 0 && (
+                          <div
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setShowComputation(s);
+                            }}
+                            className="absolute bottom-3 right-3 bg-[#014421] text-white px-3 py-2 rounded-xl border border-white/20 shadow-lg flex flex-col items-center hover:scale-110 active:scale-95 transition-all cursor-help group/score"
+                          >
+                            <span className="text-[7px] font-black uppercase text-white/50 leading-none group-hover/score:text-white/80">Match</span>
+                            <span className="text-sm font-black leading-none mt-0.5">{(s.score * 100).toFixed(0)}%</span>
+                          </div>
+                        )}
                       </div>
 
                       <div className="px-1 space-y-4 flex-1 flex flex-col">
@@ -494,7 +602,7 @@ export default function ShopsPage() {
                     </MapContainer>
                   </div>
                 </div>
-                <div className={`bg-white rounded-[48px] border border-black/[0.04] shadow-xl flex flex-col overflow-hidden transition-all duration-500 ${showAllNearby ? 'h-fit max-h-[90vh]' : 'h-full'}`}>
+                <div className={`bg-white rounded-[48px] border border-black/[0.04] shadow-xl flex flex-col overflow-hidden transition-all duration-500 ${showAllNearby ? 'max-h-[85vh]' : 'max-h-[520px]'}`}>
                   <div className="p-8 pb-4 bg-white/50 backdrop-blur-xl border-b border-black/[0.03] flex items-center gap-5">
                     <div><h3 className="text-xl font-black text-[#014421] tracking-tighter capitalize font-outfit">Top Nearby Shops</h3></div>
                   </div>
@@ -522,10 +630,10 @@ export default function ShopsPage() {
                     })}
                   </div>
                   {filteredShops.length > 3 && (
-                    <div className="p-6 pt-0 mt-auto">
+                    <div className="p-6">
                       <button
                         onClick={() => setShowAllNearby(!showAllNearby)}
-                        className="w-full py-4 bg-[#014421]/5 text-[#014421] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#014421]/10 transition-all"
+                        className="w-full py-4 bg-[#014421]/5 text-[#014421] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#014421]/10 transition-all border border-[#014421]/10"
                       >
                         {showAllNearby ? "Show Less" : "Show More"}
                       </button>
@@ -579,7 +687,7 @@ export default function ShopsPage() {
                                 {key === 'price' ? (<>Price <span className="font-medium normal-case text-xs text-[#8E8E93]">(kg)</span></>) :
                                   key === 'time' ? 'Time' :
                                     key === 'rating' ? 'Rating' :
-                                      key === 'distance' ? (<>Dist <span className="font-medium normal-case text-xs text-[#8E8E93]">(km)</span></>) : key}
+                                      key === 'distance' ? (<>Distance <span className="font-medium normal-case text-xs text-[#8E8E93]">(km)</span></>) : key}
                               </p>
                               <span className="text-4xl font-black text-[#014421] leading-none">{val}</span>
                             </div>
