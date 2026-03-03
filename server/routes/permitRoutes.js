@@ -1,8 +1,8 @@
 const express = require("express");
 const router = express.Router();
+const { getPermit, submitPermit } = require("../controllers/permitController");
 
-// TODO: Implement permit routes (submit, view)
-// router.post("/", submitPermit);
-// router.get("/:shopId", getPermit);
+router.get("/:shopId", getPermit);
+router.post("/", submitPermit);
 
 module.exports = router;

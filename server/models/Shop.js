@@ -1,27 +1,26 @@
 const mongoose = require("mongoose");
 
 const shopSchema = new mongoose.Schema({
-  name: String,
-  ownerName: String,
-  phone: String,
-  address: String,
-  price: Number,
-  turnaroundTime: Number,
+  name: { type: String, required: true },
+  ownerId: { type: mongoose.Schema.Types.ObjectId, ref: "Owner" },
+  ownerName: { type: String, default: "" },
+  phone: { type: String, default: "" },
+  address: { type: String, required: true },
+  price: { type: Number, default: 0 },
+  turnaroundTime: { type: Number, default: 24 },
   permitStatus: {
     type: String,
     enum: ["pending", "approved", "rejected"],
     default: "pending",
   },
-  permitImage: String,
-  rejectionReason: String,
-  rating: {
-    type: Number,
-    default: 0,
-  },
-  reviewCount: {
-    type: Number,
-    default: 0,
-  }
+  permitImage: { type: String, default: "" },
+  rejectionReason: { type: String, default: "" },
+  rating: { type: Number, default: 0 },
+  reviewCount: { type: Number, default: 0 },
+  status: { type: String, enum: ["open", "closed"], default: "open" },
+  image: { type: String, default: "" },
+  latitude: { type: Number, default: 14.167 },
+  longitude: { type: Number, default: 121.241 },
 }, { timestamps: true });
 
 module.exports = mongoose.model("Shop", shopSchema);

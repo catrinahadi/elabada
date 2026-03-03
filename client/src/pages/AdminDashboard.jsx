@@ -1,22 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import api from "../services/api";
 import {
-    LayoutDashboard, Store, Users, Shield,
+    LayoutDashboard, Store, Users,
     BarChart3, Settings, LogOut,
     CheckCircle, XCircle, Clock, MoreVertical,
     Trash2, Edit3, ChevronRight, ArrowUpRight,
     FileText, Eye, AlertCircle, TrendingUp,
-    MapPin, Calendar, ShieldCheck, ArrowLeft
+    MapPin, Calendar, ArrowLeft, Phone
 } from "lucide-react";
 
-// Mock Data
-const INITIAL_SHOPS = [
-    { id: "s1", shopName: "Fresh & Clean Laundry", ownerName: "Juan Dela Cruz", address: "Lopez Avenue, Los Baños", price: 45, permitStatus: "pending", submittedAt: "2h ago", image: "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?w=400&h=250&fit=crop", permitUrl: "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80" },
-    { id: "s2", shopName: "QuickWash Express", ownerName: "Maria Santos", address: "National Highway, Los Baños", price: 50, permitStatus: "approved", submittedAt: "1d ago", image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=250&fit=crop", permitUrl: "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80" },
-    { id: "s3", shopName: "Elite Washers", ownerName: "Ricardo Dalisay", address: "Poblacion, Los Baños", price: 60, permitStatus: "rejected", submittedAt: "3d ago", image: "https://images.unsplash.com/photo-1570624040263-54876f161989?w=400&h=250&fit=crop", permitUrl: "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80" },
-    { id: "s4", shopName: "Laba Laban", ownerName: "Sisa", address: "Anos, Los Baños", price: 40, permitStatus: "pending", submittedAt: "5h ago", image: "https://images.unsplash.com/photo-1604335399105-a0c585fd81a1?w=400&h=250&fit=crop", permitUrl: "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80" },
-];
+// Mock data as fallback
+const INITIAL_SHOPS = [];
 
 function PermitModal({ shop, onClose }) {
     return (
@@ -25,7 +21,7 @@ function PermitModal({ shop, onClose }) {
                 <div className="p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
                     <div>
                         <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Business Permit Verification</h2>
-                        <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-widest">Document Registry #{shop.id.toUpperCase()}</p>
+                        <p className="text-xs font-bold text-[#8E8E93] uppercase tracking-widest">Document Registry #{(shop.id || shop._id || "").toUpperCase()}</p>
                     </div>
                     <button onClick={onClose} className="btn-icon bg-white text-black border-none hover:bg-black hover:text-white transition-colors">
                         <XCircle className="w-6 h-6" />
@@ -33,23 +29,22 @@ function PermitModal({ shop, onClose }) {
                 </div>
                 <div className="flex-1 overflow-y-auto p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
                     <div className="bg-white p-4 rounded-[32px] shadow-sm border border-black/[0.03]">
-                        <img src={shop.permitUrl} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
+                        <img src={shop.permitUrl || shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
                     </div>
                     <div className="grid grid-cols-2 gap-8">
                         <div className="space-y-4">
-                            <h3 className="text-[10px] font-black uppercase text-[#003366] tracking-[0.2em]">Application Details</h3>
                             <div className="space-y-3">
                                 <div className="flex justify-between border-b border-black/[0.05] pb-2">
                                     <span className="text-xs text-[#8E8E93] font-bold">Shop Name</span>
-                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.shopName}</span>
+                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.shopName || shop.name}</span>
                                 </div>
                                 <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-xs text-[#8E8E93] font-bold">Representative</span>
+                                    <span className="text-xs text-[#8E8E93] font-bold">Owner Name</span>
                                     <span className="text-xs text-[#1D1D1F] font-black">{shop.ownerName}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-xs text-[#8E8E93] font-bold">Submission Date</span>
-                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.submittedAt}</span>
+                                    <span className="text-xs text-[#8E8E93] font-bold">Date Submitted</span>
+                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
                                 </div>
                             </div>
                         </div>
@@ -63,7 +58,7 @@ function PermitModal({ shop, onClose }) {
                     </div>
                 </div>
                 <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">
-                    <button className="btn-primary py-4 px-12 text-[10px] uppercase tracking-widest bg-[#003366]">Approve Document</button>
+                    <button onClick={onClose} className="btn-primary py-4 px-12 text-[10px] uppercase tracking-widest bg-[#003366]">Close View</button>
                 </div>
             </div>
         </div>
@@ -73,47 +68,75 @@ function PermitModal({ shop, onClose }) {
 export default function AdminDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
-    const [sidebarTab, setSidebarTab] = useState("overview");
-    const [overviewSubView, setOverviewSubView] = useState("main"); // main, pending, approved, rejected
-    const [shops, setShops] = useState(INITIAL_SHOPS);
+    const [shops, setShops] = useState([]);
+    const [stats, setStats] = useState({ shops: {}, users: { total: 0 } });
     const [viewingPermit, setViewingPermit] = useState(null);
+    const [expandedShops, setExpandedShops] = useState(new Set());
+    const [filterStatus, setFilterStatus] = useState("pending");
 
-    const filteredShops = useMemo(() => {
-        if (sidebarTab === "registry") return shops.filter(s => s.permitStatus === "approved");
-        // If in overview sub-view, filter by that sub-view status
-        if (overviewSubView === "pending") return shops.filter(s => s.permitStatus === "pending");
-        if (overviewSubView === "approved") return shops.filter(s => s.permitStatus === "approved");
-        if (overviewSubView === "rejected") return shops.filter(s => s.permitStatus === "rejected");
-        return [];
-    }, [shops, sidebarTab, overviewSubView]);
+    useEffect(() => {
+        api.get("/admin/shops")
+            .then(({ data }) => setShops(data.map(s => ({
+                ...s,
+                ownerName: s.ownerName || "Authorized Owner",
+            }))))
+            .catch(err => console.error("Failed to load admin shops:", err.message));
+
+        api.get("/admin/stats")
+            .then(({ data }) => setStats(data))
+            .catch(err => console.error("Failed to load stats:", err.message));
+    }, []);
+
+    const approvedShops = useMemo(() => shops.filter(s => s.permitStatus === "approved"), [shops]);
+    const pendingShops = useMemo(() => shops.filter(s => s.permitStatus === "pending"), [shops]);
+    const rejectedShops = useMemo(() => shops.filter(s => s.permitStatus === "rejected"), [shops]);
+    const filteredList = useMemo(() => shops.filter(s => s.permitStatus === filterStatus), [shops, filterStatus]);
 
     const handleLogout = () => { logout(); navigate("/login"); };
-    const handleApprove = (id) => setShops(prev => prev.map(s => s.id === id ? { ...s, permitStatus: 'approved' } : s));
-    const handleReject = (id) => setShops(prev => prev.map(s => s.id === id ? { ...s, permitStatus: 'rejected' } : s));
-    const handleDelete = (id) => { if (window.confirm("Permanently delete this shop?")) setShops(prev => prev.filter(s => s.id !== id)); };
+
+    const handleApprove = async (id) => {
+        try {
+            await api.put(`/admin/shops/${id}/approve`);
+            setShops(prev => prev.map(s => s._id === id ? { ...s, permitStatus: 'approved', rejectionReason: "" } : s));
+        } catch (err) {
+            console.error("Failed to approve shop:", err.message);
+        }
+    };
+
+    const handleReject = async (id) => {
+        const reason = prompt("Enter rejection reason:");
+        if (reason === null) return;
+        try {
+            await api.put(`/admin/shops/${id}/reject`, { reason });
+            setShops(prev => prev.map(s => s._id === id ? { ...s, permitStatus: 'rejected', rejectionReason: reason } : s));
+        } catch (err) {
+            console.error("Failed to reject shop:", err.message);
+        }
+    };
+
+    const handleDelete = async (id) => {
+        if (!window.confirm("Permanently delete this shop?")) return;
+        try {
+            await api.delete(`/admin/shops/${id}`);
+            setShops(prev => prev.filter(s => s._id !== id));
+        } catch (err) {
+            console.error("Failed to delete shop:", err.message);
+        }
+    };
 
     return (
         <div className="flex bg-[#F8F9FA] min-h-screen text-[#1D1D1F]">
             {/* Sidebar - Pro Blue */}
-            <aside className="w-72 bg-[#E6FCE6] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+            <aside className="w-72 bg-[#FDFDFD] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.01)]">
                 <div className="flex items-center gap-4 mb-16 px-2">
-                    <div className="brand-logo bg-[#003366]">E</div>
+                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#014421]/20">E</div>
                     <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter">ELaBada</span>
                 </div>
 
                 <nav className="flex-1 space-y-3">
                     <div className="pb-3 px-4 text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em]">System Engine</div>
-                    <button
-                        onClick={() => { setSidebarTab("overview"); setOverviewSubView("main"); }}
-                        className={`sidebar-link w-full ${sidebarTab === "overview" ? "active bg-[#014421] text-white shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}
-                    >
+                    <button className="sidebar-link w-full active bg-[#014421] text-white shadow-lg shadow-[#014421]/20">
                         <LayoutDashboard className="w-5 h-5" /> Overview
-                    </button>
-                    <button
-                        onClick={() => setSidebarTab("registry")}
-                        className={`sidebar-link w-full ${sidebarTab === "registry" ? "active bg-[#014421] text-white shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}
-                    >
-                        <Store className="w-5 h-5" /> Shop Registry
                     </button>
                 </nav>
 
@@ -126,212 +149,149 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
-                <header className="h-24 px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
-                    <div className="flex items-center gap-6">
-                        {sidebarTab === "overview" && overviewSubView !== "main" && (
-                            <button
-                                onClick={() => setOverviewSubView("main")}
-                                className="h-10 w-10 rounded-full bg-white border border-black/5 flex items-center justify-center hover:bg-[#003366] hover:text-white transition-all shadow-sm"
-                            >
-                                <ArrowLeft className="w-5 h-5" />
-                            </button>
-                        )}
-                        <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tighter capitalize">
-                            {sidebarTab === "registry" ? "Verified Shop Registry" :
-                                overviewSubView === "main" ? "Admin Dashboard" :
-                                    `${overviewSubView} Permits`}
-                        </h1>
-                    </div>
+                <header className="h-24 px-12 flex items-center sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
+                    <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
                 </header>
 
-                <div className="p-12 space-y-16 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                <div className="p-12 space-y-10 max-w-[1600px] w-full mx-auto animate-fadeUp">
 
-                    {sidebarTab === "overview" && overviewSubView === "main" && (
-                        <>
-                            {/* CONTROL CENTER STYLE TILES */}
-                            <section className="space-y-8">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-[11px] font-black uppercase text-[#8E8E93] tracking-[0.4em]">Operational Status</h2>
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                                    {/* PENDING */}
-                                    <button
-                                        onClick={() => setOverviewSubView("pending")}
-                                        className="md:col-span-2 row-span-2 relative overflow-hidden rounded-[48px] p-10 bg-white text-[#1D1D1F] border border-black/[0.04] hover:border-[#00336620] transition-all duration-500 group flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2"
-                                    >
-                                        <div className="flex items-start justify-between">
-                                            <div className="w-16 h-16 rounded-[24px] flex items-center justify-center bg-[#00336610] group-hover:bg-[#003366] transition-colors">
-                                                <Clock className="w-8 h-8 text-[#003366] group-hover:text-white" />
-                                            </div>
-                                            <ArrowUpRight className="w-8 h-8 opacity-20 group-hover:opacity-100 transition-opacity" />
-                                        </div>
-                                        <div>
-                                            <p className="text-[12px] font-black uppercase tracking-[0.3em] mb-2 text-[#8E8E93]">Pending Verification</p>
-                                            <div className="flex items-baseline gap-4">
-                                                <h3 className="text-8xl font-black tracking-tighter leading-none">{shops.filter(s => s.permitStatus === 'pending').length}</h3>
-                                                <span className="text-xs font-bold text-[#8E8E93]">Applications</span>
-                                            </div>
-                                        </div>
-                                    </button>
-
-                                    {/* APPROVED */}
-                                    <button
-                                        onClick={() => setOverviewSubView("approved")}
-                                        className="rounded-[48px] p-8 bg-white text-[#1D1D1F] border border-black/[0.04] hover:border-[#228B2220] transition-all duration-500 group flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2"
-                                    >
-                                        <div className="w-14 h-14 rounded-3xl flex items-center justify-center bg-[#228B2210] group-hover:bg-[#228B22] transition-colors">
-                                            <CheckCircle className="w-7 h-7 text-[#228B22] group-hover:text-white" />
-                                        </div>
-                                        <div className="text-left py-4">
-                                            <h3 className="text-5xl font-black tracking-tighter">{shops.filter(s => s.permitStatus === 'approved').length}</h3>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#8E8E93]">Approved Nodes</p>
-                                        </div>
-                                    </button>
-
-                                    {/* REJECTED */}
-                                    <button
-                                        onClick={() => setOverviewSubView("rejected")}
-                                        className="rounded-[48px] p-8 bg-white text-[#1D1D1F] border border-black/[0.04] hover:border-[#80000020] transition-all duration-500 group flex flex-col justify-between hover:shadow-2xl hover:-translate-y-2"
-                                    >
-                                        <div className="w-14 h-14 rounded-3xl flex items-center justify-center bg-[#80000010] group-hover:bg-[#800000] transition-colors">
-                                            <XCircle className="w-7 h-7 text-[#800000] group-hover:text-white" />
-                                        </div>
-                                        <div className="text-left py-4">
-                                            <h3 className="text-5xl font-black tracking-tighter">{shops.filter(s => s.permitStatus === 'rejected').length}</h3>
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-[#8E8E93]">Rejected Permits</p>
-                                        </div>
-                                    </button>
-
-                                    <div className="bg-[#1D1D1F] text-white rounded-[48px] p-8 flex flex-col justify-between shadow-xl">
-                                        <TrendingUp className="w-8 h-8 text-[#9FE870]" />
-                                        <div>
-                                            <h4 className="text-4xl font-black tracking-tight">+14.2%</h4>
-                                            <p className="text-[9px] font-black uppercase text-white/40 tracking-widest">Network Growth</p>
-                                        </div>
-                                    </div>
-
-                                    <div className="bg-white border border-black/[0.04] rounded-[48px] p-8 flex flex-col justify-between shadow-sm">
-                                        <Users className="w-8 h-8 text-[#003366]" />
-                                        <div>
-                                            <h4 className="text-4xl font-black tracking-tight text-[#1D1D1F]">3.2k</h4>
-                                            <p className="text-[9px] font-black uppercase text-[#8E8E93] tracking-widest">Total Users</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section className="space-y-8 animate-fadeUp">
-                                <div className="flex items-center justify-between">
-                                    <h2 className="text-[11px] font-black uppercase text-[#8E8E93] tracking-[0.4em]">System Intelligence</h2>
-                                </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                                    <div className="lg:col-span-2 bg-white rounded-[40px] p-10 border border-black/[0.04] shadow-sm flex flex-col gap-8 group cursor-pointer hover:border-[#00336620] transition-all" onClick={() => alert("Permit Velocity Analytics Deep-Dive Coming Soon")}>
-                                        <div className="flex items-center justify-between">
-                                            <div>
-                                                <h3 className="text-xl font-black text-[#1D1D1F] tracking-tight group-hover:text-[#003366] transition-colors">Permit Velocity</h3>
-                                                <p className="text-xs font-bold text-[#8E8E93]">Average processing speed per region</p>
-                                            </div>
-                                            <BarChart3 className="w-6 h-6 text-[#003366]" />
-                                        </div>
-                                        <div className="flex-1 flex items-end gap-3 h-48">
-                                            {[60, 40, 90, 70, 50, 80, 100, 60, 75, 45, 85, 95].map((h, i) => (
-                                                <div key={i} className="flex-1 bg-[#F0F4F8] rounded-t-xl relative group/bar overflow-hidden">
-                                                    <div className={`absolute bottom-0 left-0 right-0 rounded-t-xl transition-all duration-1000 ${i % 3 === 0 ? 'bg-[#800000]' : i % 2 === 0 ? 'bg-[#003366]' : 'bg-[#228B22]'}`} style={{ height: `${h}%` }} />
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <div onClick={() => alert("Analyzing Discrepancies...")} className="bg-[#800000] rounded-[40px] p-10 text-white flex flex-col justify-between shadow-2xl relative overflow-hidden group cursor-pointer hover:scale-[1.02] transition-all">
-                                        <div className="relative z-10">
-                                            <AlertCircle className="w-10 h-10 mb-6 text-white/60" />
-                                            <h3 className="text-3xl font-black tracking-tighter leading-tight mb-2">Priority Flag:<br />Validation Required</h3>
-                                            <p className="text-sm font-bold text-white/50 leading-relaxed">System detected inconsistent permits in Region IV-A. Manual verification mandated.</p>
-                                        </div>
-                                        <button className="relative z-10 w-full py-4 bg-white/10 hover:bg-white/20 rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] transition-all border border-white/10">Analyze Discrepancies</button>
-                                        <div className="absolute -bottom-10 -right-10 w-48 h-48 bg-white/5 rounded-full blur-3xl group-hover:bg-white/20 transition-colors" />
-                                    </div>
-                                </div>
-                            </section>
-                        </>
-                    )}
-
-                    {/* LIST VIEW (Internal for Registry or Overview Sub-views) */}
-                    {(sidebarTab === "registry" || (sidebarTab === "overview" && overviewSubView !== "main")) && (
-                        <section className="space-y-10">
-                            <div className="flex flex-col gap-2">
-                                <h2 className="text-4xl font-black tracking-tighter text-[#1D1D1F]">
-                                    {sidebarTab === "registry" ? "Verified Network Nodes" : `${overviewSubView.toUpperCase()} ENTRIES`}
-                                </h2>
-                                <p className="text-sm font-bold text-[#8E8E93]">
-                                    {sidebarTab === "registry" ? "Listing all active compliant shops." : "Action required for selected permit entries."}
-                                </p>
+                    {/* COMPACT STAT TILES — 4 across */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        {/* Pending */}
+                        <button onClick={() => { setFilterStatus("pending"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "pending" ? "border-[#555]/60 shadow-md" : "border-[#555]/20"
+                            }`}>
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "pending" ? "bg-[#555]/20" : "bg-[#555]/10"
+                                }`}>
+                                <Clock className="w-5 h-5 text-[#555]" />
                             </div>
+                            <div>
+                                <h3 className="text-4xl font-black tracking-tighter text-[#3D3D3D]">{pendingShops.length}</h3>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">Pending</p>
+                            </div>
+                        </button>
+                        {/* Approved */}
+                        <button onClick={() => { setFilterStatus("approved"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "approved" ? "border-[#1A6B1A]/60 shadow-md" : "border-[#1A6B1A]/25"
+                            }`}>
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "approved" ? "bg-[#1A6B1A]/20" : "bg-[#1A6B1A]/10"
+                                }`}>
+                                <CheckCircle className="w-5 h-5 text-[#1A6B1A]" />
+                            </div>
+                            <div>
+                                <h3 className="text-4xl font-black tracking-tighter text-[#1A6B1A]">{approvedShops.length}</h3>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">Approved</p>
+                            </div>
+                        </button>
+                        {/* Rejected */}
+                        <button onClick={() => { setFilterStatus("rejected"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "rejected" ? "border-[#8B1A1A]/60 shadow-md" : "border-[#8B1A1A]/25"
+                            }`}>
+                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "rejected" ? "bg-[#8B1A1A]/20" : "bg-[#8B1A1A]/10"
+                                }`}>
+                                <XCircle className="w-5 h-5 text-[#8B1A1A]" />
+                            </div>
+                            <div>
+                                <h3 className="text-4xl font-black tracking-tighter text-[#8B1A1A]">{rejectedShops.length}</h3>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">Rejected</p>
+                            </div>
+                        </button>
+                        {/* Users */}
+                        <div className="rounded-[28px] p-6 bg-white border-2 border-[#1A237E]/25 flex flex-col gap-3">
+                            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#1A237E]/10">
+                                <Users className="w-5 h-5 text-[#1A237E]" />
+                            </div>
+                            <div>
+                                <h3 className="text-4xl font-black tracking-tighter text-[#1A237E]">{stats.users?.total || 0}</h3>
+                                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-0.5">Users</p>
+                            </div>
+                        </div>
+                    </div>
 
-                            <div className="grid grid-cols-1 gap-6">
-                                {filteredShops.length > 0 ? filteredShops.map(shop => (
-                                    <div key={shop.id} className="bg-white rounded-[40px] p-10 flex flex-col md:flex-row items-center gap-12 border border-black/[0.02] shadow-sm hover:shadow-xl hover:border-[#00336610] transition-all group">
-                                        <div className="relative shrink-0">
-                                            <img src={shop.image} className="w-32 h-32 rounded-[48px] object-cover shadow-lg border-2 border-white grayscale group-hover:grayscale-0 transition-all duration-700" alt="" />
-                                            <div className="absolute -bottom-2 -right-2 bg-white w-10 h-10 rounded-2xl flex items-center justify-center shadow-2xl border border-black/5">
-                                                <Shield className={`w-5 h-5 ${shop.permitStatus === 'approved' ? 'text-[#228B22]' : 'text-[#1D1D1F]'}`} />
-                                            </div>
+                    {/* FULL-WIDTH FILTERED LIST */}
+                    <div className="flex flex-col gap-4">
+                        {filteredList.length === 0 ? (
+                            <div className="rounded-[28px] border-2 border-dashed border-black/10 p-16 text-center">
+                                <p className="text-[11px] font-bold text-[#8E8E93] uppercase tracking-widest">No {filterStatus} shops</p>
+                            </div>
+                        ) : filteredList.map(shop => {
+                            const isExpanded = expandedShops.has(shop._id);
+                            const toggleExpand = () => setExpandedShops(prev => {
+                                const next = new Set(prev);
+                                isExpanded ? next.delete(shop._id) : next.add(shop._id);
+                                return next;
+                            });
+                            const colors = {
+                                approved: { border: "border-[#1A6B1A]", activeBorder: "border-[#1A6B1A]/40", dimBorder: "border-[#1A6B1A]/15", sep: "border-[#1A6B1A]/10", chevron: "text-[#1A6B1A]/40" },
+                                pending: { border: "border-[#555]", activeBorder: "border-[#555]/40", dimBorder: "border-[#555]/15", sep: "border-[#555]/10", chevron: "text-[#555]/40" },
+                                rejected: { border: "border-[#8B1A1A]", activeBorder: "border-[#8B1A1A]/40", dimBorder: "border-[#8B1A1A]/15", sep: "border-[#8B1A1A]/10", chevron: "text-[#8B1A1A]/40" },
+                            };
+                            const c = colors[filterStatus];
+                            return (
+                                <div
+                                    key={shop._id}
+                                    onClick={toggleExpand}
+                                    className={`bg-white rounded-[24px] p-6 border-2 transition-all duration-300 cursor-pointer overflow-hidden ${isExpanded ? `${c.activeBorder} shadow-lg` : `${c.dimBorder} hover:${c.activeBorder} hover:shadow-md`
+                                        }`}
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1 min-w-0">
+                                            <h4 className="text-base font-black text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
+                                            <p className="text-[10px] font-bold text-[#8E8E93] mt-0.5 flex items-center gap-1">
+                                                <MapPin className="w-3 h-3 shrink-0" /> {shop.address}
+                                            </p>
                                         </div>
-                                        <div className="flex-1 space-y-6">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h4 className="text-3xl font-black text-[#1D1D1F] tracking-tighter mb-1 uppercase">{shop.shopName}</h4>
-                                                    <div className="flex items-center gap-2 text-xs font-bold text-[#8E8E93] uppercase tracking-tighter">
-                                                        <MapPin className="w-3.5 h-3.5 text-[#003366]" /> {shop.address}
-                                                    </div>
-                                                </div>
-                                                <div className="text-right">
-                                                    <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-widest mb-1.5">Owner Metadata</p>
-                                                    <p className="text-sm font-black text-[#1D1D1F] tracking-tight">{shop.ownerName}</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex flex-wrap gap-8 pt-6 border-t border-black/[0.04]">
-                                                <div className="space-y-1">
-                                                    <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-widest">Submitted Registry</p>
-                                                    <p className="text-xs font-bold text-[#1D1D1F] flex items-center gap-2 uppercase">
-                                                        <Calendar className="w-3 h-3 text-[#003366]" /> {shop.submittedAt}
+                                        <ChevronRight className={`w-5 h-5 ${c.chevron} shrink-0 ml-4 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                                    </div>
+
+                                    {isExpanded && (
+                                        <div className={`mt-5 pt-5 border-t ${c.sep} flex flex-col gap-4`} onClick={e => e.stopPropagation()}>
+                                            {/* Vertical details */}
+                                            <div className="flex flex-col gap-2">
+                                                <p className="text-[8px] font-black text-[#8E8E93] uppercase tracking-widest">Details</p>
+                                                <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
+                                                    <Calendar className="w-3 h-3 text-[#003366] shrink-0" />
+                                                    {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                                </p>
+                                                {shop.ownerName && (
+                                                    <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
+                                                        <Users className="w-3 h-3 text-[#003366] shrink-0" /> {shop.ownerName}
                                                     </p>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-widest">Rate (₱/kg)</p>
-                                                    <p className="text-xs font-black text-[#800000]">₱{shop.price}.00</p>
-                                                </div>
-                                                <div className="space-y-1">
-                                                    <p className="text-[9px] font-black text-[#8E8E93] uppercase tracking-widest">Shop ID</p>
-                                                    <p className="text-xs font-bold text-[#1D1D1F] uppercase">{shop.id}</p>
-                                                </div>
+                                                )}
+                                                {shop.price && (
+                                                    <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
+                                                        <span className="text-[#003366] font-black text-xs shrink-0">₱</span> ₱{shop.price}/kg
+                                                    </p>
+                                                )}
+                                                {shop.turnaroundTime && (
+                                                    <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
+                                                        <Clock className="w-3 h-3 text-[#003366] shrink-0" /> {shop.turnaroundTime} hr turnaround
+                                                    </p>
+                                                )}
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <button onClick={() => setViewingPermit(shop)} className="btn-icon h-16 w-16 rounded-[28px] bg-[#F8F9FA] hover:bg-[#E1EFFF] hover:text-[#003366] border-none text-[10px] font-black uppercase flex-col gap-1 pb-1" title="View Document">
-                                                <Eye className="w-6 h-6" /> <span className="text-[8px] tracking-widest">VIEW</span>
+                                            {/* Icon action row */}
+                                            <div className="flex items-center gap-2">
+                                                <button title="Edit" className="p-2.5 rounded-xl bg-[#F0F4FF] text-[#1A237E] hover:bg-[#1A237E] hover:text-white transition-all">
+                                                    <Edit3 className="w-4 h-4" />
+                                                </button>
+                                                {filterStatus !== 'approved' && (
+                                                    <button title="Approve" onClick={() => handleApprove(shop._id)} className="p-2.5 rounded-xl bg-[#E1FFE1] text-[#228B22] hover:bg-[#228B22] hover:text-white transition-all">
+                                                        <CheckCircle className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                                {filterStatus !== 'rejected' && (
+                                                    <button title="Reject" onClick={() => handleReject(shop._id)} className="p-2.5 rounded-xl bg-[#FFF0F0] text-[#FF3B30] hover:bg-[#FF3B30] hover:text-white transition-all">
+                                                        <XCircle className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                            {/* View Permit — full width */}
+                                            <button onClick={() => setViewingPermit(shop)} className="w-full py-3 rounded-xl bg-[#1D1D1F] text-white hover:bg-[#003366] transition-all text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-2">
+                                                <FileText className="w-3.5 h-3.5" /> View permit
                                             </button>
-                                            <div className="h-10 w-[1px] bg-black/[0.05]" />
-                                            {shop.permitStatus !== 'approved' && (
-                                                <button onClick={() => handleApprove(shop.id)} className="btn-icon h-16 w-16 rounded-[28px] bg-[#E1FFE1] text-[#228B22] hover:bg-[#228B22] hover:text-white border-none shadow-sm" title="Approve"><CheckCircle className="w-6 h-6" /></button>
-                                            )}
-                                            {shop.permitStatus !== 'rejected' && (
-                                                <button onClick={() => handleReject(shop.id)} className="btn-icon h-16 w-16 rounded-[28px] bg-[#FFF0F0] text-[#FF3B30] hover:bg-[#FF3B30] hover:text-white border-none shadow-sm" title="Reject"><XCircle className="w-6 h-6" /></button>
-                                            )}
-                                            <button onClick={() => handleDelete(shop.id)} className="btn-icon h-16 w-16 rounded-[28px] bg-[#F8F9FA] text-[#8E8E93] hover:bg-black hover:text-white border-none shadow-sm" title="Delete Permanent"><Trash2 className="w-6 h-6" /></button>
                                         </div>
-                                    </div>
-                                )) : (
-                                    <div className="p-40 text-center space-y-6 rounded-[64px] bg-white border border-black/[0.03] shadow-inner font-black text-[#D1D1D6] flex flex-col items-center">
-                                        <Shield className="w-24 h-24 mb-4 opacity-10" />
-                                        <p className="text-xl tracking-[0.4em] uppercase">Null Registry</p>
-                                        <p className="text-[10px] text-[#8E8E93] tracking-widest max-w-sm">System holds no entries for this classification.</p>
-                                    </div>
-                                )}
-                            </div>
-                        </section>
-                    )}
+                                    )}
+                                </div>
+                            );
+                        })}
+                    </div>
                 </div>
             </main>
 

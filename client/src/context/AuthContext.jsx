@@ -1,33 +1,56 @@
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
+import api from "../services/api";
 
 const AuthContext = createContext(null);
 
-/* ── Demo credentials ──────────────────────────────────────
-   Admin:    admin@elabada.com    / admin123
-   Owner:    owner@elabada.com    / owner123   (or owner2@…)
-   Customer: customer@elabada.com / cust123
-────────────────────────────────────────────────────────────*/
-const DEMO_USERS = [
-    { id: "admin1", role: "admin", name: "System Admin", email: "admin@elabada.com", password: "admin123" },
-    { id: "owner1", role: "owner", name: "Maria Santos", email: "owner@elabada.com", password: "owner123" },
-    { id: "owner2", role: "owner", name: "Juan Dela Cruz", email: "owner2@elabada.com", password: "owner123" },
-    { id: "cust1", role: "customer", name: "Sarah Johnson", email: "customer@elabada.com", password: "cust123" },
-];
-
 export function AuthProvider({ children }) {
-    const [user, setUser] = useState(null); // null = not logged in
+    const [user, setUser] = useState(null);
+    const [loading, setLoading] = useState(true);
 
-    const login = (email, password) => {
-        const found = DEMO_USERS.find(u => u.email === email && u.password === password);
-        if (!found) return { ok: false, message: "Invalid email or password." };
-        setUser(found);
-        return { ok: true, role: found.role };
+    // Restore session from localStorage on app start
+    useEffect(() => {
+        const stored = localStorage.getItem("elabada_user");
+        const token = localStorage.getItem("elabada_token");
+        if (stored && token) {
+            setUser(JSON.parse(stored));
+        }
+        setLoading(false);
+    }, []);
+
+    const login = async (email, password) => {
+        try {
+            const { data } = await api.post("/auth/login", { email, password });
+            localStorage.setItem("elabada_token", data.token);
+            localStorage.setItem("elabada_user", JSON.stringify(data.user));
+            setUser(data.user);
+            return { ok: true, role: data.user.role };
+        } catch (err) {
+            const msg = err.response?.data?.message || "Invalid email or password.";
+            return { ok: false, message: msg };
+        }
     };
 
-    const logout = () => setUser(null);
+    const signup = async (payload) => {
+        try {
+            const { data } = await api.post("/auth/signup", payload);
+            localStorage.setItem("elabada_token", data.token);
+            localStorage.setItem("elabada_user", JSON.stringify(data.user));
+            setUser(data.user);
+            return { ok: true, role: data.user.role };
+        } catch (err) {
+            const msg = err.response?.data?.message || "Email already registered.";
+            return { ok: false, message: msg };
+        }
+    };
+
+    const logout = () => {
+        localStorage.removeItem("elabada_token");
+        localStorage.removeItem("elabada_user");
+        setUser(null);
+    };
 
     return (
-        <AuthContext.Provider value={{ user, login, logout }}>
+        <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

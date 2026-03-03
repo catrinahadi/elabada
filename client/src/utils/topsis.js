@@ -6,20 +6,36 @@
  * @param {Object} weights - Object containing criterion weights (rating, price, time, distance)
  * @returns {Array} - Array of objects with shop ID and performance score
  */
-export function calculateTopsis(shops, weights) {
+export function calculateTopsis(shops, weights, priorities = ['rating', 'price', 'time', 'distance']) {
     if (!shops || shops.length === 0) return [];
 
+    // Map priorities to multipliers (higher rank gets higher multiplier)
+    // Rank 0 (Top) -> 1.6, Rank 1 -> 1.2, Rank 2 -> 0.8, Rank 3 -> 0.4
+    const rankMultipliers = {
+        [priorities[0]]: 1.6,
+        [priorities[1]]: 1.2,
+        [priorities[2]]: 0.8,
+        [priorities[3]]: 0.4
+    };
+
+    const weightedBase = {
+        price: (weights.price || 0.1) * (rankMultipliers['price'] || 1),
+        time: (weights.time || 0.1) * (rankMultipliers['time'] || 1),
+        rating: (weights.rating || 0.1) * (rankMultipliers['rating'] || 1),
+        distance: (weights.distance || 0.1) * (rankMultipliers['distance'] || 1)
+    };
+
     const totalWeight =
-        (weights.price || 0) +
-        (weights.time || 0) +
-        (weights.rating || 0) +
-        (weights.distance || 0) || 1;
+        weightedBase.price +
+        weightedBase.time +
+        weightedBase.rating +
+        weightedBase.distance || 1;
 
     const normalizedWeights = {
-        price: (weights.price || 0.1) / totalWeight,
-        time: (weights.time || 0.1) / totalWeight,
-        rating: (weights.rating || 0.1) / totalWeight,
-        distance: (weights.distance || 0.1) / totalWeight
+        price: weightedBase.price / totalWeight,
+        time: weightedBase.time / totalWeight,
+        rating: weightedBase.rating / totalWeight,
+        distance: weightedBase.distance / totalWeight
     };
 
     const criteria = [
