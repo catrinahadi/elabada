@@ -52,23 +52,23 @@ export default function OwnerDashboard() {
     return (
         <div className="flex bg-[#F8F9FA] min-h-screen text-[#1D1D1F]">
             {/* Sidebar - High Contrast */}
-            <aside className="w-72 bg-white border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20">
+            <aside className="w-72 bg-[#E6FCE6] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
                 <div className="flex items-center gap-4 mb-16 px-2">
                     <div className="brand-logo bg-[#800000]">E</div>
-                    <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter uppercase">ELaBada</span>
+                    <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter">ELaBada</span>
                 </div>
 
                 <nav className="flex-1 space-y-3">
                     <div className="pb-3 px-4 text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em]">Owner Panel</div>
                     <button
                         onClick={() => setSidebarTab("overview")}
-                        className={`sidebar-link w-full ${sidebarTab === "overview" ? "active bg-[#003366] text-white shadow-lg shadow-[#003366]/20" : "text-[#8E8E93]"}`}
+                        className={`sidebar-link w-full ${sidebarTab === "overview" ? "active bg-[#014421] text-white shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}
                     >
                         <LayoutDashboard className="w-5 h-5" /> Overview
                     </button>
                     <button
                         onClick={() => setSidebarTab("listings")}
-                        className={`sidebar-link w-full ${sidebarTab === "listings" ? "active bg-[#003366] text-white shadow-lg shadow-[#003366]/20" : "text-[#8E8E93]"}`}
+                        className={`sidebar-link w-full ${sidebarTab === "listings" ? "active bg-[#014421] text-white shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}
                     >
                         <Store className="w-5 h-5" /> Active Listings
                     </button>
