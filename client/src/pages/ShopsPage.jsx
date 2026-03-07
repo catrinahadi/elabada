@@ -5,15 +5,15 @@ import { useAuth } from "../context/AuthContext";
 import { calculateTopsis } from "../utils/topsis";
 import {
   Star, MapPin, Search, Filter, Map as MapIcon,
-  Clock, Package, ShieldCheck, ChevronRight,
+  Clock, Package, Check, ChevronRight,
   X, Info, MessageSquare, ArrowUpRight, Award,
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
-  GripVertical, ArrowUp, ArrowDown, Map as GoogleMap,
+  ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, MoreVertical, LocateFixed,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown
 } from "lucide-react";
-import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -63,42 +63,51 @@ const UP_GREEN_LIGHT = "#0F4D32";
 const UP_MAROON = "#7B1113";
 const UP_GREEN_ACCENT = "#D1FFD1";
 
-const USER_LOCATION = [14.1670, 121.2435];
+const DEFAULT_LOCATION = [14.1670, 121.2435];
 
 // Custom Icons for Map
 const createUserLocationIcon = () => L.divIcon({
   className: 'user-location-marker',
-  html: `<div class="relative w-8 h-8 flex items-center justify-center">
-    <div class="absolute w-full h-full bg-blue-500/20 rounded-full animate-ping"></div>
-    <div class="absolute w-4 h-4 bg-blue-500 rounded-full border-2 border-white shadow-lg"></div>
+  html: `<div class="relative w-14 h-14 flex items-center justify-center">
+    <div class="absolute w-full h-full bg-blue-500/30 rounded-full animate-ping"></div>
+    <div class="absolute w-7 h-7 bg-blue-500 rounded-full border-[3px] border-white shadow-2xl"></div>
   </div>`,
-  iconSize: [32, 32],
-  iconAnchor: [16, 16]
+  iconSize: [56, 56],
+  iconAnchor: [28, 28]
 });
 
-const createShopMarkerIcon = (rank, name) => {
+const createShopMarkerIcon = (rank) => {
   const isTop3 = rank <= 3;
   const mainColor = isTop3 ? "#FF8C00" : "#7B1113";
-  const dotColor = "#FFFFFF";
+  const textColor = "#FFFFFF";
 
   return L.divIcon({
     className: 'custom-shop-marker',
     html: `<div class="flex flex-col items-center">
-      ${isTop3 ? `
-      <div class="bg-white px-2 py-1 rounded-full shadow-lg border border-black/5 mb-1 animate-bounceIn">
-        <p class="text-[8px] font-black text-[#014421] tracking-tighter whitespace-nowrap leading-none">${name}</p>
-      </div>` : ''}
-      <div class="relative ${isTop3 ? 'scale-90' : 'scale-75'} transition-transform">
-        <svg width="24" height="32" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div class="relative ${isTop3 ? 'scale-110' : 'scale-90'} transition-transform">
+        <svg width="32" height="42" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M14 0C6.26801 0 0 6.26801 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.26801 21.732 0 14 0Z" fill="${mainColor}"/>
-          <circle cx="14" cy="14" r="5" fill="${dotColor}"/>
+          <circle cx="14" cy="14" r="5" fill="#FFFFFF"/>
         </svg>
       </div>
     </div>`,
-    iconSize: [isTop3 ? 100 : 20, isTop3 ? 60 : 28],
-    iconAnchor: [isTop3 ? 50 : 10, isTop3 ? 55 : 28]
+    iconSize: [isTop3 ? 40 : 32, isTop3 ? 50 : 42],
+    iconAnchor: [isTop3 ? 20 : 16, isTop3 ? 45 : 38]
   });
 };
+
+function MapController({ routePath, userLocation }) {
+  const map = useMap();
+  useEffect(() => {
+    if (routePath && routePath.length > 0) {
+      const bounds = L.latLngBounds(routePath);
+      map.fitBounds(bounds, { padding: [100, 100], animate: true });
+    } else {
+      map.setView(userLocation, 15);
+    }
+  }, [routePath, map, userLocation]);
+  return null;
+}
 
 
 
@@ -124,13 +133,13 @@ function ReviewForm({ shopId, onPosted }) {
     <form onSubmit={handleSubmit} className="bg-[#F8F9FA] p-8 rounded-[40px] border border-black/[0.03] space-y-6">
       <div className="space-y-1">
         <h3 className="text-lg font-black text-[#1D1D1F] tracking-tighter">Write a Review</h3>
-        <p className="text-xs font-bold text-[#8E8E93]">Rate your experience</p>
+        <p className="text-[12px] font-bold text-[#1D1D1F]">Rate your experience</p>
       </div>
 
       <div className="flex gap-2">
         {[1, 2, 3, 4, 5].map((s) => (
           <button key={s} type="button" onClick={() => setRating(s)} className="p-1">
-            <Star className={`w-8 h-8 transition-transform active:scale-90 ${s <= rating ? 'fill-[#FFB017] text-[#FFB017]' : 'text-[#8E8E93]/20'}`} />
+            <Star className={`w-8 h-8 transition-transform active:scale-90 ${s <= rating ? 'fill-[#FFB017] text-[#FFB017]' : 'text-[#1D1D1F]/20'}`} />
           </button>
         ))}
       </div>
@@ -139,13 +148,13 @@ function ReviewForm({ shopId, onPosted }) {
         value={comment}
         onChange={(e) => setComment(e.target.value)}
         placeholder="Share your thoughts (optional)"
-        className="w-full h-32 bg-white rounded-3xl p-5 text-sm font-bold outline-none border border-black/[0.05] focus:ring-2 focus:ring-[#014421]/10 placeholder:text-[#8E8E93]/40 transition-all resize-none"
+        className="w-full h-32 bg-white rounded-3xl p-5 text-[12px] font-bold outline-none border border-black/[0.05] focus:ring-2 focus:ring-[#014421]/10 placeholder:text-[#1D1D1F]/40 transition-all resize-none"
       />
 
       <button
         type="submit"
         disabled={submitting || rating === 0}
-        className="w-full py-4 bg-[#014421] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#1D1D1F] transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50"
+        className="w-full py-4 bg-[#014421] text-white rounded-2xl text-[12px] font-black uppercase tracking-widest hover:bg-[#1D1D1F] transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50"
       >
         {submitting ? "Posting..." : "Post Review"}
       </button>
@@ -153,7 +162,7 @@ function ReviewForm({ shopId, onPosted }) {
   );
 }
 
-function ShopDetailModal({ shop, reviews = [], onClose, onPosted }) {
+function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputation, showMatchScore }) {
   return (
     <div className="modal-overlay flex items-center justify-center p-4 z-[300]">
       <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
@@ -169,15 +178,15 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted }) {
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
             <div className="absolute bottom-6 left-8 right-8 flex justify-between items-end">
               <h2 className="text-4xl font-black text-white tracking-tighter leading-none">{shop.name}</h2>
-              {shop.score && (
+              {showMatchScore && shop.score && (
                 <button
                   onClick={(e) => {
                     e.stopPropagation();
-                    setShowComputation(shop);
+                    onShowComputation(shop);
                   }}
                   className="bg-[#1D1D1F] text-white px-5 py-3 rounded-2xl flex flex-col items-center gap-0.5 border border-white/10 hover:bg-black transition-all hover:scale-105 active:scale-95 group shadow-xl"
                 >
-                  <span className="text-[10px] font-bold text-white/50 lowercase leading-none group-hover:text-white/80 transition-colors">Match Score</span>
+                  <span className="text-[12px] font-bold text-white/50 lowercase leading-none group-hover:text-white/80 transition-colors">Match Score</span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-2xl font-black leading-none">{(shop.score * 100).toFixed(0)}%</span>
                     <Info className="w-3.5 h-3.5 text-white/30 group-hover:text-white" />
@@ -190,27 +199,30 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted }) {
           <div className="p-8 space-y-12">
             <div className="space-y-4">
               <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03] flex items-center gap-6 shadow-sm">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md shrink-0"><MapPin className="w-6 h-6 text-[#014421]" /></div>
-                <div className="flex-1"><p className="text-sm font-black text-[#1D1D1F] tracking-tight leading-tight">{shop.address}</p></div>
+                <div className="flex-1"><p className="text-[12px] font-medium text-[#1D1D1F] tracking-tight leading-tight">{shop.address}</p></div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm">
-                  <DollarSign className="w-5 h-5 text-[#7B1113]" />
-                  <span className="text-xs font-black text-[#1D1D1F]">₱{shop.price}/kg</span>
+              <div className="grid grid-cols-4 gap-4">
+                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm text-center">
+                  <span className="text-[12px] font-bold text-gray-500 tracking-widest uppercase">Price</span>
+                  <span className="text-[12px] font-medium text-[#1D1D1F]">₱{shop.price}/kg</span>
                 </div>
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm">
-                  <Timer className="w-5 h-5 text-[#7B1113]" />
-                  <span className="text-xs font-black text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
+                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm text-center">
+                  <span className="text-[10px] font-bold text-gray-500 tracking-widest uppercase leading-tight">Turnaround<br />Time</span>
+                  <span className="text-[12px] font-medium text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
                 </div>
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm">
-                  <ShieldCheck className="w-5 h-5 text-[#228B22]" />
-                  <span className="text-[9px] font-black text-[#228B22] tracking-widest">Verified</span>
+                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm text-center">
+                  <span className="text-[12px] font-bold text-gray-500 tracking-widest uppercase">Location</span>
+                  <span className="text-[12px] font-medium text-[#1D1D1F]">{(shop.distance || 0).toFixed(1)} km</span>
                 </div>
+                <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`, "_blank")} className="bg-[#1D1D1F] p-4 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 shadow-sm hover:bg-[#014421] transition-all group">
+                  <Navigation2 className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                  <span className="text-[10px] font-bold text-white tracking-widest uppercase">Navigate</span>
+                </button>
               </div>
             </div>
 
-            <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`, "_blank")} className="w-full py-5 bg-[#1D1D1F] text-white rounded-[24px] font-black text-[10px] capitalize tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#014421] transition-all shadow-xl shadow-black/10"><Navigation2 className="w-4 h-4 fill-white" /> Access navigation</button>
+            <button onClick={() => window.open(`https://www.google.com/maps/dir/?api=1&destination=${shop.latitude},${shop.longitude}`, "_blank")} className="w-full py-5 bg-[#1D1D1F] text-white rounded-[24px] font-black text-[12px] capitalize tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#014421] transition-all shadow-xl shadow-black/10"><Navigation2 className="w-4 h-4 fill-white" /> Access navigation</button>
 
 
 
@@ -225,12 +237,12 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted }) {
                       <Star key={s} className={`w-4 h-4 ${s <= Math.floor(shop.rating) ? "fill-[#FFB017] text-[#FFB017]" : "text-[#FFB017] opacity-20"}`} />
                     ))}
                   </div>
-                  <p className="text-xs font-bold text-[#8E8E93] tracking-tight whitespace-nowrap">({reviews.length} reviews)</p>
+                  <p className="text-[12px] font-bold text-[#1D1D1F] tracking-tight whitespace-nowrap">({reviews.length} reviews)</p>
                 </div>
                 <div className="flex-1 space-y-2.5 pt-2">
                   {[5, 4, 3, 2, 1].map((n) => (
                     <div key={n} className="flex items-center gap-3">
-                      <span className="text-[9px] font-black text-[#1D1D1F] w-2">{n}</span>
+                      <span className="text-[12px] font-black text-[#1D1D1F] w-2">{n}</span>
                       <div className="flex-1 h-1.5 bg-[#F3F4F6] rounded-full overflow-hidden relative">
                         <div className="absolute inset-y-0 left-0 bg-[#FFB017] rounded-full" style={{ width: `${n === 5 ? 85 : n === 4 ? 60 : n === 3 ? 15 : 5}%` }} />
                       </div>
@@ -241,19 +253,19 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted }) {
 
               <div className="space-y-6">
                 {reviews.length === 0 ? (
-                  <p className="text-sm font-bold text-[#8E8E93] text-center py-6">No reviews yet. Be the first to review!</p>
+                  <p className="text-[12px] font-bold text-[#1D1D1F] text-center py-6">No reviews yet. Be the first to review!</p>
                 ) : reviews.map(r => (
                   <div key={r._id || r.id} className="space-y-2 pb-6 border-b border-black/[0.04] last:border-0 animate-fadeUp">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-black text-[#1D1D1F]">{r.reviewerName || r.user || 'Anonymous'}</span>
+                      <span className="text-[12px] font-black text-[#1D1D1F]">{r.reviewerName || r.user || 'Anonymous'}</span>
                       <div className="flex items-center gap-1.5 border border-[#FFB017] px-3 py-1 rounded-full">
                         <Star className="w-3 h-3 fill-[#FFB017] text-[#FFB017]" />
-                        <span className="text-[10px] font-black text-[#FFB017]">{r.rating}</span>
+                        <span className="text-[12px] font-black text-[#FFB017]">{r.rating}</span>
                       </div>
                     </div>
-                    <p className="text-sm font-bold text-[#555] leading-relaxed tracking-tight">{r.comment}</p>
+                    <p className="text-[12px] font-bold text-[#555] leading-relaxed tracking-tight">{r.comment}</p>
                     {r.createdAt && (
-                      <span className="text-[10px] font-bold text-[#8E8E93]">
+                      <span className="text-[12px] font-bold text-[#1D1D1F]">
                         {new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' })}
                       </span>
                     )}
@@ -302,7 +314,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
           <div className="space-y-2">
             <div className="flex items-center gap-3">
               <div className="bg-[#014421] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Analysis</div>
-              <p className="text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.3em]">How we calculated your match</p>
+              <p className="text-[11px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">How we calculated your match</p>
             </div>
             <h3 className="text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking Breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
           </div>
@@ -370,7 +382,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                           </div>
                           <div>
                             <p className="text-sm font-black text-[#1D1D1F]">{info.label}</p>
-                            <p className="text-[10px] font-bold text-[#8E8E93]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
+                            <p className="text-[10px] font-bold text-[#1D1D1F]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
                           </div>
                         </div>
                         <div className="text-right">
@@ -386,7 +398,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                             style={{ width: `${info.percentage}%` }}
                           />
                         </div>
-                        <p className="text-[10px] font-medium text-[#8E8E93] leading-relaxed italic">
+                        <p className="text-[10px] font-medium text-[#1D1D1F] leading-relaxed italic">
                           {info.desc} Your priority weight: <span className="font-bold text-[#1D1D1F]">{(detail.weight * 100).toFixed(0)}%</span>
                         </p>
                       </div>
@@ -417,17 +429,76 @@ export default function ShopsPage() {
   const navigate = useNavigate();
   const [sidebarTab, setSidebarTab] = useState("overview");
   const [selectedShop, setSelectedShop] = useState(null);
-  const [weights, setWeights] = useState({ rating: 4, price: 30, time: 24, distance: 10 });
+  // Automatic weights derived from drag order: rank 1=40%, 2=30%, 3=20%, 4=10%
+  const POSITION_WEIGHTS = [0.40, 0.30, 0.20, 0.10];
+  const [weights, setWeights] = useState({ price: 30, time: 24, distance: 10, rating: 4 });
   const [searchQuery, setSearchQuery] = useState("");
   const [mapSearchQuery, setMapSearchQuery] = useState("");
   const [mapSelection, setMapSelection] = useState(null);
-  const [priorities, setPriorities] = useState(['rating', 'price', 'time', 'distance']);
+  const [priorities, setPriorities] = useState(['price', 'time', 'distance', 'rating']);
   const [dragIndex, setDragIndex] = useState(null);
   const [isApplied, setIsApplied] = useState(false);
   const [showComputation, setShowComputation] = useState(null);
   const [showAllNearby, setShowAllNearby] = useState(false);
+  const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
   const [shops, setShops] = useState(initialShops);
   const [shopReviews, setShopReviews] = useState({});
+  const [activeRouteShopId, setActiveRouteShopId] = useState(null);
+  const [routePath, setRoutePath] = useState([]);
+  const [showWeightManual, setShowWeightManual] = useState(false);
+  const [showPriorityManual, setShowPriorityManual] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [showMapSuggestions, setShowMapSuggestions] = useState(false);
+
+  // Detect actual user location on mount
+  const refreshLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserLocation([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.error("Error detecting location:", error);
+        }
+      );
+    }
+  };
+
+  useEffect(() => {
+    refreshLocation();
+  }, []);
+
+  // Reset map states when changing tabs
+  useEffect(() => {
+    setActiveRouteShopId(null);
+    setRoutePath([]);
+  }, [sidebarTab]);
+
+  // Fetch real road route using OSRM when a shop is selected for routing
+  useEffect(() => {
+    if (!activeRouteShopId) {
+      setRoutePath([]);
+      return;
+    }
+
+    const shop = shops.find(s => s.id === activeRouteShopId || s._id === activeRouteShopId);
+    if (!shop) return;
+
+    // OSRM expects [lng, lat]
+    const userCoords = `${userLocation[1]},${userLocation[0]}`;
+    const shopCoords = `${shop.longitude},${shop.latitude}`;
+
+    fetch(`https://router.project-osrm.org/route/v1/driving/${userCoords};${shopCoords}?overview=full&geometries=geojson`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.routes && data.routes[0]) {
+          // OSRM geojson is [lng, lat], Leaflet needs [lat, lng]
+          const coords = data.routes[0].geometry.coordinates.map(c => [c[1], c[0]]);
+          setRoutePath(coords);
+        }
+      })
+      .catch(err => console.error("Routing error:", err));
+  }, [activeRouteShopId, shops]);
 
   // Fetch shops from backend on mount; fallback to mock data if API unavailable
   useEffect(() => {
@@ -437,7 +508,6 @@ export default function ShopsPage() {
           const mapped = data.map(s => ({
             ...s,
             id: s._id,
-            distance: calcDistance(USER_LOCATION[0], USER_LOCATION[1], s.latitude || 14.167, s.longitude || 121.241),
             image: s.image || DEFAULT_SHOP_IMAGE,
           }));
           setShops(mapped);
@@ -501,9 +571,27 @@ export default function ShopsPage() {
     setDragIndex(null);
   };
 
+  // Auto-weights from priority order combined with weight ranges
+  const combinedWeights = useMemo(() => {
+    const w = {};
+    priorities.forEach((key, i) => {
+      // Multiply the slider weight by the priority-based multiplier
+      // This ensures both values influence the final decision
+      w[key] = (weights[key] || 1) * POSITION_WEIGHTS[i];
+    });
+    return w;
+  }, [priorities, weights]);
+
+  const shopsWithDistance = useMemo(() => {
+    return shops.map(s => ({
+      ...s,
+      distance: calcDistance(userLocation[0], userLocation[1], s.latitude || 14.1675, s.longitude || 121.2433)
+    }));
+  }, [shops, userLocation]);
+
   const rankedShops = useMemo(() => {
-    const scores = calculateTopsis(shops, weights, priorities);
-    return shops.map(shop => {
+    const scores = calculateTopsis(shopsWithDistance, combinedWeights, priorities);
+    return shopsWithDistance.map(shop => {
       const scoreData = scores.find(s => s.id === shop.id);
       return {
         ...shop,
@@ -511,19 +599,38 @@ export default function ShopsPage() {
         details: scoreData?.details ?? []
       };
     }).sort((a, b) => b.score - a.score);
-  }, [weights, shops]);
+  }, [combinedWeights, shopsWithDistance, priorities]);
 
-  const nearbyShops = useMemo(() => [...shops].sort((a, b) => a.distance - b.distance).slice(0, 3), [shops]);
+  const nearbyShops = useMemo(() => [...shopsWithDistance].sort((a, b) => a.distance - b.distance).slice(0, 3), [shopsWithDistance]);
   const top3 = useMemo(() => rankedShops.slice(0, 3), [rankedShops]);
 
-  const filteredShops = useMemo(() =>
-    rankedShops.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.address.toLowerCase().includes(searchQuery.toLowerCase())),
-    [rankedShops, searchQuery]
-  );
+  const filteredShops = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return rankedShops;
+
+    return rankedShops.filter(s =>
+      s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query)
+    );
+  }, [rankedShops, searchQuery]);
+
+  // Suggestions logic
+  const suggestions = useMemo(() => {
+    const query = searchQuery.toLowerCase().trim();
+    if (!query) return [];
+    return rankedShops.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+  }, [rankedShops, searchQuery]);
+
+  const mapSuggestions = useMemo(() => {
+    const query = mapSearchQuery.toLowerCase().trim();
+    if (!query) return [];
+    return rankedShops.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+  }, [rankedShops, mapSearchQuery]);
+
+
 
   return (
     <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden">
-      <aside className="w-72 bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+      <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-4 mb-16 px-2">
           <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#014421]/20">E</div>
           <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter font-outfit">ELaBada</span>
@@ -531,24 +638,24 @@ export default function ShopsPage() {
 
         <nav className="flex-1 space-y-3">
 
-          <button onClick={() => setSidebarTab("overview")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-sm font-black transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
+          <button onClick={() => setSidebarTab("overview")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
             <LayoutDashboard className={`w-5 h-5 ${sidebarTab === "overview" ? "text-white" : "text-[#014421]/40"}`} />
             Overview
           </button>
 
-          <button onClick={() => setSidebarTab("map")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-sm font-black transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
+          <button onClick={() => setSidebarTab("map")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
             <MapIcon className={`w-5 h-5 ${sidebarTab === "map" ? "text-white" : "text-[#014421]/40"}`} />
             Location
           </button>
 
-          <button onClick={() => setSidebarTab("computation")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-sm font-black transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
+          <button onClick={() => setSidebarTab("computation")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421]/60 hover:bg-[#014421]/5"}`}>
             <BarChart3 className={`w-5 h-5 ${sidebarTab === "computation" ? "text-white" : "text-[#014421]/40"}`} />
             Computation
           </button>
         </nav>
 
         <div className="mt-auto pt-8 border-t border-[#F3F4F6]">
-          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-sm font-black">
+          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-[14px] font-normal">
             <LogOut className="w-5 h-5" />
             Log out
           </button>
@@ -560,24 +667,48 @@ export default function ShopsPage() {
         {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
           <div className="px-10 pt-10 pb-3 shrink-0">
-            <div className="flex items-center gap-8">
-              <div className="flex-1 bg-[#0D3A2C] rounded-[56px] p-12 text-white shadow-2xl relative overflow-hidden flex flex-col justify-between min-h-[300px]">
-                <div className="relative z-10">
-                  <h2 className="text-6xl font-black tracking-tighter leading-none font-outfit">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
+            <div className="flex items-stretch gap-8">
+              <div className="flex-1 bg-[#0D3A2C] rounded-[56px] p-12 text-white shadow-2xl relative flex flex-col min-h-[320px]">
+                <div className="absolute inset-0 flex items-center px-12 pb-14 z-10 pointer-events-none">
+                  <h2 className="text-[60px] font-normal tracking-tighter leading-none font-outfit pointer-events-auto">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
-                <div className="relative z-10 self-end w-full max-w-xl mt-8">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#8E8E93]"><Search className="w-6 h-6" /></div>
+                <div className="mt-auto relative z-30 self-end w-full max-w-xl flex-shrink-0 pointer-events-auto">
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-6 h-6" /></div>
                   <input
                     type="text"
                     placeholder="Search Shops"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full h-16 bg-white rounded-[24px] border border-black/[0.05] pl-16 pr-6 text-sm font-bold shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:text-[#8E8E93] text-[#1D1D1F]"
+                    onFocus={() => setShowSuggestions(true)}
+                    onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+                    className="w-full h-16 bg-white rounded-[24px] border border-black/[0.05] pl-16 pr-6 text-[12px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
                   />
+                  {searchQuery && suggestions.length > 0 && showSuggestions && (
+                    <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
+                      {suggestions.map(s => (
+                        <button
+                          key={s.id}
+                          onClick={() => { setSearchQuery(s.name); setShowSuggestions(false); }}
+                          className="w-full px-8 py-5 flex items-center justify-between hover:bg-[#F8F9FA] transition-all border-b border-black/[0.02] last:border-0 group"
+                        >
+                          <div className="flex items-center gap-4">
+                            <div className="w-10 h-10 rounded-2xl bg-[#1D1D1F]/5 flex items-center justify-center text-[#1D1D1F] group-hover:bg-[#1D1D1F] group-hover:text-white transition-all">
+                              <Store className="w-5 h-5" />
+                            </div>
+                            <div className="text-left">
+                              <p className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{s.name}</p>
+                              <p className="text-[12px] font-medium text-[#1D1D1F]/50 truncate max-w-[200px]">{s.address}</p>
+                            </div>
+                          </div>
+                          <ArrowUpRight className="w-4 h-4 text-[#1D1D1F] group-hover:text-[#1D1D1F] transition-all" />
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-                <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               </div>
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col justify-center gap-6 pb-14">
                 <button onClick={() => setSidebarTab("computation")} className="w-20 h-20 rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 hover:-translate-y-1">
                   <Sliders className="w-8 h-8 text-white transition-all" />
                 </button>
@@ -593,11 +724,11 @@ export default function ShopsPage() {
         <div className={`flex-1 overflow-y-auto no-scrollbar animate-fadeUp ${sidebarTab === "overview" ? "px-10 pb-10 pt-3" : "p-10"}`}>
 
           {sidebarTab === "overview" && (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tighter font-outfit">Laundry Shops</h3>
-                  <p className="text-[11px] font-medium text-[#8E8E93] tracking-tight">{filteredShops.length} shops found</p>
+            <div className="space-y-6 px-12">
+              <div className="flex items-center justify-between pt-8">
+                <div className="space-y-1">
+                  <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter font-outfit leading-none">Laundry Shops</h3>
+                  <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate">{filteredShops.length} shops found</p>
                 </div>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
@@ -609,48 +740,62 @@ export default function ShopsPage() {
                   >
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-5">
                       <img src={s.image} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />
-                      <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm">
-                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-[#8E8E93]'}`} />
-                        <span className={`text-[9px] font-black capitalize tracking-widest ${s.status === 'open' ? 'text-[#228B22]' : 'text-[#8E8E93]'}`}>{s.status}</span>
+                      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm">
+                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-[#1D1D1F]'}`} />
+                        <span className={`text-[12px] font-black capitalize tracking-widest ${s.status === 'open' ? 'text-[#228B22]' : 'text-[#1D1D1F]'}`}>{s.status}</span>
                       </div>
-                      {s.score > 0 && (
-                        <div
-                          onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
-                          className="absolute bottom-3 right-3 bg-[#014421] text-white px-3 py-2 rounded-xl border border-white/20 shadow-lg flex flex-col items-center hover:scale-110 active:scale-95 transition-all cursor-help group/score"
-                        >
-                          <span className="text-[7px] font-black uppercase text-white/50 leading-none group-hover/score:text-white/80">Match</span>
-                          <span className="text-sm font-black leading-none mt-0.5">{(s.score * 100).toFixed(0)}%</span>
-                        </div>
+                      {isApplied && s.score > 0 && (
+                        <>
+                          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
+                          <div
+                            onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
+                            className="absolute bottom-3 right-3 left-3 px-2 flex flex-col gap-1.5 cursor-help"
+                          >
+                            <div className="flex justify-between items-end drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
+                              <span className="text-[10px] font-bold tracking-widest leading-none text-white/90">MATCH</span>
+                              <span className="text-sm font-[950] leading-none text-white">{(s.score * 100).toFixed(0)}%</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/20">
+                              <div className="h-full bg-[#228B22] rounded-full transition-all duration-1000 ease-out" style={{ width: `${(s.score * 100).toFixed(0)}%` }}></div>
+                            </div>
+                          </div>
+                        </>
                       )}
                     </div>
                     <div className="px-1 space-y-4 flex-1 flex flex-col">
-                      <div className="flex justify-between items-start gap-2">
-                        <h4 className="text-sm font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                      <div className="flex justify-between items-center gap-2">
+                        <div className="flex items-center gap-1.5 min-w-0">
+                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                          {s.permitStatus === 'approved' && (
+                            <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
+                              <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
+                            </div>
+                          )}
+                        </div>
                         <div className="flex items-center gap-1 shrink-0">
                           <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
-                          <span className="text-xs font-black text-[#1D1D1F]">{s.rating}</span>
-                          <span className="text-xs font-bold text-[#8E8E93]">({s.reviewCount})</span>
+                          <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating}</span>
+                          <span className="text-[12px] font-medium text-[#1D1D1F]">({s.reviewCount})</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[#8E8E93]">
-                        <MapPin className="w-3.5 h-3.5 shrink-0 opacity-60" />
-                        <p className="text-[11px] font-bold truncate">{s.address}</p>
+                      <div className="flex items-center gap-1.5 text-[#1D1D1F] mt-1">
+                        <MapPin className="w-3.5 h-3.5 shrink-0 opacity-40" />
+                        <p className="text-[12px] font-medium truncate">{s.address}</p>
                       </div>
                       <div className="flex items-center gap-4 py-1">
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#014421] opacity-60" />
-                          <span className="text-[10px] font-black text-[#1D1D1F] lowercase">{s.turnaroundTime} hr</span>
+                          <Clock className="w-3.5 h-3.5 text-[#1D1D1F] opacity-40" />
+                          <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{s.turnaroundTime} hr</span>
                         </div>
                       </div>
                       <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
                         <div className="flex flex-col">
-                          <span className="text-[10px] font-bold text-[#8E8E93] capitalize tracking-wider">Price</span>
-                          <span className="text-lg font-[900] text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-xs font-bold text-[#8E8E93]/60 lowercase ml-0.5">/kg</span></span>
+                          <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113] lowercase ml-0.5 opacity-80">/kg</span></span>
                         </div>
                         <button
                           disabled={s.status !== 'open'}
                           onClick={(e) => { e.stopPropagation(); s.status === 'open' && handleSelectShop(s); }}
-                          className={`px-5 py-3 rounded-full text-[10px] font-bold capitalize tracking-wider transition-all shadow-lg shadow-black/10 flex items-center justify-center ${s.status === 'open' ? 'bg-[#1D1D1F] text-white' : 'bg-[#8E8E93]/20 text-[#8E8E93] cursor-not-allowed'}`}
+                          className={`px-4 py-2.5 rounded-2xl text-[12px] font-normal capitalize tracking-wider transition-all shadow-md flex items-center justify-center ${s.status === 'open' ? 'bg-[#1D1D1F] text-white hover:bg-[#7B1113] active:scale-95' : 'bg-[#1D1D1F]/10 text-[#1D1D1F]/50 cursor-not-allowed'}`}
                         >
                           View details
                         </button>
@@ -667,40 +812,39 @@ export default function ShopsPage() {
               <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
                 <div className="xl:col-span-8 space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
-                    <div className="bg-white rounded-[64px] border border-black/[0.03] shadow-2xl p-14 flex flex-col space-y-12">
-                      <div className="space-y-1.5">
-                        <h3 className="text-4xl font-[900] text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
-                        <p className="text-xs font-bold text-[#8E8E93] capitalize tracking-widest mt-2">Hold and drag items to reorder</p>
-                      </div>
-                      <div className="space-y-5">
-                        {priorities.map((key, index) => (
-                          <div key={key} draggable onDragStart={() => onDragStart(index)} onDragOver={onDragOver} onDrop={() => { onDrop(index); setIsApplied(false); }} className="flex items-center justify-between gap-6 bg-[#F8F9FA] p-5 rounded-[36px] border border-black/[0.01] group transition-all hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing border-l-[6px] border-l-transparent hover:border-l-[#014421]">
-                            <div className="flex-1 min-w-0">
-                              <p className="text-xl font-[900] text-[#1D1D1F] tracking-tighter font-outfit leading-none whitespace-normal">
-                                {key === 'price' ? (<>Price <span className="font-medium text-xs text-[#8E8E93]">(per kg)</span></>) :
-                                  key === 'time' ? 'Turnaround Time' :
-                                    key === 'rating' ? 'Rating' :
-                                      key === 'distance' ? (<>Distance <span className="font-medium text-xs text-[#8E8E93]">(km)</span></>) : key}
-                              </p>
+                    {/* Weight ranges — first */}
+                    <div className="bg-white p-14 rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
+                          <button
+                            onClick={() => setShowWeightManual(!showWeightManual)}
+                            className={`p-3 rounded-2xl transition-all ${showWeightManual ? 'bg-[#014421] text-white shadow-lg shadow-[#014421]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
+                          >
+                            <Info className="w-6 h-6" />
+                          </button>
+                        </div>
+                        {showWeightManual && (
+                          <div className="bg-[#014421]/5 p-6 rounded-[32px] flex items-start gap-4 border border-[#014421]/10 animate-fadeUp">
+                            <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#014421]/20">
+                              <Sliders className="w-5 h-5 text-white" />
                             </div>
-                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-lg text-[#8E8E93] group-hover:text-[#014421] transition-all group-active:scale-95 border border-black/[0.03] shrink-0">
-                              <GripVertical className="w-6 h-6" />
+                            <div>
+                              <p className="text-sm font-bold text-[#1D1D1F] font-outfit">Set your preferences</p>
+                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Adjust these sliders to set your ideal budget, distance, and time. We'll use these to find shops that fit your needs.</p>
                             </div>
                           </div>
-                        ))}
+                        )}
                       </div>
-                    </div>
-                    <div className="bg-white p-14 rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
-                      <h3 className="text-4xl font-[900] text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
                       <div className="space-y-10 relative z-10">
                         {Object.entries(weights).map(([key, val]) => (
                           <div key={key} className="space-y-5">
                             <div className="flex justify-between items-end gap-3">
-                              <p className="text-xl font-black text-[#1D1D1F] tracking-tighter font-outfit whitespace-nowrap">
-                                {key === 'price' ? (<>Price <span className="font-medium normal-case text-xs text-[#8E8E93]">(kg)</span></>) :
-                                  key === 'time' ? 'Time' :
+                              <p className="text-xl font-medium text-[#1D1D1F] tracking-tight font-outfit whitespace-nowrap">
+                                {key === 'price' ? (<>Price <span className="font-medium normal-case text-xs text-[#1D1D1F]">(kg)</span></>) :
+                                  key === 'time' ? 'Turnaround Time' :
                                     key === 'rating' ? 'Rating' :
-                                      key === 'distance' ? (<>Distance <span className="font-medium normal-case text-xs text-[#8E8E93]">(km)</span></>) : key}
+                                      key === 'distance' ? (<>Distance <span className="font-medium normal-case text-xs text-[#1D1D1F]">(km)</span></>) : key}
                               </p>
                               <span className="text-lg font-black text-[#014421] leading-none">{val}</span>
                             </div>
@@ -712,7 +856,54 @@ export default function ShopsPage() {
                           </div>
                         ))}
                       </div>
-                      <div className="pt-8 border-t border-black/[0.03] relative z-10">
+                    </div>
+                    {/* Rank your priorities — second */}
+                    <div className="bg-white rounded-[64px] border border-black/[0.03] shadow-2xl p-14 flex flex-col space-y-12">
+                      <div className="space-y-6">
+                        <div className="flex items-center justify-between gap-4">
+                          <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
+                          <button
+                            onClick={() => setShowPriorityManual(!showPriorityManual)}
+                            className={`p-3 rounded-2xl transition-all ${showPriorityManual ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
+                          >
+                            <Info className="w-6 h-6" />
+                          </button>
+                        </div>
+                        {showPriorityManual && (
+                          <div className="bg-[#7B1113]/5 p-6 rounded-[32px] flex items-start gap-4 border border-[#7B1113]/10 animate-fadeUp">
+                            <div className="w-10 h-10 bg-[#7B1113] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#7B1113]/20">
+                              <Activity className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="text-sm font-bold text-[#1D1D1F] font-outfit">What matters most?</p>
+                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Drag items to reorder them. The item at the top is given the most importance (40%) when calculating your shop recommendations.</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                      <div className="space-y-4">
+                        {priorities.map((key, index) => (
+                          <div key={key} draggable onDragStart={() => onDragStart(index)} onDragOver={onDragOver} onDrop={() => { onDrop(index); setIsApplied(false); }} className="flex items-center justify-between gap-6 bg-[#F8F9FA] p-5 rounded-[36px] border border-black/[0.01] group transition-all hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing">
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xl font-medium text-[#1D1D1F] tracking-tight font-outfit leading-none whitespace-normal">
+                                {key === 'price' ? (<>Price <span className="text-xs text-[#1D1D1F]">(per kg)</span></>) :
+                                  key === 'time' ? 'Turnaround Time' :
+                                    key === 'rating' ? 'Rating' :
+                                      key === 'distance' ? (<>Distance <span className="text-xs text-[#1D1D1F]">(km)</span></>) : key}
+                              </p>
+                            </div>
+                            <div className="shrink-0 w-16 flex items-center justify-end">
+                              <span className="text-xl font-black text-[#014421] font-outfit leading-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
+                            </div>
+                          </div>
+                        ))}
+                        {/* Total row */}
+                        <div className="flex items-center justify-between gap-6 px-2 pt-4 border-t border-black/[0.06]">
+                          <p className="text-xs font-bold text-[#1D1D1F] uppercase tracking-widest font-outfit">Total</p>
+                          <span className="text-xl font-bold text-[#1D1D1F] font-outfit">100%</span>
+                        </div>
+                      </div>
+                      <div className="pt-8 border-t border-black/[0.03]">
                         <button onClick={() => setIsApplied(true)} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-medium text-xs capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
                       </div>
                     </div>
@@ -721,13 +912,13 @@ export default function ShopsPage() {
                 <div className="xl:col-span-4 min-h-[500px]">
                   {shops.length === 0 ? (
                     <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">
-                      <Store className="w-10 h-10 text-[#8E8E93]/40 mb-4" />
-                      <p className="text-[11px] font-bold text-[#8E8E93] max-w-[220px] leading-relaxed">No shops available yet in the system.</p>
+                      <Store className="w-10 h-10 text-[#1D1D1F]/40 mb-4" />
+                      <p className="text-[11px] font-bold text-[#1D1D1F] max-w-[220px] leading-relaxed">No shops available yet in the system.</p>
                     </div>
                   ) : isApplied ? (
                     <div className="space-y-10 animate-fadeUp">
                       <h3 className="text-3xl font-bold text-[#1D1D1F] tracking-tighter font-outfit">Recommended shops for you</h3>
-                      <p className="text-[11px] font-medium text-[#8E8E93] tracking-widest leading-relaxed">Based on your priorities</p>
+                      <p className="text-[12px] font-medium text-[#1D1D1F] tracking-widest leading-relaxed">Based on your priorities</p>
                       <div className="flex flex-col gap-5">
                         {top3.map((s, i) => (
                           <div key={s.id} onClick={() => { if (s.status === 'open') setShowComputation(s); }} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-6 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
@@ -736,26 +927,45 @@ export default function ShopsPage() {
                                 <span className="text-5xl font-[950] text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
                               </div>
                               <div className="flex-1 min-w-0">
-                                <h4 className="text-xl font-[950] text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors">{s.name}</h4>
-                                <div className="flex items-center gap-2 text-[#8E8E93] mt-1">
-                                  <MapPin className="w-4 h-4 opacity-60" />
-                                  <p className="text-[10px] font-bold capitalize truncate">{s.address}</p>
+                                <div className="flex items-center gap-2">
+                                  <h4 className="text-[14px] font-[950] text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors">{s.name}</h4>
+                                  {s.permitStatus === 'approved' && (
+                                    <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
+                                      <Check className="w-3 h-3 text-white stroke-[4]" />
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-2 text-[#1D1D1F] mt-1">
+                                  <MapPin className="w-3.5 h-3.5 opacity-40" />
+                                  <p className="text-[12px] font-medium capitalize truncate">{s.address}</p>
+                                </div>
+                                <div className="flex items-center gap-1.5 mt-2">
+                                  <div className="flex items-center gap-0.5">
+                                    {[...Array(5)].map((_, idx) => (
+                                      <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                    ))}
+                                  </div>
+                                  <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating}</span>
+                                  <span className="text-[12px] font-medium text-[#1D1D1F]">({s.reviewCount || 0})</span>
                                 </div>
                               </div>
                               <p className="text-2xl font-[950] text-[#014421] font-outfit shrink-0 tracking-tighter">{(s.score * 100).toFixed(0)}%</p>
                             </div>
                             <div className="flex items-center justify-between mt-auto pt-4 border-t border-black/[0.03]">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-3">
+                                <div className="flex flex-col">
+                                  <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113] lowercase ml-0.5 opacity-80">/kg</span></span>
+                                </div>
                                 {s.status !== 'open' && (
-                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#8E8E93]/10 rounded-full">
-                                    <XCircle className="w-3 h-3 text-[#8E8E93]" />
-                                    <span className="text-[9px] font-bold text-[#8E8E93] tracking-wider">Currently closed</span>
+                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
+                                    <XCircle className="w-3 h-3 text-[#1D1D1F]" />
+                                    <span className="text-[12px] font-normal text-[#1D1D1F] tracking-wider">Currently closed</span>
                                   </div>
                                 )}
                               </div>
                               {s.status === 'open' && (
-                                <div className="flex items-center gap-1.5 text-white bg-[#1D1D1F] px-5 py-2.5 rounded-full text-[9px] font-bold capitalize tracking-wider shadow-lg transition-all active:scale-95">
-                                  View details <ChevronRight className="w-4 h-4" />
+                                <div className="flex items-center gap-1.5 text-white bg-[#1D1D1F] px-4 py-2.5 rounded-2xl text-[12px] font-normal capitalize tracking-wider shadow-md transition-all active:scale-95 hover:bg-[#7B1113]">
+                                  View details <ChevronRight className="w-3 h-3" />
                                 </div>
                               )}
                             </div>
@@ -765,8 +975,8 @@ export default function ShopsPage() {
                     </div>
                   ) : (
                     <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">
-                      <Target className="w-10 h-10 text-[#8E8E93]/40 mb-4" />
-                      <p className="text-[11px] font-bold text-[#8E8E93] max-w-[220px] leading-relaxed">Adjust your rankings and click Apply to see top shops recommendations</p>
+                      <Target className="w-10 h-10 text-[#1D1D1F]/40 mb-4" />
+                      <p className="text-[11px] font-bold text-[#1D1D1F] max-w-[220px] leading-relaxed">Adjust your rankings and click Apply to see top shops recommendations</p>
                     </div>
                   )}
                 </div>
@@ -775,101 +985,198 @@ export default function ShopsPage() {
           )}
         </div>
 
-        {/* ── FULL-SCREEN MAP OVERLAY (covers sidebar + main) ── */}
+        {/* ── REDESIGNED MAP INTERFACE ── */}
         {sidebarTab === "map" && (
-          <div className="absolute inset-0 z-30 flex flex-col bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] animate-fadeUp">
-            {/* Top bar */}
-            <div className="h-20 px-10 flex items-center gap-6 bg-white/90 backdrop-blur-2xl border-b border-black/[0.05] shrink-0 shadow-sm">
-              <button
-                onClick={() => setSidebarTab("overview")}
-                className="flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-[#F8F9FA] text-sm font-black text-[#1D1D1F] hover:bg-[#1D1D1F] hover:text-white transition-all shadow-sm active:scale-95"
-              >
-                <ArrowLeft className="w-4 h-4" /> Back
-              </button>
-              <h2 className="text-xl font-black text-[#1D1D1F] tracking-tighter">Laundry Shops in Los Baños</h2>
-              <div className="ml-auto relative w-80">
-                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-[#014421] opacity-40"><Search className="w-4 h-4" /></div>
-                <input
-                  type="text"
-                  placeholder="Search by name or street..."
-                  value={mapSearchQuery}
-                  onChange={(e) => setMapSearchQuery(e.target.value)}
-                  className="w-full h-11 bg-[#F8F9FA] rounded-[20px] border border-black/[0.04] pl-12 pr-4 text-sm font-bold shadow-sm focus:ring-2 focus:ring-[#014421] transition-all outline-none placeholder:text-[#8E8E93]"
+          <div className="absolute inset-0 z-30 flex flex-col bg-slate-50 animate-fadeUp overflow-hidden">
+            {/* Map Background */}
+            <div className="absolute inset-0 z-0">
+              <MapContainer center={userLocation} zoom={15} className="w-full h-full z-0 overflow-hidden" zoomControl={false}>
+                <TileLayer
+                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                 />
-              </div>
+
+                <MapController routePath={routePath} userLocation={userLocation} />
+
+                {/* User Location Marker */}
+                <Marker position={userLocation} icon={createUserLocationIcon()} />
+
+                {/* Shop Markers */}
+                {rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase())).map((s, i) => (
+                  <Marker
+                    key={s.id}
+                    position={[s.latitude, s.longitude]}
+                    icon={createShopMarkerIcon(i + 1)}
+                    eventHandlers={{
+                      click: () => {
+                        setMapSelection({ ...s, index: i + 1 });
+                        setActiveRouteShopId(s.id === activeRouteShopId ? null : s.id);
+                      }
+                    }}
+                  />
+                ))}
+
+                {/* Routing Line - Road Following */}
+                {routePath.length > 0 && (
+                  <Polyline
+                    positions={routePath}
+                    color="#014421"
+                    weight={6}
+                    opacity={0.8}
+                    lineCap="round"
+                    lineJoin="round"
+                  />
+                )}
+              </MapContainer>
             </div>
 
-            {/* Map + side panel */}
-            <div className="flex-1 overflow-hidden p-6">
-              <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 h-full">
-                {/* Map */}
-                <div className="xl:col-span-3 bg-white rounded-[40px] overflow-hidden border border-black/[0.04] shadow-xl relative flex flex-col">
-                  <div className="flex-1 relative bg-[#E8EAED]">
-                    <MapContainer center={[14.167, 121.241]} zoom={15} className="w-full h-full z-0 overflow-hidden">
-                      <TileLayer
-                        url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                      />
-                      <Marker position={USER_LOCATION} icon={createUserLocationIcon()}>
-                        <Popup className="font-outfit"><p className="text-[10px] font-black uppercase">Your Location</p></Popup>
-                      </Marker>
-                      {rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase())).map((s, i) => (
-                        <Marker key={s.id} position={[s.latitude, s.longitude]} icon={createShopMarkerIcon(i + 1, s.name)} eventHandlers={{ click: () => setMapSelection({ ...s, index: i + 1 }) }}>
-                          <Popup className="font-outfit">
-                            <div className="p-2 space-y-2">
-                              <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-widest">Rank #0{i + 1}</p>
-                              <h4 className="text-sm font-black text-[#1D1D1F] uppercase">{s.name}</h4>
-                              <button onClick={() => setSelectedShop(s)} className="w-full py-2 bg-[#014421] text-white rounded-lg text-[9px] font-black capitalize tracking-widest hover:bg-[#014421]/90 transition-all">View details</button>
+            <div className="absolute inset-0 z-10 pointer-events-none p-10 flex flex-col">
+              <div className="flex items-start justify-between pointer-events-auto">
+                <div className="flex items-center gap-6">
+                  <button
+                    onClick={() => { setSidebarTab("overview"); setActiveRouteShopId(null); }}
+                    className="flex items-center justify-center w-16 h-16 rounded-[24px] bg-white/90 backdrop-blur-xl text-[#1D1D1F] shadow-2xl hover:bg-[#1D1D1F] hover:text-white transition-all active:scale-95"
+                  >
+                    <ArrowLeft className="w-6 h-6" />
+                  </button>
+                  <button
+                    onClick={refreshLocation}
+                    className="flex items-center justify-center w-16 h-16 rounded-[24px] bg-white/90 backdrop-blur-xl text-[#014421] shadow-2xl hover:bg-[#014421] hover:text-white transition-all active:scale-95"
+                    title="Detect my current location"
+                  >
+                    <LocateFixed className="w-6 h-6" />
+                  </button>
+                  <div className="relative w-[450px]">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-5 h-5" /></div>
+                    <input
+                      type="text"
+                      placeholder="Search laundry nearby..."
+                      value={mapSearchQuery}
+                      onChange={(e) => setMapSearchQuery(e.target.value)}
+                      onFocus={() => setShowMapSuggestions(true)}
+                      onBlur={() => setTimeout(() => setShowMapSuggestions(false), 200)}
+                      className="w-full h-16 bg-white/90 backdrop-blur-xl rounded-[32px] pl-16 pr-6 text-[12px] font-normal shadow-2xl outline-none focus:ring-4 focus:ring-[#014421]/10 transition-all placeholder:text-gray-500 text-gray-500"
+                    />
+                    {mapSearchQuery && mapSuggestions.length > 0 && showMapSuggestions && (
+                      <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp pointer-events-auto">
+                        {mapSuggestions.map(s => (
+                          <button
+                            key={s.id}
+                            onClick={() => {
+                              setMapSearchQuery(s.name);
+                              setShowMapSuggestions(false);
+                              setActiveRouteShopId(s.id);
+                            }}
+                            className="w-full px-8 py-5 flex items-center justify-between hover:bg-[#F8F9FA] transition-all border-b border-black/[0.02] last:border-0 group"
+                          >
+                            <div className="flex items-center gap-4">
+                              <div className="w-10 h-10 rounded-2xl bg-[#1D1D1F]/5 flex items-center justify-center text-[#1D1D1F] group-hover:bg-[#1D1D1F] group-hover:text-white transition-all">
+                                <Store className="w-5 h-5" />
+                              </div>
+                              <div className="text-left">
+                                <p className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{s.name}</p>
+                                <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate max-w-[200px]">{s.address}</p>
+                              </div>
                             </div>
-                          </Popup>
-                        </Marker>
-                      ))}
-                    </MapContainer>
-                  </div>
-                </div>
-
-                {/* Side panel - nearby shops */}
-                <div className="bg-white rounded-[40px] border border-black/[0.04] shadow-xl flex flex-col overflow-hidden">
-                  <div className="p-6 pb-4 border-b border-black/[0.03] bg-white/50 backdrop-blur-xl">
-                    <h3 className="text-xl font-black text-[#014421] tracking-tighter capitalize font-outfit">Top Nearby Shops</h3>
-                  </div>
-                  <div className="flex-1 overflow-y-auto no-scrollbar p-5 space-y-3">
-                    {(showAllNearby
-                      ? rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase()))
-                      : rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase())).slice(0, 3)
-                    ).map((s, i) => {
-                      const isTop3 = i < 3;
-                      return (
-                        <div key={s.id} onClick={() => setSelectedShop(s)} className={`bg-white rounded-[24px] flex items-center justify-between border border-black/[0.03] transition-all p-4 hover:shadow-md cursor-pointer group ${s.status === 'open' ? '' : 'opacity-80 grayscale-[0.3]'}`}>
-                          <div className="flex items-center gap-4 overflow-hidden">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-black font-outfit shrink-0 ${isTop3 ? 'bg-[#FF8C00]/10 text-[#FF8C00]' : 'bg-[#1D1D1F]/5 text-[#1D1D1F]/40'}`}>{i + 1}</div>
-                            <div className="flex flex-col min-w-0">
-                              <h4 className="text-sm font-black text-[#1D1D1F] tracking-tight capitalize leading-none truncate font-outfit">{s.name}</h4>
-                              <p className="text-[10px] font-bold text-[#8E8E93] truncate mt-1">{s.address}</p>
-                            </div>
-                          </div>
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 transition-all ${s.status === 'open' ? 'bg-[#F8F9FA] group-hover:bg-[#1D1D1F] group-hover:text-white' : 'bg-transparent text-[#8E8E93]/20'}`}>
-                            {s.status === 'open' ? <ChevronRight className="w-4 h-4" /> : <X className="w-3 h-3" />}
-                          </div>
-                        </div>
-                      );
-                    })}
-                    {rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase())).length > 3 && (
-                      <button onClick={() => setShowAllNearby(!showAllNearby)} className="w-full mt-1 py-3 bg-[#014421]/5 text-[#014421] rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-[#014421]/10 transition-all border border-[#014421]/10">
-                        {showAllNearby ? "Show Less" : "Show More"}
-                      </button>
+                            <ArrowUpRight className="w-4 h-4 text-[#1D1D1F] group-hover:text-[#1D1D1F] transition-all" />
+                          </button>
+                        ))}
+                      </div>
                     )}
                   </div>
                 </div>
               </div>
+
+              <div className="mt-6 self-end pointer-events-none w-[420px] max-h-[85%] flex flex-col">
+                {(() => {
+                  const query = mapSearchQuery.toLowerCase().trim();
+                  const filtered = query
+                    ? rankedShops.filter(s => s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query))
+                    : rankedShops;
+                  return (
+                    <>
+                      <div className="px-8 pb-10 pointer-events-auto relative">
+                        <div className="absolute -inset-x-24 -inset-y-16 bg-white opacity-80 blur-[100px] rounded-full -z-10 pointer-events-none" />
+                        <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tight">{filtered.length} Shops Around You</h3>
+                      </div>
+                      <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto">
+                        <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-5 no-scrollbar pointer-events-auto">
+                          {filtered.map((s, i) => {
+                            const isActive = activeRouteShopId === s.id;
+                            return (
+                              <div
+                                key={s.id}
+                                onClick={() => {
+                                  setActiveRouteShopId(isActive ? null : s.id);
+                                }}
+                                className={`relative p-7 rounded-[40px] bg-white border border-black/[0.1] transition-all duration-300 cursor-pointer ${isActive ? 'scale-[1.02]' : ''}`}
+                              >
+                                <div className="flex items-start gap-6">
+                                  {/* Left Side: Info */}
+                                  <div className="flex-1 min-w-0">
+                                    <div className="flex items-start gap-4">
+                                      <span className="text-4xl font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}</span>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                                          {s.permitStatus === 'approved' && (
+                                            <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
+                                              <Check className="w-3 h-3 text-white stroke-[4]" />
+                                            </div>
+                                          )}
+                                        </div>
+                                        <p className="text-[12px] font-medium text-[#1D1D1F] mt-1 flex items-center gap-1.5 opacity-60">
+                                          <LocateFixed className="w-3 h-3 opacity-60" />
+                                          {(s.distance || 0).toFixed(1)} km away
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    <div className="mt-3 space-y-2">
+                                      <div className="flex items-center gap-1.5">
+                                        <div className="flex items-center gap-0.5">
+                                          {[...Array(5)].map((_, idx) => (
+                                            <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                          ))}
+                                        </div>
+                                        <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center gap-6">
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-[16px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-80">/kg</span></span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <Clock className="w-4 h-4 text-[#1D1D1F] opacity-40" />
+                                          <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="w-32 h-32 rounded-[32px] overflow-hidden shrink-0 shadow-inner">
+                                    <img src={s.image} className="w-full h-full object-cover" alt={s.name} />
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
+              </div>
             </div>
           </div>
-        )}
-      </main>
+        )
+        }
+      </main >
 
-      {selectedShop && <ShopDetailModal shop={selectedShop} reviews={shopReviews[selectedShop._id || selectedShop.id] || []} onClose={() => setSelectedShop(null)} onPosted={handlePostReview} />}
+      {selectedShop && <ShopDetailModal shop={selectedShop} reviews={shopReviews[selectedShop._id || selectedShop.id] || []} onClose={() => setSelectedShop(null)} onPosted={handlePostReview} onShowComputation={setShowComputation} showMatchScore={isApplied} />
+      }
       {showComputation && <ComputationDetailsModal shop={showComputation} weights={weights} onClose={() => setShowComputation(null)} />}
-    </div>
+    </div >
   );
 }
 

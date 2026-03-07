@@ -1,113 +1,104 @@
 /**
  * TOPSIS (Technique for Order of Preference by Similarity to Ideal Solution)
- * A multi-criteria decision analysis method to rank laundry shops.
- * 
- * @param {Array} shops - Array of shop objects
- * @param {Object} weights - Object containing criterion weights (rating, price, time, distance)
- * @returns {Array} - Array of objects with shop ID and performance score
+ * Implementation based on the 8-step algorithm:
+ * 1. Identify Criteria
+ * 2. Construct Decision Matrix
+ * 3. Normalize the Matrix (Vector Normalization)
+ * 4. Compute the Weighted Normalized Matrix
+ * 5. Determine Ideal Best and Ideal Worst Values
+ * 6. Compute Separation Distances
+ * 7. Calculate the Closeness Coefficient
+ * 8. Rank the Alternatives
  */
-export function calculateTopsis(shops, weights, priorities = ['rating', 'price', 'time', 'distance']) {
+export function calculateTopsis(shops, weights, priorities = ['price', 'time', 'distance', 'rating']) {
     if (!shops || shops.length === 0) return [];
 
-    // Map priorities to multipliers (higher rank gets higher multiplier)
-    // Rank 0 (Top) -> 1.6, Rank 1 -> 1.2, Rank 2 -> 0.8, Rank 3 -> 0.4
-    const rankMultipliers = {
-        [priorities[0]]: 1.6,
-        [priorities[1]]: 1.2,
-        [priorities[2]]: 0.8,
-        [priorities[3]]: 0.4
-    };
-
-    const weightedBase = {
-        price: (weights.price || 0.1) * (rankMultipliers['price'] || 1),
-        time: (weights.time || 0.1) * (rankMultipliers['time'] || 1),
-        rating: (weights.rating || 0.1) * (rankMultipliers['rating'] || 1),
-        distance: (weights.distance || 0.1) * (rankMultipliers['distance'] || 1)
-    };
-
-    const totalWeight =
-        weightedBase.price +
-        weightedBase.time +
-        weightedBase.rating +
-        weightedBase.distance || 1;
-
-    const normalizedWeights = {
-        price: weightedBase.price / totalWeight,
-        time: weightedBase.time / totalWeight,
-        rating: weightedBase.rating / totalWeight,
-        distance: weightedBase.distance / totalWeight
-    };
-
+    // Step 1: Identify the Criteria (Key mapping and benefit/cost type)
     const criteria = [
-        { key: 'price', weight: normalizedWeights.price, isBenefit: false },
-        { key: 'turnaroundTime', weight: normalizedWeights.time, isBenefit: false },
-        { key: 'rating', weight: normalizedWeights.rating, isBenefit: true },
-        { key: 'distance', weight: normalizedWeights.distance, isBenefit: false }
+        { key: 'price', weightKey: 'price', isBenefit: false },
+        { key: 'turnaroundTime', weightKey: 'time', isBenefit: false },
+        { key: 'rating', weightKey: 'rating', isBenefit: true },
+        { key: 'distance', weightKey: 'distance', isBenefit: false }
     ];
 
+    // Map weights (priorities) to the criteria
+    const totalWeight = criteria.reduce((sum, c) => sum + (weights[c.weightKey] || 0), 0) || 1;
+    const criterionWeights = criteria.map(c => (weights[c.weightKey] || 0) / totalWeight);
+
+    // Step 2 & 3: Construct the Decision Matrix and Normalize the Matrix (Vector Normalization)
     const columnNorms = criteria.map(c => {
         const sumSq = shops.reduce((sum, s) => {
             const val = typeof s[c.key] === "number" ? s[c.key] : 0;
-            return sum + Math.pow(val, 2);
+            return sum + (val * val);
         }, 0);
-        return Math.sqrt(sumSq) || 1;
+        return Math.sqrt(sumSq) || 0.0001;
     });
 
-    const weighted = shops.map(shop => {
-        const vals = criteria.map((c, i) => {
+    const normalizedMatrix = shops.map(shop => {
+        return criteria.map((c, j) => {
             const val = typeof shop[c.key] === "number" ? shop[c.key] : 0;
-            const normalized = val / columnNorms[i];
-            return normalized * c.weight;
+            return val / columnNorms[j];
         });
-        return { id: shop.id, vals };
     });
 
-    const ideal = criteria.map((c, i) => {
-        const columnVals = weighted.map(w => w.vals[i]);
-        return c.isBenefit
-            ? Math.max(...columnVals)
-            : Math.min(...columnVals);
+    // Step 4: Compute the Weighted Normalized Matrix
+    const weightedNormalizedMatrix = normalizedMatrix.map(row => {
+        return row.map((r_ij, j) => r_ij * criterionWeights[j]);
     });
 
-    const antiIdeal = criteria.map((c, i) => {
-        const columnVals = weighted.map(w => w.vals[i]);
-        return c.isBenefit
-            ? Math.min(...columnVals)
-            : Math.max(...columnVals);
+    // Step 5: Determine Ideal Best (A+) and Ideal Worst (A-) Values
+    const idealBest = criteria.map((c, j) => {
+        const columnVals = weightedNormalizedMatrix.map(row => row[j]);
+        return c.isBenefit ? Math.max(...columnVals) : Math.min(...columnVals);
     });
 
-    return weighted.map((w, shopIdx) => {
-        const distIdeal = Math.sqrt(
-            w.vals.reduce((sum, v, i) => sum + Math.pow(v - ideal[i], 2), 0)
+    const idealWorst = criteria.map((c, j) => {
+        const columnVals = weightedNormalizedMatrix.map(row => row[j]);
+        return c.isBenefit ? Math.min(...columnVals) : Math.max(...columnVals);
+    });
+
+    // Separation distances and scores
+    return weightedNormalizedMatrix.map((row, i) => {
+        const distToBest = Math.sqrt(
+            row.reduce((sum, v_ij, j) => sum + Math.pow(v_ij - idealBest[j], 2), 0)
         );
 
-        const distAntiIdeal = Math.sqrt(
-            w.vals.reduce((sum, v, i) => sum + Math.pow(v - antiIdeal[i], 2), 0)
+        const distToWorst = Math.sqrt(
+            row.reduce((sum, v_ij, j) => sum + Math.pow(v_ij - idealWorst[j], 2), 0)
         );
 
-        const score =
-            distAntiIdeal / (distIdeal + distAntiIdeal || 1);
-
-        const shopData = shops[shopIdx];
+        const closenessCoefficient = distToWorst / (distToBest + distToWorst || 0.0001);
 
         return {
-            id: w.id,
-            score,
-            details: criteria.map((c, i) => ({
-                criterion: c.key,
-                weight: c.weight,
-                actualValue: shopData[c.key],
-                weightedValue: w.vals[i],
-                idealValue: ideal[i],
-                antiIdealValue: antiIdeal[i],
-                isBenefit: c.isBenefit,
-                // Simple percentage of how good this shop is in this specific criterion
-                // For benefit: (val - min) / (max - min)
-                // For cost: (max - val) / (max - min)
-                rating: c.isBenefit
-                    ? (w.vals[i] - antiIdeal[i]) / (ideal[i] - antiIdeal[i] || 1)
-                    : (antiIdeal[i] - w.vals[i]) / (antiIdeal[i] - ideal[i] || 1)
-            }))
+            id: shops[i].id || shops[i]._id,
+            score: closenessCoefficient,
+            details: criteria.map((c, j) => {
+                const val = row[j];
+                const best = idealBest[j];
+                const worst = idealWorst[j];
+
+                // Relative "rating" (0 to 1) for this specific criterion
+                // Measures how close this shop is to the ideal best compared to the worst for THIS criterion
+                let relativeRating = 0;
+                if (Math.abs(best - worst) < 0.0001) {
+                    relativeRating = 1.0; // All shops are equal in this criterion
+                } else {
+                    relativeRating = c.isBenefit
+                        ? (val - worst) / (best - worst)
+                        : (worst - val) / (worst - best);
+                }
+
+                return {
+                    criterion: c.key,
+                    weight: criterionWeights[j],
+                    actualValue: shops[i][c.key],
+                    normalizedValue: val,
+                    idealBest: best,
+                    idealWorst: worst,
+                    isBenefit: c.isBenefit,
+                    rating: Math.max(0, Math.min(1, relativeRating))
+                };
+            })
         };
     });
 }

@@ -1,4 +1,15 @@
 import { useState, useEffect, useRef } from "react";
+import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+
+// Fix for default marker icons in Leaflet with React
+delete L.Icon.Default.prototype._getIconUrl;
+L.Icon.Default.mergeOptions({
+    iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon-2x.png',
+    iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-icon.png',
+    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
+});
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
@@ -7,11 +18,25 @@ import {
     LogOut, ChevronRight,
     TrendingUp, Star, MoreVertical,
     Edit3, Trash2, ArrowUpRight, Clock,
-    FileText, ShieldCheck, MapPin, XCircle, CheckCircle, Plus,
-    Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera
+    FileText, Check, MapPin, XCircle, CheckCircle, Plus,
+    Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera, LocateFixed, Info, Search, ShieldCheck
 } from "lucide-react";
 
 const API_BASE = "http://localhost:5000";
+
+const Field = ({ label, value, onChange, type = "text", placeholder, step }) => (
+    <div className="space-y-1.5">
+        <label className="block text-[11px] font-medium text-[#1D1D1F]">{label}</label>
+        <input
+            type={type}
+            step={step}
+            value={value}
+            onChange={onChange}
+            placeholder={placeholder}
+            className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-sm text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+        />
+    </div>
+);
 
 function ConfirmationModal({ title, message, onConfirm, onCancel }) {
     return (
@@ -22,7 +47,7 @@ function ConfirmationModal({ title, message, onConfirm, onCancel }) {
                 </div>
                 <div>
                     <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">{title}</h2>
-                    <p className="text-sm font-bold text-[#8E8E93] mt-2">{message}</p>
+                    <p className="text-sm font-bold text-[#1D1D1F] mt-2">{message}</p>
                 </div>
                 <div className="grid grid-cols-2 gap-4 w-full pt-4">
                     <button onClick={onCancel} className="py-4 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] font-medium text-sm hover:bg-[#E5E5EA] transition-colors">Cancel</button>
@@ -55,7 +80,7 @@ function UploadBox({ label, hint, onFileSelected, preview, small = false, extraC
                         <UploadCloud className={small ? "w-4 h-4" : "w-5 h-5"} />
                     </div>
                     <p className="text-[10px] font-medium text-[#1D1D1F] text-center">{label}</p>
-                    {hint && <p className="text-[9px] text-[#8E8E93] text-center">{hint}</p>}
+                    {hint && <p className="text-[9px] text-[#1D1D1F] text-center">{hint}</p>}
                 </>
             )}
             <input ref={inputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleChange} />
@@ -63,10 +88,36 @@ function UploadBox({ label, hint, onFileSelected, preview, small = false, extraC
     );
 }
 
+function MapPicker({ position, onPositionChange }) {
+    const map = useMap();
+    useEffect(() => {
+        if (position) map.setView(position, map.getZoom());
+    }, [position]);
+
+    useMapEvents({
+        click(e) {
+            onPositionChange([e.latlng.lat, e.latlng.lng]);
+        },
+    });
+
+    return (
+        <Marker
+            position={position}
+            draggable={true}
+            eventHandlers={{
+                dragend: (e) => {
+                    const pos = e.target.getLatLng();
+                    onPositionChange([pos.lat, pos.lng]);
+                }
+            }}
+        />
+    );
+}
+
 function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const [form, setForm] = useState(initialData || {
         name: "", address: "", price: "", turnaroundTime: "",
-        latitude: "14.167", longitude: "121.241",
+        latitude: "14.1675", longitude: "121.2433",
         permitImage: "", image: ""
     });
 
@@ -76,6 +127,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const [shopImagePreview, setShopImagePreview] = useState(initialData?.image || "");
     const [permitPreview, setPermitPreview] = useState(initialData?.permitImage || "");
     const [uploading, setUploading] = useState(false);
+    const [isGeocoding, setIsGeocoding] = useState(false);
 
     const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -101,6 +153,10 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         return `${API_BASE}${data.url}`;
     };
 
+
+
+
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.name || !form.address) return;
@@ -116,19 +172,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         }
     };
 
-    const Field = ({ label, field, type = "text", placeholder, step }) => (
-        <div className="space-y-1.5">
-            <label className="block text-[11px] font-medium text-[#8E8E93]">{label}</label>
-            <input
-                type={type}
-                step={step}
-                value={form[field]}
-                onChange={e => set(field, e.target.value)}
-                placeholder={placeholder}
-                className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-sm text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#8E8E93]/40 transition-all font-outfit"
-            />
-        </div>
-    );
+
 
     const isLoading = loading || uploading;
 
@@ -158,28 +202,67 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
                         {/* Right: Name + Price */}
                         <div className="flex-1 space-y-3">
-                            <Field label="Shop name" field="name" placeholder="Official business name" />
-                            <Field label="Price per kilo (₱)" field="price" type="number" placeholder="45" />
+                            <Field label="Shop name" value={form.name} onChange={e => set("name", e.target.value)} placeholder="Official business name" />
+                            <Field label="Price per kilo (₱)" value={form.price} onChange={e => set("price", e.target.value)} type="number" placeholder="45" />
                         </div>
                     </div>
 
-                    {/* Row 2: Address */}
-                    <Field label="Business address" field="address" placeholder="Full address" />
+                    {/* Row 2: Address & Interactive Map */}
+                    <div className="space-y-4">
+                        <div className="space-y-1.5">
+                            <label className="block text-[11px] font-medium text-[#1D1D1F]">Business address</label>
+                            <div className="relative w-full">
+                                <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-40" />
+                                <input
+                                    type="text"
+                                    value={form.address}
+                                    onChange={e => set("address", e.target.value)}
+                                    placeholder="Type your shop address..."
+                                    className="w-full h-11 bg-[#F8F9FA] rounded-[14px] pl-11 pr-4 text-sm text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Interactive Leaflet Map Picker */}
+                        <div className="space-y-2">
+                            <label className="block text-[10px] font-black text-[#1D1D1F] uppercase tracking-widest">Pin exact location</label>
+                            <div className="h-60 rounded-[32px] overflow-hidden border border-black/5 shadow-inner bg-[#F1F4F2] relative group">
+                                <MapContainer
+                                    center={[parseFloat(form.latitude), parseFloat(form.longitude)]}
+                                    zoom={15}
+                                    className="w-full h-full z-0"
+                                    zoomControl={false}
+                                >
+                                    <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                                    <MapPicker
+                                        position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
+                                        onPositionChange={([lat, lng]) => {
+                                            set("latitude", lat.toFixed(6).toString());
+                                            set("longitude", lng.toFixed(6).toString());
+                                        }}
+                                    />
+                                </MapContainer>
+                                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-xl border border-black/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500">
+                                    <p className="text-[9px] font-black text-[#1D1D1F] uppercase tracking-widest whitespace-nowrap">Drag pin or click map to adjust</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
                     {/* Row 3: Turnaround time (left) + Permit upload (right, spans full height) */}
                     <div className="flex gap-5 items-stretch">
                         {/* Left col: Turnaround time, Lat, Long */}
                         <div className="flex-1 space-y-3">
-                            <Field label="Turnaround time (hours)" field="turnaroundTime" type="number" placeholder="24" />
-                            <div className="grid grid-cols-2 gap-3">
-                                <Field label="Latitude" field="latitude" type="number" step="any" placeholder="14.167" />
-                                <Field label="Longitude" field="longitude" type="number" step="any" placeholder="121.241" />
+                            <Field label="Turnaround time (hours)" value={form.turnaroundTime} onChange={e => set("turnaroundTime", e.target.value)} type="number" placeholder="24" />
+                            <div className="grid grid-cols-2 gap-3 opacity-60">
+                                <Field label="Latitude" value={form.latitude} onChange={e => set("latitude", e.target.value)} type="text" placeholder="14.167" />
+                                <Field label="Longitude" value={form.longitude} onChange={e => set("longitude", e.target.value)} type="text" placeholder="121.241" />
                             </div>
                         </div>
                         {/* Right: Business permit upload */}
                         {!initialData && (
                             <div className="w-52 shrink-0 flex flex-col">
-                                <label className="block text-[11px] font-medium text-[#8E8E93] mb-1.5">Business permit</label>
+                                <label className="block text-[11px] font-medium text-[#1D1D1F] mb-1.5">Business permit</label>
                                 <UploadBox
                                     label={permitFile ? "Uploaded!" : "Upload permit"}
                                     hint="JPG / PNG / PDF"
@@ -288,23 +371,23 @@ export default function OwnerDashboard() {
 
     return (
         <div className="flex bg-[#F1F4F2] min-h-screen text-[#1D1D1F] font-outfit">
-            <aside className="w-72 bg-[#FDFDFD] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.01)] transition-all">
+            <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all">
                 <div className="flex items-center gap-4 mb-16 px-2">
                     <div className="w-10 h-10 bg-[#7B1113] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#7B1113]/20">E</div>
                     <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter">ELaBada</span>
                 </div>
 
                 <nav className="flex-1 space-y-3">
-                    <button onClick={() => setSidebarTab("overview")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-sm font-black transition-all group ${sidebarTab === "overview" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
+                    <button onClick={() => setSidebarTab("overview")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "overview" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
                         <LayoutDashboard className="w-5 h-5" /> Overview
                     </button>
-                    <button onClick={() => setSidebarTab("listings")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-sm font-black transition-all group ${sidebarTab === "listings" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
+                    <button onClick={() => setSidebarTab("listings")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "listings" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
                         <Store className="w-5 h-5" /> My shops
                     </button>
                 </nav>
 
                 <div className="mt-auto pt-8 border-t border-black/[0.05]">
-                    <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.05] transition-all flex items-center gap-4 text-sm font-black">
+                    <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.05] transition-all flex items-center gap-4 text-[14px] font-normal">
                         <LogOut className="w-5 h-5" /> Log out
                     </button>
                 </div>
@@ -348,7 +431,7 @@ export default function OwnerDashboard() {
                                 >
                                     <div className="w-16 h-16 rounded-[24px] bg-[#7B1113]/[0.05] flex items-center justify-center transition-colors group-hover:bg-[#7B1113] group-hover:text-white"><Store className="w-8 h-8" /></div>
                                     <div>
-                                        <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em] mb-2 font-outfit">Total shops</p>
+                                        <p className="text-[10px] font-black text-[#1D1D1F] uppercase tracking-[0.3em] mb-2 font-outfit">Total shops</p>
                                         <h3 className="text-7xl font-black text-[#1D1D1F] tracking-tighter leading-none">{shops.length}</h3>
                                     </div>
                                 </button>
@@ -365,7 +448,7 @@ export default function OwnerDashboard() {
                                         </div>
                                         <div>
                                             <h4 className="text-5xl font-black text-[#1D1D1F] tracking-tighter leading-none">{stat.count}</h4>
-                                            <p className="text-[10px] font-black text-[#8E8E93] uppercase tracking-[0.3em] mt-3">{stat.label}</p>
+                                            <p className="text-[10px] font-black text-[#1D1D1F] uppercase tracking-[0.3em] mt-3">{stat.label}</p>
                                         </div>
                                     </div>
                                 ))}
@@ -379,14 +462,14 @@ export default function OwnerDashboard() {
                                 </div>
                             ) : shops.length === 0 ? (
                                 <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 bg-white rounded-[48px] border-2 border-dashed border-black/[0.08] p-16">
-                                    <Store className="w-12 h-12 text-[#8E8E93]/30" />
-                                    <p className="text-sm font-bold text-[#8E8E93]">No shops yet. Register your first shop to get started.</p>
+                                    <Store className="w-12 h-12 text-[#1D1D1F]/30" />
+                                    <p className="text-sm font-bold text-[#1D1D1F]">No shops yet. Register your first shop to get started.</p>
                                     <button onClick={() => setShowAddShop(true)} className="mt-2 px-8 py-3 bg-[#014421] text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#1D1D1F] transition-all flex items-center gap-2">
                                         <Plus className="w-4 h-4" /> Add shop
                                     </button>
                                 </div>
                             ) : (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
                                     {shops.map(shop => (
                                         <div key={shop._id} className="bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm hover:shadow-xl transition-all overflow-hidden p-4 group">
                                             {/* Image */}
@@ -397,60 +480,62 @@ export default function OwnerDashboard() {
                                                     alt={shop.name}
                                                 />
                                                 {/* Status badge */}
-                                                <div className="absolute top-3 left-3">
-                                                    <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl border backdrop-blur-md shadow-sm ${statusColor(shop.permitStatus)}`}>
-                                                        {statusLabel(shop.permitStatus)}
-                                                    </span>
-                                                </div>
+                                                {shop.permitStatus !== "approved" && (
+                                                    <div className="absolute bottom-3 right-3">
+                                                        <span className={`text-[9px] font-black px-3 py-1.5 rounded-xl border backdrop-blur-md shadow-sm ${statusColor(shop.permitStatus)}`}>
+                                                            {statusLabel(shop.permitStatus)}
+                                                        </span>
+                                                    </div>
+                                                )}
                                                 {/* Edit & Delete icons */}
                                                 <div className="absolute top-3 right-3 flex gap-2">
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setEditingShop(shop); }}
-                                                        className="w-8 h-8 rounded-xl bg-[#7B1113] text-white flex items-center justify-center hover:bg-black transition-all shadow-lg shadow-[#7B1113]/30 active:scale-95"
+                                                        className="w-11 h-11 rounded-xl bg-[#1D1D1F] text-white flex items-center justify-center shadow-lg"
                                                     >
-                                                        <Edit3 className="w-3.5 h-3.5" />
+                                                        <Edit3 className="w-5 h-5" />
                                                     </button>
                                                     <button
                                                         onClick={(e) => { e.stopPropagation(); setDeletingId(shop._id); }}
-                                                        className="w-8 h-8 rounded-xl bg-white/90 text-[#7B1113] flex items-center justify-center hover:bg-[#7B1113] hover:text-white transition-all shadow-md active:scale-95"
+                                                        className="w-11 h-11 rounded-xl bg-[#7B1113] text-white flex items-center justify-center shadow-lg"
                                                     >
-                                                        <Trash2 className="w-3.5 h-3.5" />
+                                                        <Trash2 className="w-5 h-5" />
                                                     </button>
                                                 </div>
-                                                {/* Permit image indicator */}
-                                                {(shop.permitImage || shop.permitUrl) && (
-                                                    <div className="absolute bottom-3 right-3 bg-[#014421]/90 text-white px-2 py-1 rounded-lg text-[8px] font-black flex items-center gap-1">
-                                                        <FileText className="w-3 h-3" /> Permit
-                                                    </div>
-                                                )}
                                             </div>
 
                                             {/* Info */}
-                                            <div className="px-1 space-y-3 flex-1 flex flex-col">
-                                                <h4 className="text-sm font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{shop.name}</h4>
-
-                                                <div className="flex items-center gap-1.5 text-[#8E8E93]">
-                                                    <MapPin className="w-3.5 h-3.5 shrink-0 opacity-60" />
-                                                    <p className="text-[11px] font-bold truncate">{shop.address}</p>
-                                                </div>
-
-                                                <div className="flex items-center gap-4 py-0.5">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <Clock className="w-3.5 h-3.5 text-[#014421] opacity-60" />
-                                                        <span className="text-[10px] font-black text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
+                                            <div className="px-1 space-y-4 flex-1 flex flex-col mt-4">
+                                                <div className="flex justify-between items-center gap-2">
+                                                    <div className="flex items-center gap-1.5 min-w-0">
+                                                        <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{shop.name}</h4>
+                                                        {shop.permitStatus === 'approved' && (
+                                                            <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
+                                                                <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
+                                                            </div>
+                                                        )}
                                                     </div>
-                                                    {shop.rating > 0 && (
-                                                        <div className="flex items-center gap-1">
-                                                            <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
-                                                            <span className="text-[10px] font-black text-[#1D1D1F]">{shop.rating}</span>
-                                                        </div>
-                                                    )}
+                                                    <div className="flex items-center gap-1 shrink-0">
+                                                        <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
+                                                        <span className="text-[12px] font-medium text-[#1D1D1F]">{shop.rating || 0}</span>
+                                                    </div>
                                                 </div>
 
-                                                <div className="mt-auto pt-3 flex items-center justify-between border-t border-black/[0.03]">
+                                                <div className="flex items-center gap-1.5 text-[#1D1D1F] mt-1">
+                                                    <MapPin className="w-3.5 h-3.5 shrink-0 opacity-40" />
+                                                    <p className="text-[12px] font-medium truncate">{shop.address}</p>
+                                                </div>
+
+                                                <div className="flex items-center gap-4 py-1">
+                                                    <div className="flex items-center gap-1.5">
+                                                        <Clock className="w-3.5 h-3.5 text-[#1D1D1F] opacity-40" />
+                                                        <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{shop.turnaroundTime} hr</span>
+                                                    </div>
+                                                </div>
+
+                                                <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
                                                     <div className="flex flex-col">
-                                                        <span className="text-[10px] font-bold text-[#8E8E93]">Price</span>
-                                                        <span className="text-lg font-[900] text-[#7B1113] tracking-tighter leading-none">₱{shop.price}<span className="text-xs font-bold text-[#8E8E93]/60 ml-0.5">/kg</span></span>
+                                                        <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{shop.price}<span className="text-[12px] font-bold text-[#7B1113] lowercase ml-0.5 opacity-80">/kg</span></span>
                                                     </div>
                                                 </div>
 
