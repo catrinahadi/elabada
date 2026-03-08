@@ -1079,10 +1079,10 @@ export default function ShopsPage() {
                         </div>
                       )}
                     </div>
-                    <div className="px-1 space-y-2 flex-1 flex flex-col">
+                    <div className="px-2 py-3 space-y-3 flex-1 flex flex-col">
                       <div className="flex justify-between items-center gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate">{s.name}</h4>
                           {s.permitStatus === 'approved' && (
                             <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
                               <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
@@ -1232,7 +1232,7 @@ export default function ShopsPage() {
                       <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight">Based on your priorities</p>
                       <div className="flex flex-col gap-5 pt-6">
                         {top3.map((s, i) => (
-                          <div key={s.id || s._id || i} onClick={() => { if (s.status === 'open') handleSelectShop(s); }} className={`bg-white p-4 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-2 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
+                          <div key={s.id || s._id || i} onClick={() => { if (s.status === 'open') handleSelectShop(s); }} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-4 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
                             <div className="flex justify-between items-start gap-3">
                               <div className="relative shrink-0 flex justify-center w-12 pt-0.5">
                                 <span className="text-5xl font-black text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
@@ -1240,7 +1240,7 @@ export default function ShopsPage() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 overflow-hidden">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <h4 className="text-[14px] font-[950] text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors">{s.name}</h4>
+                                    <h4 className="text-[14px] font-[950] text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal">{s.name}</h4>
                                     {s.permitStatus === 'approved' && (
                                       <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
                                         <Check className="w-3 h-3 text-white stroke-[4]" />
@@ -1271,7 +1271,7 @@ export default function ShopsPage() {
                                     </div>
                                   </div>
                                   <div className="mt-1 flex items-center gap-4">
-                                    <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-none">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                                    <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-normal">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                                     {s.status !== 'open' && (
                                       <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
                                         <XCircle className="w-3 h-3 text-[#1D1D1F]" />
