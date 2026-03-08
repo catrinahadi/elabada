@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -10,7 +10,7 @@ import {
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, MoreVertical, LocateFixed, Camera,
-  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2,
+  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2,
   Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
@@ -112,67 +112,163 @@ function MapController({ routePath, userLocation }) {
 
 
 const reviewCategories = [
-  "Overall Service", "Customer Support", "Speed and Efficiency",
-  "Repair Quality", "Pickup and Delivery Service", "Transparency"
+  "Overall Service", "Cleanliness", "Folding Quality", "Fabric Care", "Smell/Fragrance"
 ];
 
 function ReviewForm({ shopId, onPosted }) {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
+  const [images, setImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef(null);
 
-  if (!user || user.role !== 'customer') return null;
+  if (!user) return (
+    <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl text-center space-y-3">
+      <p className="text-[14px] font-normal text-[#1D1D1F]">Please login as a customer to write a review.</p>
+    </div>
+  );
+
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    if (images.length + files.length > 3) {
+      alert("You can only upload up to 3 photos.");
+      return;
+    }
+
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages(prev => [...prev, reader.result].slice(0, 3));
+      };
+      reader.readAsDataURL(file);
+    });
+  };
+
+  const removeImage = (index) => {
+    setImages(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleTagClick = (tag) => {
+    setComment(prev => prev ? `${prev}, ${tag}` : tag);
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
-    await onPosted(shopId, { rating, comment, reviewerName: user.name });
-    setRating(0);
-    setComment("");
-    setSubmitting(false);
+    try {
+      console.log("Submitting review for shop:", shopId);
+      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images });
+      setRating(0);
+      setComment("");
+      setImages([]);
+    } catch (err) {
+      console.error("Submission error:", err);
+      alert("Failed to post review. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl space-y-8 animate-fadeUp">
-      <div className="space-y-4 text-center">
-        <h3 className="text-2xl font-black text-[#1D1D1F] tracking-tighter">Rate your experience</h3>
-        <div className="flex justify-center gap-2">
-          {[1, 2, 3, 4, 5].map((s) => (
-            <button key={s} type="button" onClick={() => setRating(s)} className="p-1 transition-transform active:scale-95">
-              <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-gray-200'}`} />
-            </button>
-          ))}
+    <div className="space-y-8 animate-fadeUp">
+      <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl space-y-8">
+        <div className="space-y-4 text-center">
+          <h3 className="text-[14px] font-normal text-[#1D1D1F] tracking-tighter">Rate your experience</h3>
+          <div className="flex justify-center gap-2">
+            {[1, 2, 3, 4, 5].map((s) => (
+              <button key={s} type="button" onClick={() => setRating(s)} className="p-1 transition-transform active:scale-95">
+                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#E67E00] text-[#E67E00]' : 'text-gray-200'}`} />
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="relative group">
-        <textarea
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="What's on your mind?"
-          className="w-full h-40 bg-gray-50 rounded-[32px] p-6 text-[14px] font-medium outline-none border-2 border-transparent focus:border-[#FF8C00]/20 focus:bg-white transition-all resize-none placeholder:text-gray-400"
-        />
-        <button type="button" className="absolute right-6 bottom-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg border border-black/[0.03] hover:scale-110 active:scale-90 transition-all text-gray-400 hover:text-[#FF8C00]">
-          <Camera className="w-5 h-5" />
+        <div className="space-y-4">
+          <p className="text-[12px] font-normal text-[#1D1D1F] px-2">What did you like?</p>
+          <div className="flex flex-wrap gap-2">
+            {reviewCategories.map(cat => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => handleTagClick(cat)}
+                className="px-5 py-2.5 bg-gray-50 text-gray-500 rounded-full text-[12px] font-normal border border-black/[0.02] hover:bg-[#E67E00]/10 hover:text-[#E67E00] hover:border-[#E67E00]/30 transition-all cursor-pointer"
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative group">
+          <textarea
+            value={comment}
+            onChange={(e) => setComment(e.target.value)}
+            placeholder="What's on your mind?"
+            className="w-full h-40 bg-gray-50 rounded-[32px] p-6 text-[12px] font-medium outline-none border-2 border-transparent focus:border-[#E67E00]/20 focus:bg-white transition-all resize-none placeholder:text-gray-400"
+          />
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleImageChange}
+            multiple
+            accept="image/*"
+            className="hidden"
+          />
+        </div>
+
+        <div className="space-y-4 px-2">
+          <p className="text-[12px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
+          <div className="flex gap-4">
+            {images.map((img, idx) => (
+              <div key={idx} className="relative w-20 h-20 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
+                <img src={img} className="w-full h-full object-cover" alt="" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(idx)}
+                  className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity text-white"
+                >
+                  <Trash2 className="w-5 h-5" />
+                </button>
+              </div>
+            ))}
+            {images.length < 3 && (
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-[#E67E00] hover:text-[#E67E00] hover:bg-[#E67E00]/5 transition-all group"
+              >
+                <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
+              </button>
+            )}
+          </div>
+        </div>
+        <button
+          onClick={handleSubmit}
+          disabled={submitting || rating === 0}
+          className="w-full py-5 bg-[#014421] text-white rounded-xl text-[12px] font-normal tracking-widest hover:opacity-90 transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {submitting ? "Posting..." : "Post Review"}
         </button>
       </div>
-
-      <button
-        type="submit"
-        disabled={submitting || rating === 0}
-        className="w-full py-5 bg-[#FF8C00] text-white rounded-[24px] text-[14px] font-black uppercase tracking-widest hover:bg-[#e67e00] transition-all shadow-xl shadow-[#FF8C00]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {submitting ? "Posting..." : "Post Review"}
-      </button>
-    </form>
+    </div>
   );
 }
 
 function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputation, showMatchScore, onNavigate }) {
-  const [showForm, setShowForm] = useState(false);
   const [filter, setFilter] = useState('All');
+  const [showAllReviews, setShowAllReviews] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const formRef = useRef(null);
+
+  useEffect(() => {
+    if (showForm && formRef.current) {
+      setTimeout(() => {
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+    }
+  }, [showForm]);
 
   const ratingCounts = [
     { stars: 5, percentage: 85 },
@@ -182,15 +278,93 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
     { stars: 1, percentage: 5 },
   ];
 
+  const filteredReviews = useMemo(() => {
+    if (filter === 'All') return reviews;
+    return reviews.filter(r => r.rating.toString() === filter);
+  }, [reviews, filter]);
+
+  if (showAllReviews) {
+    return (
+      <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
+        <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+          <div className="p-6 flex flex-col gap-4 sticky top-0 bg-white z-20 border-b border-black/5">
+            <button onClick={() => setShowAllReviews(false)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+              <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
+            </button>
+            <div className="flex items-center justify-between px-2.5">
+              <h3 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">All reviews</h3>
+              <div className="flex flex-wrap items-center gap-2">
+                {['All', '5', '4', '3', '2', '1'].map((val) => (
+                  <button
+                    key={val}
+                    onClick={() => setFilter(val)}
+                    className={`px-4 py-1.5 rounded-full text-[12px] font-normal transition-all ${filter === val
+                      ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
+                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                      }`}
+                  >
+                    {val === 'All' ? 'All' : `${val} Stars`}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
+            {filteredReviews.length === 0 ? (
+              <div className="text-center py-20 space-y-3">
+                <p className="text-gray-400 text-[16px] font-bold">No reviews found.</p>
+                <p className="text-gray-300 text-[13px]">Try changing the rating filter.</p>
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {filteredReviews.map((r, i) => (
+                  <div key={r._id || r.id} className="bg-white p-6 rounded-[28px] border border-black/[0.03] shadow-sm space-y-4 animate-fadeUp">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-[#FF8C00] font-black border-2 border-white shadow-sm">
+                          {r.reviewerName?.[0] || r.user?.[0] || 'A'}
+                        </div>
+                        <div className="space-y-0.5">
+                          <h5 className="text-[12px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
+                          <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-none">
+                            {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
+                        <Star className="w-3.5 h-3.5 fill-[#E67E00]" />
+                        <span className="text-[12px] font-black leading-none">{r.rating}</span>
+                      </div>
+                    </div>
+                    <p className="text-[12px] font-normal text-gray-600 leading-relaxed pl-16">
+                      {r.comment}
+                    </p>
+                    {r.images && r.images.length > 0 && (
+                      <div className="flex gap-3 pl-16 mt-2">
+                        {r.images.map((img, idx) => (
+                          <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
+                            <img src={img} className="w-full h-full object-cover" alt="" />
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
       <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
         <div className="p-6 flex items-center justify-between sticky top-0 bg-white z-20 border-b border-black/5">
           <button onClick={onClose} className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
             <ArrowLeft className="w-6 h-6 text-[#1D1D1F]" />
-          </button>
-          <button className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
-            <MoreHorizontal className="w-6 h-6 text-[#1D1D1F]" />
           </button>
         </div>
 
@@ -205,7 +379,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   onClick={(e) => { e.stopPropagation(); onShowComputation(shop); }}
                   className="bg-[#1D1D1F]/90 backdrop-blur-xl text-white px-5 py-3 rounded-2xl flex flex-col items-center gap-0.5 border border-white/10 hover:bg-black transition-all hover:scale-105 shadow-2xl"
                 >
-                  <span className="text-[12px] font-bold text-white/50 lowercase leading-none">Match Score</span>
+                  <span className="text-[12px] font-bold text-white/50 leading-none">Match score</span>
                   <div className="flex items-center gap-1.5">
                     <span className="text-2xl font-black leading-none">{(shop.score * 100).toFixed(0)}%</span>
                   </div>
@@ -217,147 +391,143 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
           <div className="p-8 space-y-12 pb-24">
             <div className="space-y-4">
               <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03] flex items-center gap-6">
-                <div className="flex-1"><p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight leading-tight">{shop.address}</p></div>
+                <div className="flex-1"><p className="text-[12px] font-medium text-[#1D1D1F] tracking-tight leading-tight">{shop.address}</p></div>
               </div>
 
               <div className="grid grid-cols-3 gap-4">
                 <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
                   <span className="text-[12px] font-medium text-gray-400 tracking-tight">Price</span>
-                  <span className="text-[14px] font-black text-[#1D1D1F]">₱{shop.price}/kg</span>
+                  <span className="text-[12px] font-normal text-[#1D1D1F]">₱{shop.price}/kg</span>
                 </div>
                 <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
                   <span className="text-[12px] font-medium text-gray-400 tracking-tight">Turnaround time</span>
-                  <span className="text-[14px] font-black text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
+                  <span className="text-[12px] font-normal text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
                 </div>
                 <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
                   <span className="text-[12px] font-medium text-gray-400 tracking-tight">Location</span>
                   <div className="flex flex-col items-center">
-                    <span className="text-[14px] font-black text-[#1D1D1F]">{(shop.distance || 0).toFixed(1)} km</span>
-                    <span className="text-[10px] font-normal text-[#014421]">{getWalkTime(shop.distance)} min walk</span>
+                    <span className="text-[12px] font-normal text-[#1D1D1F]">{(shop.distance || 0).toFixed(1)} km</span>
                   </div>
                 </div>
               </div>
 
-              <button onClick={() => onNavigate(shop)} className="w-full py-5 bg-[#1D1D1F] text-white rounded-[24px] font-black text-[14px] capitalize tracking-widest flex items-center justify-center gap-3 hover:bg-[#014421] transition-all shadow-xl shadow-[#1D1D1F]/20 active:scale-[0.98]">
+              <button onClick={() => onNavigate(shop)} className="w-full py-5 bg-[#1D1D1F] text-white rounded-[24px] font-normal text-[12px] capitalize tracking-widest flex items-center justify-center gap-3 hover:bg-[#014421] transition-all shadow-xl shadow-[#1D1D1F]/20 active:scale-[0.98]">
                 <Navigation2 className="w-4 h-4 fill-white" /> Access navigation
               </button>
             </div>
 
             <div className="space-y-10 pt-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-2xl font-black text-[#1D1D1F] tracking-tighter">Ratings & Reviews</h3>
+                <h3 className="text-[16px] font-normal text-[#1D1D1F] tracking-tighter leading-none">Ratings & Reviews</h3>
               </div>
 
-              <div className="flex gap-12 items-center">
-                <div className="text-center space-y-3 shrink-0">
-                  <h4 className="text-7xl font-black text-[#1D1D1F] tracking-tighter">{shop.rating || '0.0'}</h4>
-                  <div className="flex justify-center gap-0.5">
-                    {[1, 2, 3, 4, 5].map((s) => (
-                      <Star key={s} className={`w-5 h-5 ${s <= Math.floor(shop.rating) ? "fill-[#FF8C00] text-[#FF8C00]" : "text-gray-200"}`} />
-                    ))}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
+                <div className="bg-[#F8F9FA] p-7 rounded-[32px] border border-black/[0.02] shadow-sm space-y-6 relative h-fit">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[12px] font-normal text-[#1D1D1F] tracking-tight">Customer Feedback</span>
+                    <button
+                      onClick={() => setShowAllReviews(true)}
+                      className="flex items-center gap-1.5 text-[12px] font-normal text-gray-400 hover:translate-x-0.5 transition-all group"
+                    >
+                      Read all <ChevronRight className="w-4 h-4 text-gray-400" />
+                    </button>
                   </div>
-                  <p className="text-[12px] font-bold text-gray-400">({reviews.length > 1000 ? (reviews.length / 1000).toFixed(1) + 'k' : reviews.length} reviews)</p>
-                </div>
 
-                <div className="flex-1 space-y-3">
-                  {ratingCounts.map((rc) => (
-                    <div key={rc.stars} className="flex items-center gap-4 group">
-                      <span className="text-[12px] font-bold text-gray-400 w-2">{rc.stars}</span>
-                      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden relative">
-                        <div className="absolute inset-y-0 left-0 bg-[#FF8C00] rounded-full transition-all duration-1000" style={{ width: `${rc.percentage}%` }} />
-                      </div>
+                  {filteredReviews.length === 0 ? (
+                    <div className="text-center py-12 space-y-2">
+                      <p className="text-gray-400 text-[14px] font-bold">No reviews found.</p>
+                      <p className="text-gray-300 text-[11px]">Be the first to leave a review!</p>
                     </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="flex gap-3 overflow-x-auto no-scrollbar py-2">
-                <button
-                  onClick={() => setFilter('All')}
-                  className={`px-6 py-2.5 rounded-full flex items-center gap-2 text-[12px] font-black transition-all whitespace-nowrap border-2 ${filter === 'All' ? 'bg-[#FF8C00] text-white border-[#FF8C00]' : 'bg-white text-gray-400 border-gray-100 hover:border-[#FF8C00]/30'}`}
-                >
-                  <Star className={`w-3.5 h-3.5 ${filter === 'All' ? 'fill-white' : ''}`} /> All
-                </button>
-                {[5, 4, 3, 2, 1].map(n => (
-                  <button
-                    key={n}
-                    onClick={() => setFilter(n.toString())}
-                    className={`px-6 py-2.5 rounded-full flex items-center gap-2 text-[12px] font-black transition-all whitespace-nowrap border-2 ${filter === n.toString() ? 'bg-[#FF8C00] text-white border-[#FF8C00]' : 'bg-white text-gray-400 border-gray-100 hover:border-[#FF8C00]/30'}`}
-                  >
-                    <Star className={`w-3.5 h-3.5 ${filter === n.toString() ? 'fill-white' : ''}`} /> {n}
-                  </button>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-2">
-                {reviewCategories.map(cat => (
-                  <span key={cat} className="px-5 py-2.5 bg-gray-50 text-gray-500 rounded-full text-[12px] font-bold border border-black/[0.02] hover:bg-gray-100 transition-colors cursor-pointer">{cat}</span>
-                ))}
-              </div>
-
-              <div className="pt-4">
-                <button
-                  onClick={() => setShowForm(!showForm)}
-                  className={`w-full py-5 rounded-[24px] font-black text-[14px] uppercase tracking-widest transition-all shadow-xl active:scale-[0.98] ${showForm ? 'bg-gray-100 text-gray-400' : 'bg-[#FF8C00] text-white shadow-[#FF8C00]/20'}`}
-                >
-                  {showForm ? 'Cancel Review' : 'Write a review'}
-                </button>
-              </div>
-
-              {showForm && (
-                <div className="animate-fadeUp">
-                  <ReviewForm
-                    shopId={shop._id || shop.id}
-                    onPosted={(id, payload) => {
-                      onPosted(id, payload);
-                      setShowForm(false);
-                    }}
-                  />
-                </div>
-              )}
-
-              <div className="space-y-8 pt-6">
-                {reviews.length === 0 ? (
-                  <div className="text-center py-12 space-y-3">
-                    <p className="text-gray-400 text-[14px] font-bold">No reviews yet.</p>
-                    <p className="text-gray-300 text-[12px]">Be the first to share your experience!</p>
-                  </div>
-                ) : reviews.map((r, i) => (
-                  <div key={r._id || r.id} className="space-y-4 pb-8 border-b border-black/[0.04] last:border-0 animate-fadeUp" style={{ animationDelay: `${i * 100}ms` }}>
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-orange-100 to-orange-50 flex items-center justify-center text-[#FF8C00] font-black overflow-hidden border-2 border-white shadow-sm">
-                          {r.reviewerName?.[0] || r.user?.[0] || 'A'}
+                  ) : (
+                    <div className="space-y-6 flex flex-col">
+                      {filteredReviews.slice(0, 2).map((r) => (
+                        <div key={r._id || r.id} className="bg-white p-6 rounded-[24px] border border-black/[0.03] shadow-md space-y-4 animate-fadeUp">
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#014421] font-black border-2 border-white shadow-sm text-xs">
+                                {r.reviewerName?.[0] || r.user?.[0] || 'A'}
+                              </div>
+                              <div className="space-y-0.5">
+                                <h5 className="text-[12px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
+                                <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest leading-none">
+                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
+                                </span>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
+                              <Star className="w-3.5 h-3.5 fill-[#E67E00]" />
+                              <span className="text-[12px] font-black leading-none">{r.rating}</span>
+                            </div>
+                          </div>
+                          <p className="text-[12px] font-normal text-gray-600 leading-relaxed pl-13">
+                            {r.comment}
+                          </p>
+                          {r.images && r.images.length > 0 && (
+                            <div className="flex gap-3 pl-13 mt-2">
+                              {r.images.map((img, idx) => (
+                                <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
+                                  <img src={img} className="w-full h-full object-cover" alt="" />
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                        <div className="space-y-0.5">
-                          <h5 className="text-[14px] font-black text-[#1D1D1F]">{r.reviewerName || r.user || 'Anonymous'}</h5>
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
-                            {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
-                          </span>
-                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Column 2: Aggregate Rating Summary */}
+                <div className="space-y-8 pt-7">
+                  <div className="flex items-center gap-8">
+                    <div className="text-center space-y-2">
+                      <h4 className="text-7xl font-black text-[#1D1D1F] tracking-tighter leading-none">{shop.rating || '0.0'}</h4>
+                      <div className="flex justify-center gap-0.5">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className={`w-5 h-5 ${s <= Math.floor(shop.rating) ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
+                        ))}
                       </div>
-                      <div className="flex items-center gap-2 px-4 py-1.5 bg-orange-50 text-[#FF8C00] rounded-full border border-orange-100">
-                        <Star className="w-3.5 h-3.5 fill-[#FF8C00]" />
-                        <span className="text-[14px] font-black">{r.rating}</span>
-                      </div>
+                      <p className="text-[12px] font-normal text-gray-400">({reviews.length} reviews)</p>
                     </div>
 
-                    <p className="text-[14px] font-medium text-gray-600 leading-relaxed tracking-tight pl-16">
-                      {r.comment}
-                    </p>
-
-                    <div className="flex items-center gap-6 pl-16 pt-2">
-                      <button className="flex items-center gap-2 text-gray-400 hover:text-[#FF8C00] transition-colors group">
-                        <Heart className="w-4 h-4 group-hover:scale-110 transition-transform" />
-                        <span className="text-[12px] font-bold">{Math.floor(Math.random() * 500) + 10}</span>
-                      </button>
-                      <button className="text-[12px] font-bold text-gray-400 hover:text-[#1D1D1F]">Reply</button>
-                      <MoreHorizontal className="w-4 h-4 text-gray-300 ml-auto cursor-pointer hover:text-gray-500" />
+                    <div className="flex-1 space-y-3">
+                      {ratingCounts.map((rc) => (
+                        <button
+                          key={rc.stars}
+                          onClick={() => setFilter(prev => prev === rc.stars.toString() ? 'All' : rc.stars.toString())}
+                          className={`w-full flex items-center gap-4 px-4 py-1.5 rounded-xl transition-all group ${filter === rc.stars.toString() ? 'bg-[#E67E00]/10' : 'hover:bg-gray-50'}`}
+                        >
+                          <span className={`text-[12px] font-bold w-2 ${filter === rc.stars.toString() ? 'text-[#E67E00]' : 'text-gray-400 font-medium'}`}>{rc.stars}</span>
+                          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden relative">
+                            <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${filter === rc.stars.toString() ? 'bg-[#E67E00]' : 'bg-[#E67E00]/60'}`} style={{ width: `${rc.percentage}%` }} />
+                          </div>
+                        </button>
+                      ))}
                     </div>
                   </div>
-                ))}
+                  <div className="pt-4 flex justify-end">
+                    <button
+                      onClick={() => setShowForm(!showForm)}
+                      className="px-8 py-3 bg-[#014421] text-white rounded-xl text-[12px] font-normal transition-all shadow-lg shadow-[#014421]/20 active:scale-95 group flex items-center justify-center gap-2"
+                    >
+                      {showForm ? 'Cancel review' : 'Write a review'}
+                    </button>
+                  </div>
+                </div>
               </div>
             </div>
+
+            {showForm && (
+              <div ref={formRef} className="pt-12 border-t border-black/[0.04] animate-fadeUp">
+                <ReviewForm
+                  shopId={shop._id || shop.id}
+                  onPosted={(id, payload) => {
+                    onPosted(id, payload);
+                    setShowForm(false);
+                  }}
+                />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -402,7 +572,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
               <div className="bg-[#014421] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Analysis</div>
               <p className="text-[11px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">How we calculated your match</p>
             </div>
-            <h3 className="text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking Breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
+            <h3 className="text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
           </div>
         </div>
 
@@ -940,7 +1110,7 @@ export default function ShopsPage() {
                       </div>
                       <div className="mt-auto pt-1 flex items-center justify-between">
                         <div className="flex flex-col">
-                          <span className="text-[18px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                          <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-none">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                         </div>
                       </div>
                     </div>
@@ -1103,7 +1273,7 @@ export default function ShopsPage() {
                                     </div>
                                   </div>
                                   <div className="mt-1 flex items-center gap-4">
-                                    <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                                    <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-none">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                                     {s.status !== 'open' && (
                                       <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
                                         <XCircle className="w-3 h-3 text-[#1D1D1F]" />
@@ -1287,20 +1457,17 @@ export default function ShopsPage() {
                                       <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
                                         <div className="flex items-center gap-6">
                                           <div className="flex items-center gap-2">
-                                            <span className="text-[16px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
+                                            <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
                                           </div>
                                           <div className="flex items-center gap-2">
                                             <Clock className="w-4 h-4 text-[#1D1D1F]" />
-                                            <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                            <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
                                           </div>
                                         </div>
                                       </div>
                                       <div className="flex items-center gap-2">
                                         <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
                                           {(s.distance || 0).toFixed(1)} km
-                                        </div>
-                                        <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                          {getWalkTime(s.distance)} min walk
                                         </div>
                                       </div>
                                     </div>
