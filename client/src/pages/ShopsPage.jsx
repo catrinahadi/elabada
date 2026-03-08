@@ -233,7 +233,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   <span className="text-[12px] font-medium text-gray-400 tracking-tight">Location</span>
                   <div className="flex flex-col items-center">
                     <span className="text-[14px] font-black text-[#1D1D1F]">{(shop.distance || 0).toFixed(1)} km</span>
-                    <span className="text-[10px] font-bold text-[#014421]">{getWalkTime(shop.distance)} min walk</span>
+                    <span className="text-[10px] font-normal text-[#014421]">{getWalkTime(shop.distance)} min walk</span>
                   </div>
                 </div>
               </div>
@@ -844,7 +844,7 @@ export default function ShopsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter font-outfit leading-none">Laundry Shops</h3>
-                    <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate">{filteredShops.length} shops found</p>
+                    <p className="text-[18px] font-medium text-[#1D1D1F]/60 truncate uppercase tracking-tighter leading-none">{filteredShops.length} shops found</p>
                   </div>
                   <div className="flex items-center gap-4 relative">
                     {/* Simplified Sort Dropdown */}
@@ -925,7 +925,7 @@ export default function ShopsPage() {
                           <span className="text-[12px] font-black text-[#FF8C00]">{s.rating}</span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 text-[#1D1D1F]/60 mt-1">
+                      <div className="flex items-center justify-between gap-1.5 text-[#1D1D1F]/60 mt-1">
                         <div className="flex items-center gap-1.5 truncate">
                           <MapPin className="w-3.5 h-3.5 shrink-0 opacity-40" />
                           <p className="text-[12px] font-medium truncate">{s.address}</p>
@@ -939,7 +939,7 @@ export default function ShopsPage() {
                       </div>
                       <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
                         <div className="flex flex-col">
-                          <span className="text-2xl font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-sm font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                          <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                         </div>
                         <button
                           disabled={s.status !== 'open'}
@@ -1107,7 +1107,7 @@ export default function ShopsPage() {
                             </div>
                             <div className="flex items-center justify-between mt-auto pt-4 border-t border-black/[0.03]">
                               <div className="flex items-center gap-4">
-                                <span className="text-[18px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-sm font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                                <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                                 {s.status !== 'open' && (
                                   <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
                                     <XCircle className="w-3 h-3 text-[#1D1D1F]" />
@@ -1249,7 +1249,7 @@ export default function ShopsPage() {
                     <>
                       <div className="px-8 pb-10 pointer-events-auto relative">
                         <div className="absolute -inset-x-24 -inset-y-16 bg-white opacity-80 blur-[100px] rounded-full -z-10 pointer-events-none" />
-                        <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tight">{filtered.length} Shops Around You</h3>
+                        <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none">{filtered.length} Shops Around You</h3>
                       </div>
                       <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto">
                         <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-5 no-scrollbar pointer-events-auto">
@@ -1261,13 +1261,13 @@ export default function ShopsPage() {
                                 onClick={() => {
                                   setActiveRouteShopId(isActive ? null : s.id);
                                 }}
-                                className={`relative p-7 rounded-[40px] bg-white border border-black/[0.1] transition-all duration-300 cursor-pointer ${isActive ? 'scale-[1.02]' : ''}`}
+                                className={`relative p-7 rounded-[40px] bg-white border transition-all duration-300 cursor-pointer ${isActive ? 'border-[#014421] ring-2 ring-[#014421]/20 shadow-2xl shadow-[#014421]/15 z-10' : 'border-black/[0.1] hover:border-black/20'}`}
                               >
                                 <div className="flex items-start gap-6">
                                   {/* Left Side: Info */}
                                   <div className="flex-1 min-w-0">
                                     <div className="flex items-start gap-4">
-                                      <span className="text-4xl font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}</span>
+                                      <span className="text-[14px] font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
                                       <div className="flex-1 min-w-0">
                                         <div className="flex items-center gap-2">
                                           <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
@@ -1277,10 +1277,7 @@ export default function ShopsPage() {
                                             </div>
                                           )}
                                         </div>
-                                        <p className="text-[12px] font-medium text-[#1D1D1F] mt-1 flex items-center gap-1.5 opacity-60">
-                                          <LocateFixed className="w-3 h-3 opacity-60" />
-                                          {(s.distance || 0).toFixed(1)} km away
-                                        </p>
+
                                       </div>
                                     </div>
 
@@ -1296,14 +1293,19 @@ export default function ShopsPage() {
 
                                       <div className="flex flex-wrap items-center gap-6">
                                         <div className="flex items-center gap-2">
-                                          <span className="text-[18px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
+                                          <span className="text-[16px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
                                         </div>
                                         <div className="flex items-center gap-2">
                                           <Clock className="w-4 h-4 text-[#1D1D1F] opacity-40" />
                                           <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
                                         </div>
-                                        <div className="flex items-center gap-1.5 text-[10px] font-black text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                          {getWalkTime(s.distance)} min walk
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
+                                            {(s.distance || 0).toFixed(1)} km
+                                          </div>
+                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
+                                            {getWalkTime(s.distance)} min walk
+                                          </div>
                                         </div>
                                       </div>
                                     </div>
