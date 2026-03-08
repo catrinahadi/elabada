@@ -183,7 +183,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   ];
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-4 z-[300]">
+    <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
       <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
         <div className="p-6 flex items-center justify-between sticky top-0 bg-white z-20 border-b border-black/5">
           <button onClick={onClose} className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
@@ -509,6 +509,8 @@ function calcDistance(lat1, lng1, lat2, lng2) {
   return Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10) / 10;
 }
 
+const getWalkTime = (km) => Math.round((km || 0) * 12);
+
 export default function ShopsPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -546,7 +548,6 @@ export default function ShopsPage() {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
 
-  const getWalkTime = (km) => Math.round(km * 12);
 
   // Detect actual user location on mount
   const refreshLocation = () => {
@@ -616,11 +617,14 @@ export default function ShopsPage() {
 
   // Fetch reviews whenever a shop modal opens
   const handleSelectShop = (shop) => {
+    setShowComputation(null);
     setSelectedShop(shop);
     const shopId = shop._id || shop.id;
-    api.get(`/reviews/${shopId}`)
-      .then(({ data }) => setShopReviews(prev => ({ ...prev, [shopId]: data })))
-      .catch(() => { });
+    if (shopId) {
+      api.get(`/reviews/${shopId}`)
+        .then(({ data }) => setShopReviews(prev => ({ ...prev, [shopId]: data })))
+        .catch(() => { });
+    }
   };
 
   // Post a new review then refresh
@@ -844,7 +848,7 @@ export default function ShopsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter font-outfit leading-none">Laundry Shops</h3>
-                    <p className="text-[18px] font-medium text-[#1D1D1F]/60 truncate uppercase tracking-tighter leading-none">{filteredShops.length} shops found</p>
+                    <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate tracking-tighter leading-none">{filteredShops.length} shops found</p>
                   </div>
                   <div className="flex items-center gap-4 relative">
                     {/* Simplified Sort Dropdown */}
@@ -868,7 +872,7 @@ export default function ShopsPage() {
                             <button
                               key={option.id}
                               onClick={() => { setActiveSort(option.id); setShowSortDropdown(false); }}
-                              className={`w-full px-6 py-3 text-left text-[12px] font-black capitalize transition-all hover:bg-[#F8F9FA] ${activeSort === option.id ? 'text-[#FF8C00]' : 'text-[#1D1D1F]/60'}`}
+                              className={`w-full px-6 py-3 text-left text-[12px] capitalize transition-all hover:bg-[#228B22]/10 hover:text-[#228B22] ${activeSort === option.id ? 'text-[#228B22] bg-[#228B22]/5 font-normal' : 'text-[#1D1D1F]/60 font-normal'}`}
                             >
                               {option.label}
                             </button>
@@ -882,35 +886,32 @@ export default function ShopsPage() {
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
                 {filteredShops.map(s => (
                   <div
-                    key={s.id}
+                    key={s.id || s._id}
                     onClick={() => s.status === 'open' && handleSelectShop(s)}
-                    className={`bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-4 ${s.status === 'open' ? 'hover:shadow-xl cursor-pointer group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
+                    className={`bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-4 cursor-pointer ${s.status === 'open' ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
                   >
-                    <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-5">
+                    <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-2">
                       <img src={s.image} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />
-                      <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm">
-                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-[#1D1D1F]'}`} />
-                        <span className={`text-[12px] font-black capitalize tracking-widest ${s.status === 'open' ? 'text-[#228B22]' : 'text-[#1D1D1F]'}`}>{s.status}</span>
+                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${s.status === 'open' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-black/10 text-black/40'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-black/20'}`} />
+                        <span className="text-[12px] font-normal capitalize tracking-wide">{s.status}</span>
                       </div>
                       {isApplied && s.score > 0 && (
-                        <>
-                          <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 via-black/30 to-transparent pointer-events-none"></div>
-                          <div
-                            onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
-                            className="absolute bottom-3 right-3 left-3 px-2 flex flex-col gap-1.5 cursor-help"
-                          >
-                            <div className="flex justify-between items-end drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">
-                              <span className="text-[10px] font-bold tracking-tight leading-none text-white/90">Match</span>
-                              <span className="text-sm font-[950] leading-none text-white">{(s.score * 100).toFixed(0)}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-black/40 rounded-full overflow-hidden backdrop-blur-sm border border-white/20">
-                              <div className="h-full bg-[#228B22] rounded-full transition-all duration-1000 ease-out" style={{ width: `${(s.score * 100).toFixed(0)}%` }}></div>
-                            </div>
+                        <div
+                          onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
+                          className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl flex items-center gap-2.5 border border-white/20 shadow-xl cursor-help transition-all hover:scale-105 active:scale-95 group/match"
+                        >
+                          <div className="w-7 h-7 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0">
+                            <TrendingUp className="w-4 h-4 text-[#014421]" />
                           </div>
-                        </>
+                          <div className="flex flex-col -space-y-0.5">
+                            <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
+                            <span className="text-[15px] font-[950] text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
+                          </div>
+                        </div>
                       )}
                     </div>
-                    <div className="px-1 space-y-4 flex-1 flex flex-col">
+                    <div className="px-1 space-y-2 flex-1 flex flex-col">
                       <div className="flex justify-between items-center gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
                           <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
@@ -920,34 +921,27 @@ export default function ShopsPage() {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-1.5 shrink-0 bg-[#FF8C00]/10 px-2 py-1 rounded-lg border border-[#FF8C00]/20">
-                          <Star className="w-3 h-3 fill-[#FF8C00] text-[#FF8C00]" />
-                          <span className="text-[12px] font-black text-[#FF8C00]">{s.rating}</span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
+                          <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} <span className="opacity-40">({s.reviewCount || 0})</span></span>
                         </div>
                       </div>
-                      <div className="flex items-center justify-between gap-1.5 text-[#1D1D1F]/60 mt-1">
+                      <div className="flex items-center gap-1.5 text-[#1D1D1F]">
                         <div className="flex items-center gap-1.5 truncate">
-                          <MapPin className="w-3.5 h-3.5 shrink-0 opacity-40" />
+                          <MapPin className="w-3.5 h-3.5 shrink-0" />
                           <p className="text-[12px] font-medium truncate">{s.address}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4 py-1">
+                      <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#1D1D1F] opacity-40" />
-                          <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{s.turnaroundTime} hr</span>
+                          <Clock className="w-3.5 h-3.5 text-[#1D1D1F]" />
+                          <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{s.turnaroundTime} hrs</span>
                         </div>
                       </div>
-                      <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
+                      <div className="mt-auto pt-1 flex items-center justify-between">
                         <div className="flex flex-col">
-                          <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                          <span className="text-[18px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                         </div>
-                        <button
-                          disabled={s.status !== 'open'}
-                          onClick={(e) => { e.stopPropagation(); s.status === 'open' && handleSelectShop(s); }}
-                          className={`px-4 py-2.5 rounded-2xl text-[12px] font-normal capitalize tracking-wider transition-all shadow-md flex items-center justify-center ${s.status === 'open' ? 'bg-[#1D1D1F] text-white hover:bg-[#7B1113] active:scale-95' : 'bg-[#1D1D1F]/10 text-[#1D1D1F]/50 cursor-not-allowed'}`}
-                        >
-                          View details
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -1053,7 +1047,7 @@ export default function ShopsPage() {
                         </div>
                       </div>
                       <div className="pt-8 border-t border-black/[0.03]">
-                        <button onClick={() => setIsApplied(true)} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-medium text-xs capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
+                        <button onClick={() => setIsApplied(true)} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-normal text-[12px] capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
                       </div>
                     </div>
                   </div>
@@ -1070,9 +1064,9 @@ export default function ShopsPage() {
                       <p className="text-[12px] font-medium text-[#1D1D1F] tracking-widest leading-relaxed">Based on your priorities</p>
                       <div className="flex flex-col gap-5">
                         {top3.map((s, i) => (
-                          <div key={s.id} onClick={() => { if (s.status === 'open') setShowComputation(s); }} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-6 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
-                            <div className="flex justify-between items-start gap-4">
-                              <div className="relative shrink-0 flex items-center justify-center w-16">
+                          <div key={s.id || s._id || i} onClick={() => { if (s.status === 'open') handleSelectShop(s); }} className={`bg-white p-4 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-2 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
+                            <div className="flex justify-between items-start gap-3">
+                              <div className="relative shrink-0 flex justify-center w-12 pt-0.5">
                                 <span className="text-5xl font-[950] text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
                               </div>
                               <div className="flex-1 min-w-0">
@@ -1085,41 +1079,40 @@ export default function ShopsPage() {
                                       </div>
                                     )}
                                   </div>
-                                  <span className="text-[18px] font-black text-[#014421] tracking-tighter font-outfit shrink-0">{(s.score * 100).toFixed(0)}%</span>
+                                  <span
+                                    onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
+                                    className="text-[16px] font-black text-[#014421] tracking-tighter font-outfit shrink-0 hover:scale-110 transition-transform cursor-help bg-[#014421]/5 px-3 py-1 rounded-full"
+                                    title="Click to view match calculation"
+                                  >
+                                    {(s.score * 100).toFixed(0)}%
+                                  </span>
                                 </div>
                                 <div className="flex flex-col gap-1 mt-1">
-                                  <div className="flex items-center gap-2 text-[#1D1D1F]">
-                                    <MapPin className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                  <div className="flex items-center gap-1.5 text-[#1D1D1F]">
+                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
                                     <p className="text-[12px] font-medium capitalize truncate">{s.address}</p>
                                   </div>
                                   <div className="flex items-center gap-4">
                                     <div className="flex items-center gap-1.5">
-                                      <Clock className="w-3.5 h-3.5 text-[#1D1D1F] opacity-40 shrink-0" />
-                                      <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hr</span>
+                                      <Clock className="w-3.5 h-3.5 text-[#1D1D1F] shrink-0" />
+                                      <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
                                       <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
                                       <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} ({s.reviewCount || 0})</span>
                                     </div>
                                   </div>
-                                </div>
-                              </div>
-                            </div>
-                            <div className="flex items-center justify-between mt-auto pt-4 border-t border-black/[0.03]">
-                              <div className="flex items-center gap-4">
-                                <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
-                                {s.status !== 'open' && (
-                                  <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
-                                    <XCircle className="w-3 h-3 text-[#1D1D1F]" />
-                                    <span className="text-[10px] font-black text-[#1D1D1F] tracking-wider">Closed</span>
+                                  <div className="mt-1 flex items-center gap-4">
+                                    <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{s.price}<span className="text-[12px] font-bold text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
+                                    {s.status !== 'open' && (
+                                      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
+                                        <XCircle className="w-3 h-3 text-[#1D1D1F]" />
+                                        <span className="text-[10px] font-black text-[#1D1D1F] tracking-wider">Closed</span>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
-                              {s.status === 'open' && (
-                                <div className="flex items-center gap-1.5 text-white bg-[#1D1D1F] px-4 py-2.5 rounded-2xl text-[12px] font-normal capitalize tracking-wider shadow-md transition-all active:scale-95 hover:bg-[#7B1113]">
-                                  View details
                                 </div>
-                              )}
+                              </div>
                             </div>
                           </div>
                         ))}
@@ -1291,21 +1284,23 @@ export default function ShopsPage() {
                                         <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
                                       </div>
 
-                                      <div className="flex flex-wrap items-center gap-6">
-                                        <div className="flex items-center gap-2">
-                                          <span className="text-[16px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <Clock className="w-4 h-4 text-[#1D1D1F] opacity-40" />
-                                          <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                            {(s.distance || 0).toFixed(1)} km
+                                      <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
+                                        <div className="flex items-center gap-6">
+                                          <div className="flex items-center gap-2">
+                                            <span className="text-[16px] font-black text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
                                           </div>
-                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                            {getWalkTime(s.distance)} min walk
+                                          <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4 text-[#1D1D1F]" />
+                                            <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
                                           </div>
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
+                                          {(s.distance || 0).toFixed(1)} km
+                                        </div>
+                                        <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
+                                          {getWalkTime(s.distance)} min walk
                                         </div>
                                       </div>
                                     </div>
