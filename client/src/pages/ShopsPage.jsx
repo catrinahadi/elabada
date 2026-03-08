@@ -77,22 +77,20 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (rank) => {
-  const isTop3 = rank <= 3;
-  const mainColor = isTop3 ? "#FF8C00" : "#7B1113";
-  const textColor = "#FFFFFF";
+  const mainColor = "#FF8C00"; // Always orange
 
   return L.divIcon({
     className: 'custom-shop-marker',
     html: `<div class="flex flex-col items-center">
-      <div class="relative ${isTop3 ? 'scale-110' : 'scale-90'} transition-transform">
-        <svg width="32" height="42" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <div class="relative transition-transform">
+        <svg width="36" height="48" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M14 0C6.26801 0 0 6.26801 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.26801 21.732 0 14 0Z" fill="${mainColor}"/>
           <circle cx="14" cy="14" r="5" fill="#FFFFFF"/>
         </svg>
       </div>
     </div>`,
-    iconSize: [isTop3 ? 40 : 32, isTop3 ? 50 : 42],
-    iconAnchor: [isTop3 ? 20 : 16, isTop3 ? 45 : 38]
+    iconSize: [36, 48],
+    iconAnchor: [18, 48]
   });
 };
 
@@ -1316,20 +1314,20 @@ export default function ShopsPage() {
                 {/* User Location Marker */}
                 <Marker position={userLocation} icon={createUserLocationIcon()} />
 
-                {/* Shop Markers */}
-                {rankedShops.filter(s => s.name.toLowerCase().includes(mapSearchQuery.toLowerCase()) || s.address.toLowerCase().includes(mapSearchQuery.toLowerCase())).map((s, i) => (
-                  <Marker
-                    key={s.id}
-                    position={[s.latitude, s.longitude]}
-                    icon={createShopMarkerIcon(i + 1)}
-                    eventHandlers={{
-                      click: () => {
-                        setMapSelection({ ...s, index: i + 1 });
-                        setActiveRouteShopId(s.id === activeRouteShopId ? null : s.id);
-                      }
-                    }}
-                  />
-                ))}
+                {/* Shop Marker for Selected Shop Only */}
+                {(() => {
+                  if (!activeRouteShopId) return null;
+                  const selectedShopIndex = rankedShops.findIndex(s => s.id === activeRouteShopId || s._id === activeRouteShopId);
+                  const s = rankedShops[selectedShopIndex];
+                  if (!s) return null;
+                  return (
+                    <Marker
+                      key={s.id}
+                      position={[s.latitude, s.longitude]}
+                      icon={createShopMarkerIcon(selectedShopIndex + 1)}
+                    />
+                  );
+                })()}
 
                 {/* Routing Line - Road Following */}
                 {routePath.length > 0 && (
