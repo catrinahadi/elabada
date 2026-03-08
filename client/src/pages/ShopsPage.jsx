@@ -381,7 +381,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                 >
                   <span className="text-[12px] font-bold text-white/50 leading-none">Match score</span>
                   <div className="flex items-center gap-1.5">
-                    <span className="text-2xl font-black leading-none">{(shop.score * 100).toFixed(0)}%</span>
+                    <span className="text-2xl font-normal leading-none">{(shop.score * 100).toFixed(0)}%</span>
                   </div>
                 </button>
               )}
@@ -584,7 +584,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                 <div className="relative z-10 flex items-center justify-between">
                   <div className="space-y-2">
                     <p className="text-white/60 text-xs font-black uppercase tracking-widest">Overall Match Score</p>
-                    <h4 className="text-6xl font-[900] tracking-tighter">{(shop.score * 100).toFixed(1)}%</h4>
+                    <h4 className="text-6xl font-normal tracking-tighter">{(shop.score * 100).toFixed(1)}%</h4>
                   </div>
                   <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md">
                     <Target className="w-10 h-10 text-green-400" />
@@ -641,7 +641,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                           </div>
                         </div>
                         <div className="text-right">
-                          <span className={`text-lg font-black ${info.percentage > 70 ? 'text-[#014421]' : info.percentage > 40 ? 'text-orange-500' : 'text-[#7B1113]'}`}>
+                          <span className={`text-lg font-normal ${info.percentage > 70 ? 'text-[#014421]' : info.percentage > 40 ? 'text-orange-500' : 'text-[#7B1113]'}`}>
                             {info.percentage}%
                           </span>
                         </div>
@@ -654,7 +654,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                           />
                         </div>
                         <p className="text-[10px] font-medium text-[#1D1D1F] leading-relaxed italic">
-                          {info.desc} Your priority weight: <span className="font-bold text-[#1D1D1F]">{(detail.weight * 100).toFixed(0)}%</span>
+                          {info.desc} Your priority weight: <span className="font-normal text-[#1D1D1F]">{(detail.weight * 100).toFixed(0)}%</span>
                         </p>
                       </div>
                     </div>
@@ -1076,7 +1076,7 @@ export default function ShopsPage() {
                           </div>
                           <div className="flex flex-col -space-y-0.5">
                             <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
-                            <span className="text-[15px] font-[950] text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
+                            <span className="text-[15px] font-normal text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
                           </div>
                         </div>
                       )}
@@ -1129,7 +1129,7 @@ export default function ShopsPage() {
                     <div className="bg-white p-14 rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
+                          <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
                           <button
                             onClick={() => setShowWeightManual(!showWeightManual)}
                             className={`p-3 rounded-2xl transition-all ${showWeightManual ? 'bg-[#014421] text-white shadow-lg shadow-[#014421]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
@@ -1153,13 +1153,13 @@ export default function ShopsPage() {
                         {Object.entries(weights).map(([key, val]) => (
                           <div key={key} className="space-y-5">
                             <div className="flex justify-between items-end gap-3">
-                              <p className="text-xl font-medium text-[#1D1D1F] tracking-tight font-outfit whitespace-nowrap">
+                              <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight font-outfit whitespace-nowrap">
                                 {key === 'price' ? (<>Price <span className="font-medium normal-case text-xs text-[#1D1D1F]">(kg)</span></>) :
                                   key === 'time' ? 'Turnaround Time' :
                                     key === 'rating' ? 'Rating' :
                                       key === 'distance' ? (<>Distance <span className="font-medium normal-case text-xs text-[#1D1D1F]">(km)</span></>) : key}
                               </p>
-                              <span className="text-lg font-black text-[#014421] leading-none">{val}</span>
+                              <span className="text-[14px] font-normal text-[#014421] leading-none">{val}</span>
                             </div>
                             <div className="relative h-2.5 flex items-center group">
                               <div className="absolute inset-x-0 h-full bg-[#1D1D1F]/5 rounded-full overflow-hidden"><div className="h-full bg-[#014421] transition-all" style={{ width: `${(val / CRITERIA_LIMITS[key]) * 100}%` }} /></div>
@@ -1174,7 +1174,7 @@ export default function ShopsPage() {
                     <div className="bg-white rounded-[64px] border border-black/[0.03] shadow-2xl p-14 flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-4xl font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
+                          <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
                           <button
                             onClick={() => setShowPriorityManual(!showPriorityManual)}
                             className={`p-3 rounded-2xl transition-all ${showPriorityManual ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
@@ -1198,22 +1198,22 @@ export default function ShopsPage() {
                         {priorities.map((key, index) => (
                           <div key={key} draggable onDragStart={() => onDragStart(index)} onDragOver={onDragOver} onDrop={() => { onDrop(index); setIsApplied(false); }} className="flex items-center justify-between gap-6 bg-[#F8F9FA] p-5 rounded-[36px] border border-black/[0.01] group transition-all hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing">
                             <div className="flex-1 min-w-0">
-                              <p className="text-xl font-medium text-[#1D1D1F] tracking-tight font-outfit leading-none whitespace-normal">
+                              <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight font-outfit leading-none whitespace-normal">
                                 {key === 'price' ? (<>Price <span className="text-xs text-[#1D1D1F]">(per kg)</span></>) :
                                   key === 'time' ? 'Turnaround Time' :
                                     key === 'rating' ? 'Rating' :
                                       key === 'distance' ? (<>Distance <span className="text-xs text-[#1D1D1F]">(km)</span></>) : key}
                               </p>
                             </div>
-                            <div className="shrink-0 w-16 flex items-center justify-end">
-                              <span className="text-xl font-black text-[#014421] font-outfit leading-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
-                            </div>
+                            <span className="text-[14px] font-normal text-[#014421] font-outfit leading-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
                           </div>
                         ))}
                         {/* Total row */}
-                        <div className="flex items-center justify-between gap-6 px-2 pt-4 border-t border-black/[0.06]">
-                          <p className="text-xs font-bold text-[#1D1D1F] uppercase tracking-widest font-outfit">Total</p>
-                          <span className="text-xl font-bold text-[#1D1D1F] font-outfit">100%</span>
+                        <div className="flex items-center justify-between gap-6 px-5 pt-6 border-t border-black/[0.06]">
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[14px] font-medium text-[#1D1D1F] font-outfit">Total</p>
+                          </div>
+                          <span className="text-[14px] font-normal text-[#1D1D1F] font-outfit">100%</span>
                         </div>
                       </div>
                       <div className="pt-8 border-t border-black/[0.03]">
@@ -1229,15 +1229,15 @@ export default function ShopsPage() {
                       <p className="text-[11px] font-bold text-[#1D1D1F] max-w-[220px] leading-relaxed">No shops available yet in the system.</p>
                     </div>
                   ) : isApplied ? (
-                    <div className="space-y-10 animate-fadeUp">
-                      <h3 className="text-3xl font-bold text-[#1D1D1F] tracking-tighter font-outfit">Recommended shops for you</h3>
-                      <p className="text-[12px] font-medium text-[#1D1D1F] tracking-widest leading-relaxed">Based on your priorities</p>
-                      <div className="flex flex-col gap-5">
+                    <div className="space-y-1 animate-fadeUp">
+                      <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter font-outfit">Recommended shops for you</h3>
+                      <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight">Based on your priorities</p>
+                      <div className="flex flex-col gap-5 pt-6">
                         {top3.map((s, i) => (
                           <div key={s.id || s._id || i} onClick={() => { if (s.status === 'open') handleSelectShop(s); }} className={`bg-white p-4 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-2 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
                             <div className="flex justify-between items-start gap-3">
                               <div className="relative shrink-0 flex justify-center w-12 pt-0.5">
-                                <span className="text-5xl font-[950] text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
+                                <span className="text-5xl font-black text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 overflow-hidden">
@@ -1251,7 +1251,7 @@ export default function ShopsPage() {
                                   </div>
                                   <span
                                     onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
-                                    className="text-[16px] font-black text-[#014421] tracking-tighter font-outfit shrink-0 hover:scale-110 transition-transform cursor-help bg-[#014421]/5 px-3 py-1 rounded-full"
+                                    className="text-[14px] font-normal text-[#014421] tracking-tighter font-outfit shrink-0 hover:scale-110 transition-transform cursor-help bg-[#014421]/5 px-3 py-1 rounded-full"
                                     title="Click to view match calculation"
                                   >
                                     {(s.score * 100).toFixed(0)}%
