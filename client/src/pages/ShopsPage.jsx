@@ -9,7 +9,7 @@ import {
   X, Info, MessageSquare, ArrowUpRight, Award,
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
   ArrowUp, ArrowDown, Map as GoogleMap,
-  MoreHorizontal, Heart, ArrowLeft, MoreVertical, LocateFixed, Camera,
+  MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2,
   Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee
 } from "lucide-react";
@@ -157,7 +157,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
     try {
-      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images });
+      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images, userId: user?._id || user?.id });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -277,7 +277,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   );
 }
 
-function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputation, showMatchScore, onNavigate }) {
+function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputation, showMatchScore, onNavigate, setActiveImageGallery }) {
   const [filter, setFilter] = useState('All');
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -302,6 +302,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
   const filteredReviews = useMemo(() => {
     if (filter === 'All') return reviews;
+    if (filter === 'Photos') return reviews.filter(r => r.images && r.images.length > 0);
     return reviews.filter(r => r.rating.toString() === filter);
   }, [reviews, filter]);
 
@@ -315,67 +316,69 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
   if (showAllReviews) {
     return (
-      <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
-        <div className="bg-white rounded-[40px] w-full max-w-[1100px] h-[95vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
-          <div className="p-6 flex flex-col gap-4 sticky top-0 bg-white z-20 border-b border-black/5">
-            <button onClick={() => setShowAllReviews(false)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
-              <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
-            </button>
-            <div className="flex items-center justify-between px-2.5">
-              <h3 className="text-[24px] font-bold text-[#1D1D1F] tracking-tight">All reviews</h3>
-              <div className="flex flex-wrap items-center gap-3">
-                {['All', '5', '4', '3', '2', '1'].map((val) => (
-                  <button
-                    key={val}
-                    onClick={() => setFilter(val)}
-                    className={`px-6 py-2.5 rounded-full text-[16px] font-bold transition-all ${filter === val
-                      ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
-                      : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
-                      }`}
-                  >
-                    {val === 'All' ? 'All' : `${val} Stars`}
-                  </button>
-                ))}
-              </div>
+      <div className="modal-overlay flex items-center justify-center p-8 z-[1000]">
+        <div className="bg-white rounded-[40px] w-full max-w-[1000px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+          <div className="sticky top-0 bg-white z-20">
+            <div className="p-6 border-b border-black/5">
+              <button onClick={() => setShowAllReviews(false)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+                <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
+              </button>
+            </div>
+          </div>
+
+          <div className="px-8 pt-8 flex flex-col gap-4">
+            <h3 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight">All reviews</h3>
+            <div className="flex flex-wrap items-center gap-2">
+              {['All', '5', '4', '3', '2', '1', 'Photos'].map((val) => (
+                <button
+                  key={val}
+                  onClick={() => setFilter(val)}
+                  className={`px-5 py-2 rounded-full text-[14px] font-normal transition-all ${filter === val
+                    ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
+                    : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
+                    }`}
+                >
+                  {val === 'All' ? 'All' : val === 'Photos' ? 'Photos' : `${val} Stars`}
+                </button>
+              ))}
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
             {filteredReviews.length === 0 ? (
               <div className="text-center py-20 space-y-4">
-                <p className="text-gray-400 text-[24px] font-black">No reviews found.</p>
-                <p className="text-gray-300 text-[18px]">Try changing the rating filter.</p>
+                <p className="text-gray-400 text-[16px] font-normal">No reviews found</p>
               </div>
             ) : (
               <div className="space-y-8">
                 {filteredReviews.map((r, i) => (
-                  <div key={r._id || r.id} className="bg-white p-8 rounded-[32px] border border-black/[0.03] shadow-sm space-y-6 animate-fadeUp">
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-6">
-                        <div className="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center text-[#FF8C00] font-black border-2 border-white shadow-sm text-xl">
-                          {r.reviewerName?.[0] || r.user?.[0] || 'A'}
-                        </div>
-                        <div className="space-y-1">
-                          <h5 className="text-[20px] font-bold text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
-                          <span className="text-[14px] font-bold text-gray-300 uppercase tracking-widest leading-none">
-                            {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
-                          </span>
-                        </div>
+                  <div key={r._id || r.id} className="bg-white p-6 rounded-[32px] border border-black/[0.03] shadow-sm space-y-4 animate-fadeUp">
+                    <div className="flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <h5 className="text-[14px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || "Anonymous"}</h5>
+                        <span className="text-[14px] font-normal text-gray-400 tracking-tight leading-none">
+                          {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Recently'}
+                        </span>
                       </div>
-                      <div className="flex items-center gap-2 px-6 py-2.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
-                        <Star className="w-5 h-5 fill-[#E67E00]" />
-                        <span className="text-[20px] font-black leading-none">{r.rating}</span>
+                      <div className="flex items-center gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
+                        ))}
                       </div>
                     </div>
-                    <p className="text-[20px] font-normal text-gray-600 leading-relaxed pl-20">
+                    <p className="text-[14px] font-normal text-gray-600 leading-relaxed mt-4">
                       {r.comment}
                     </p>
                     {r.images && r.images.length > 0 && (
-                      <div className="flex gap-4 pl-20 mt-4">
+                      <div className="flex gap-4 mt-4">
                         {r.images.map((img, idx) => (
-                          <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
+                          <button
+                            key={idx}
+                            onClick={() => setActiveImageGallery({ images: r.images, index: idx })}
+                            className="w-28 h-28 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03] hover:scale-[1.02] transition-transform active:scale-95"
+                          >
                             <img src={img} className="w-full h-full object-cover" alt="" />
-                          </div>
+                          </button>
                         ))}
                       </div>
                     )}
@@ -392,18 +395,18 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   return (
     <div className="modal-overlay flex items-center justify-center p-8 z-[1000]">
       <div className="bg-white rounded-[40px] w-full max-w-[1000px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
-        <div className="py-2 px-6 flex items-center justify-between sticky top-0 bg-white z-20 border-b border-black/5">
-          <div className="flex items-center gap-4">
-            <button onClick={onClose} className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
-              <ArrowLeft className="w-6 h-6 text-[#1D1D1F]" />
+        <div className="sticky top-0 bg-white z-20">
+          <div className="p-6 border-b border-black/5 flex items-center justify-between">
+            <button onClick={onClose} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+              <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
             </button>
+            {showMatchScore && shop.score && (
+              <div className="bg-[#F8F9FA] px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-2">
+                <span className="text-[14px] font-normal text-gray-400">Match:</span>
+                <span className="text-[14px] font-normal text-[#1D1D1F]">{(shop.score * 100).toFixed(0)}%</span>
+              </div>
+            )}
           </div>
-          {showMatchScore && shop.score && (
-            <div className="bg-[#F8F9FA] px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-2">
-              <span className="text-[14px] font-normal text-gray-400">Match:</span>
-              <span className="text-[14px] font-normal text-[#1D1D1F]">{(shop.score * 100).toFixed(0)}%</span>
-            </div>
-          )}
         </div>
 
         <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -531,25 +534,23 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
                   {filteredReviews.length === 0 ? (
                     <div className="text-center py-12 space-y-2">
-                      <p className="text-gray-400 text-[14px] font-bold">No reviews found.</p>
-                      <p className="text-gray-300 text-[11px]">Be the first to leave a review!</p>
+                      <p className="text-gray-400 text-[16px] font-normal">No reviews found</p>
                     </div>
                   ) : (
                     <div className="space-y-6 flex flex-col">
                       {filteredReviews.slice(0, 1).map((r) => (
                         <div key={r._id || r.id} className="bg-white p-6 rounded-[24px] border border-black/[0.03] shadow-md space-y-4 animate-fadeUp">
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-3">
-                              <div className="flex flex-col gap-1.5">
-                                <h5 className="text-[16px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
-                                <span className="text-[13px] font-normal text-gray-400 tracking-tight leading-none mt-2">
-                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Recently'}
-                                </span>
-                              </div>
+                          <div className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between">
+                              <h5 className="text-[14px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
+                              <span className="text-[14px] font-normal text-gray-400 tracking-tight leading-none">
+                                {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Recently'}
+                              </span>
                             </div>
-                            <div className="flex items-center gap-2 px-5 py-2.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
-                              <Star className="w-5 h-5 fill-[#E67E00]" />
-                              <span className="text-[14px] font-bold leading-none">{r.rating}</span>
+                            <div className="flex items-center gap-1">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
+                              ))}
                             </div>
                           </div>
                           <p className="text-[14px] font-normal text-gray-600 leading-relaxed mt-4">
@@ -558,9 +559,13 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                           {r.images && r.images.length > 0 && (
                             <div className="flex gap-3 mt-4">
                               {r.images.map((img, idx) => (
-                                <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
+                                <button
+                                  key={idx}
+                                  onClick={() => setActiveImageGallery({ images: r.images, index: idx })}
+                                  className="w-28 h-28 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03] hover:scale-[1.02] transition-transform active:scale-95"
+                                >
                                   <img src={img} className="w-full h-full object-cover" alt="" />
-                                </div>
+                                </button>
                               ))}
                             </div>
                           )}
@@ -772,6 +777,7 @@ export default function ShopsPage() {
   });
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
+  const [activeImageGallery, setActiveImageGallery] = useState(null); // { images: [], index: 0 }
 
 
   // Detect actual user location on mount
@@ -1560,9 +1566,52 @@ export default function ShopsPage() {
             setActiveRouteShopId(shop.id || shop._id);
             setSelectedShop(null);
           }}
+          setActiveImageGallery={setActiveImageGallery}
         />
       )}
       {showComputation && <ComputationDetailsModal shop={showComputation} weights={weights} onClose={() => setShowComputation(null)} />}
+
+      {activeImageGallery && (
+        <div className="fixed inset-0 bg-black/95 z-[2000] flex flex-col items-center justify-center p-6 animate-fadeIn">
+          <div className="absolute top-8 left-8 z-[2001]">
+            <button
+              onClick={() => setActiveImageGallery(null)}
+              className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all group backdrop-blur-md"
+            >
+              <ArrowLeft className="w-6 h-6 text-white group-hover:-translate-x-1 transition-transform" />
+            </button>
+          </div>
+
+          <div className="absolute top-10 text-white font-normal text-[18px] tracking-tight pointer-events-none">
+            {activeImageGallery.index + 1} / {activeImageGallery.images.length}
+          </div>
+
+          <div className="relative w-full max-w-4xl max-h-[70vh] flex items-center justify-center aspect-square">
+            <img
+              src={activeImageGallery.images[activeImageGallery.index]}
+              className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl"
+              alt=""
+            />
+
+            {activeImageGallery.images.length > 1 && (
+              <>
+                <button
+                  onClick={() => setActiveImageGallery(prev => ({ ...prev, index: (prev.index - 1 + prev.images.length) % prev.images.length }))}
+                  className="absolute -left-4 md:-left-16 p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all backdrop-blur-md"
+                >
+                  <ChevronLeft className="w-8 h-8 text-white" />
+                </button>
+                <button
+                  onClick={() => setActiveImageGallery(prev => ({ ...prev, index: (prev.index + 1) % prev.images.length }))}
+                  className="absolute -right-4 md:-right-16 p-4 bg-white/10 hover:bg-white/20 rounded-full transition-all backdrop-blur-md"
+                >
+                  <ChevronRight className="w-8 h-8 text-white" />
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div >
   );
 }
