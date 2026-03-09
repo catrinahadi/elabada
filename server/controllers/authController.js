@@ -25,10 +25,10 @@ exports.login = async (req, res) => {
             if (customer) { user = customer; role = "customer"; }
         }
 
-        if (!user) return res.status(401).json({ message: "Invalid email or password." });
+        if (!user) return res.status(401).json({ message: "Invalid username or password." });
 
         const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) return res.status(401).json({ message: "Invalid email or password." });
+        if (!isMatch) return res.status(401).json({ message: "Invalid username or password." });
 
         const token = jwt.sign(
             { id: user._id, role, name: user.name, email: user.email },
@@ -64,7 +64,7 @@ exports.signup = async (req, res) => {
         const existingCust = await Customer.findOne({ email });
 
         if (existingAdmin || existingOwner || existingCust) {
-            return res.status(400).json({ message: "Email already registered." });
+            return res.status(400).json({ message: "Username already registered." });
         }
 
         const salt = await bcrypt.genSalt(10);

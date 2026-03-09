@@ -25,7 +25,7 @@ export function AuthProvider({ children }) {
             setUser(data.user);
             return { ok: true, role: data.user.role };
         } catch (err) {
-            const msg = err.response?.data?.message || "Invalid email or password.";
+            const msg = err.response?.data?.message || "Invalid username or password.";
             return { ok: false, message: msg };
         }
     };
@@ -38,7 +38,7 @@ export function AuthProvider({ children }) {
             setUser(data.user);
             return { ok: true, role: data.user.role };
         } catch (err) {
-            const msg = err.response?.data?.message || "Email already registered.";
+            const msg = err.response?.data?.message || "Username already registered.";
             return { ok: false, message: msg };
         }
     };
