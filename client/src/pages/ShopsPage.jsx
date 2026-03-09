@@ -11,7 +11,7 @@ import {
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -113,16 +113,17 @@ const reviewCategories = [
   "Overall Service", "Cleanliness", "Folding Quality", "Fabric Care", "Smell/Fragrance"
 ];
 
-function ReviewForm({ shopId, onPosted }) {
+function ReviewForm({ shopId, onPosted, onCancel }) {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [images, setImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
+  const [success, setSuccess] = useState(false);
   const fileInputRef = useRef(null);
 
   if (!user) return (
-    <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl text-center space-y-3">
+    <div className="bg-white p-6 rounded-[32px] border border-black/[0.05] shadow-xl text-center space-y-3">
       <p className="text-[14px] font-normal text-[#1D1D1F]">Please login as a customer to write a review.</p>
     </div>
   );
@@ -156,11 +157,12 @@ function ReviewForm({ shopId, onPosted }) {
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
     try {
-      console.log("Submitting review for shop:", shopId);
       await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images });
-      setRating(0);
-      setComment("");
-      setImages([]);
+      setSuccess(true);
+      setTimeout(() => {
+        setSuccess(false);
+        onCancel?.();
+      }, 2000);
     } catch (err) {
       console.error("Submission error:", err);
       alert("Failed to post review. Please try again.");
@@ -169,11 +171,22 @@ function ReviewForm({ shopId, onPosted }) {
     }
   };
 
+  if (success) {
+    return (
+      <div className="bg-white p-12 rounded-[40px] border border-emerald-100 shadow-xl flex flex-col items-center justify-center text-center space-y-4 animate-fadeUp">
+        <div className="w-16 h-16 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-600">
+          <CheckCircle className="w-8 h-8" />
+        </div>
+        <p className="text-[14px] font-normal text-gray-800">Your review has been submitted successfully!</p>
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-8 animate-fadeUp">
-      <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl space-y-8">
+    <div className="space-y-6 animate-fadeUp">
+      <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl space-y-6">
         <div className="space-y-4 text-center">
-          <h3 className="text-[14px] font-normal text-[#1D1D1F] tracking-tighter">Rate your experience</h3>
+          <h3 className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">Rate your experience</h3>
           <div className="flex justify-center gap-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <button key={s} type="button" onClick={() => setRating(s)} className="p-1 transition-transform active:scale-95">
@@ -183,15 +196,15 @@ function ReviewForm({ shopId, onPosted }) {
           </div>
         </div>
 
-        <div className="space-y-4">
-          <p className="text-[12px] font-normal text-[#1D1D1F] px-2">What did you like?</p>
+        <div className="space-y-3">
+          <p className="text-[14px] font-normal text-[#1D1D1F] px-2">What did you like?</p>
           <div className="flex flex-wrap gap-2">
             {reviewCategories.map(cat => (
               <button
                 key={cat}
                 type="button"
                 onClick={() => handleTagClick(cat)}
-                className="px-5 py-2.5 bg-gray-50 text-gray-500 rounded-full text-[12px] font-normal border border-black/[0.02] hover:bg-[#E67E00]/10 hover:text-[#E67E00] hover:border-[#E67E00]/30 transition-all cursor-pointer"
+                className="px-4 py-2 bg-gray-50 text-gray-500 rounded-full text-[14px] font-normal border border-black/[0.02] hover:bg-[#E67E00]/10 hover:text-[#E67E00] hover:border-[#E67E00]/30 transition-all cursor-pointer"
               >
                 {cat}
               </button>
@@ -203,8 +216,8 @@ function ReviewForm({ shopId, onPosted }) {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder="What's on your mind?"
-            className="w-full h-40 bg-gray-50 rounded-[32px] p-6 text-[12px] font-medium outline-none border-2 border-transparent focus:border-[#E67E00]/20 focus:bg-white transition-all resize-none placeholder:text-gray-400"
+            placeholder="Write your review here..."
+            className="w-full h-32 bg-gray-50 rounded-[32px] p-6 text-[14px] font-normal outline-none border-2 border-transparent focus:border-[#E67E00]/20 focus:bg-white transition-all resize-none placeholder:text-gray-400"
           />
           <input
             type="file"
@@ -216,11 +229,11 @@ function ReviewForm({ shopId, onPosted }) {
           />
         </div>
 
-        <div className="space-y-4 px-2">
-          <p className="text-[12px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
+        <div className="space-y-3 px-2">
+          <p className="text-[14px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
           <div className="flex gap-4">
             {images.map((img, idx) => (
-              <div key={idx} className="relative w-20 h-20 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
+              <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
                 <img src={img} className="w-full h-full object-cover" alt="" />
                 <button
                   type="button"
@@ -235,20 +248,30 @@ function ReviewForm({ shopId, onPosted }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-20 h-20 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-[#E67E00] hover:text-[#E67E00] hover:bg-[#E67E00]/5 transition-all group"
+                className="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-[#E67E00] hover:text-[#E67E00] hover:bg-[#E67E00]/5 transition-all group"
               >
                 <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
               </button>
             )}
           </div>
         </div>
-        <button
-          onClick={handleSubmit}
-          disabled={submitting || rating === 0}
-          className="w-full py-5 bg-[#014421] text-white rounded-xl text-[12px] font-normal tracking-widest hover:opacity-90 transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {submitting ? "Posting..." : "Post Review"}
-        </button>
+
+        <div className="flex gap-4">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-xl text-[14px] font-normal hover:bg-gray-200 transition-all active:scale-95"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSubmit}
+            disabled={submitting || rating === 0}
+            className="flex-1 py-4 bg-[#014421] text-white rounded-xl text-[14px] font-normal tracking-wide hover:opacity-90 transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {submitting ? "Submitting..." : "Submit"}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -258,15 +281,16 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   const [filter, setFilter] = useState('All');
   const [showAllReviews, setShowAllReviews] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [scrollCounter, setScrollCounter] = useState(0);
   const formRef = useRef(null);
 
   useEffect(() => {
     if (showForm && formRef.current) {
       setTimeout(() => {
-        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        formRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     }
-  }, [showForm]);
+  }, [showForm, scrollCounter]);
 
   const ratingCounts = [
     { stars: 5, percentage: 85 },
@@ -281,22 +305,30 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
     return reviews.filter(r => r.rating.toString() === filter);
   }, [reviews, filter]);
 
+  const handleWriteReview = () => {
+    if (showForm) {
+      setScrollCounter(prev => prev + 1);
+    } else {
+      setShowForm(true);
+    }
+  };
+
   if (showAllReviews) {
     return (
       <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
-        <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+        <div className="bg-white rounded-[40px] w-full max-w-[1100px] h-[95vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
           <div className="p-6 flex flex-col gap-4 sticky top-0 bg-white z-20 border-b border-black/5">
             <button onClick={() => setShowAllReviews(false)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
               <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
             </button>
             <div className="flex items-center justify-between px-2.5">
-              <h3 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">All reviews</h3>
-              <div className="flex flex-wrap items-center gap-2">
+              <h3 className="text-[24px] font-bold text-[#1D1D1F] tracking-tight">All reviews</h3>
+              <div className="flex flex-wrap items-center gap-3">
                 {['All', '5', '4', '3', '2', '1'].map((val) => (
                   <button
                     key={val}
                     onClick={() => setFilter(val)}
-                    className={`px-4 py-1.5 rounded-full text-[12px] font-normal transition-all ${filter === val
+                    className={`px-6 py-2.5 rounded-full text-[16px] font-bold transition-all ${filter === val
                       ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
                       : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                       }`}
@@ -310,36 +342,36 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
           <div className="flex-1 overflow-y-auto p-8 space-y-8 no-scrollbar">
             {filteredReviews.length === 0 ? (
-              <div className="text-center py-20 space-y-3">
-                <p className="text-gray-400 text-[16px] font-bold">No reviews found.</p>
-                <p className="text-gray-300 text-[13px]">Try changing the rating filter.</p>
+              <div className="text-center py-20 space-y-4">
+                <p className="text-gray-400 text-[24px] font-black">No reviews found.</p>
+                <p className="text-gray-300 text-[18px]">Try changing the rating filter.</p>
               </div>
             ) : (
               <div className="space-y-8">
                 {filteredReviews.map((r, i) => (
-                  <div key={r._id || r.id} className="bg-white p-6 rounded-[28px] border border-black/[0.03] shadow-sm space-y-4 animate-fadeUp">
+                  <div key={r._id || r.id} className="bg-white p-8 rounded-[32px] border border-black/[0.03] shadow-sm space-y-6 animate-fadeUp">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center text-[#FF8C00] font-black border-2 border-white shadow-sm">
+                      <div className="flex items-center gap-6">
+                        <div className="w-16 h-16 rounded-full bg-orange-50 flex items-center justify-center text-[#FF8C00] font-black border-2 border-white shadow-sm text-xl">
                           {r.reviewerName?.[0] || r.user?.[0] || 'A'}
                         </div>
-                        <div className="space-y-0.5">
-                          <h5 className="text-[12px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
-                          <span className="text-[10px] font-bold text-gray-300 uppercase tracking-widest leading-none">
+                        <div className="space-y-1">
+                          <h5 className="text-[20px] font-bold text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
+                          <span className="text-[14px] font-bold text-gray-300 uppercase tracking-widest leading-none">
                             {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
                           </span>
                         </div>
                       </div>
-                      <div className="flex items-center gap-1.5 px-4 py-1.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
-                        <Star className="w-3.5 h-3.5 fill-[#E67E00]" />
-                        <span className="text-[12px] font-black leading-none">{r.rating}</span>
+                      <div className="flex items-center gap-2 px-6 py-2.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
+                        <Star className="w-5 h-5 fill-[#E67E00]" />
+                        <span className="text-[20px] font-black leading-none">{r.rating}</span>
                       </div>
                     </div>
-                    <p className="text-[12px] font-normal text-gray-600 leading-relaxed pl-16">
+                    <p className="text-[20px] font-normal text-gray-600 leading-relaxed pl-20">
                       {r.comment}
                     </p>
                     {r.images && r.images.length > 0 && (
-                      <div className="flex gap-3 pl-16 mt-2">
+                      <div className="flex gap-4 pl-20 mt-4">
                         {r.images.map((img, idx) => (
                           <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
                             <img src={img} className="w-full h-full object-cover" alt="" />
@@ -358,76 +390,142 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   }
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-4 z-[1000]">
-      <div className="bg-white rounded-[40px] w-full max-w-[900px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
-        <div className="p-6 flex items-center justify-between sticky top-0 bg-white z-20 border-b border-black/5">
-          <button onClick={onClose} className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
-            <ArrowLeft className="w-6 h-6 text-[#1D1D1F]" />
-          </button>
+    <div className="modal-overlay flex items-center justify-center p-8 z-[1000]">
+      <div className="bg-white rounded-[40px] w-full max-w-[1000px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+        <div className="py-2 px-6 flex items-center justify-between sticky top-0 bg-white z-20 border-b border-black/5">
+          <div className="flex items-center gap-4">
+            <button onClick={onClose} className="p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all">
+              <ArrowLeft className="w-6 h-6 text-[#1D1D1F]" />
+            </button>
+          </div>
+          {showMatchScore && shop.score && (
+            <div className="bg-[#F8F9FA] px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-2">
+              <span className="text-[14px] font-normal text-gray-400">Match:</span>
+              <span className="text-[14px] font-normal text-[#1D1D1F]">{(shop.score * 100).toFixed(0)}%</span>
+            </div>
+          )}
         </div>
 
         <div className="flex-1 overflow-y-auto no-scrollbar">
-          <div className="h-72 w-full relative">
-            <img src={shop.image} className="w-full h-full object-cover" alt="" />
-            <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent" />
-            <div className="absolute bottom-6 left-8 right-8 flex justify-between items-end">
-              <h2 className="text-4xl font-black text-white tracking-tighter leading-none">{shop.name}</h2>
-              {showMatchScore && shop.score && (
-                <button
-                  onClick={(e) => { e.stopPropagation(); onShowComputation(shop); }}
-                  className="bg-[#1D1D1F]/90 backdrop-blur-xl text-white px-5 py-3 rounded-2xl flex flex-col items-center gap-0.5 border border-white/10 hover:bg-black transition-all hover:scale-105 shadow-2xl"
-                >
-                  <span className="text-[12px] font-bold text-white/50 leading-none">Match score</span>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-2xl font-normal leading-none">{(shop.score * 100).toFixed(0)}%</span>
-                  </div>
-                </button>
-              )}
-            </div>
-          </div>
-
-          <div className="p-8 space-y-12 pb-24">
-            <div className="space-y-4">
-              <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03] flex items-center gap-6">
-                <div className="flex-1"><p className="text-[12px] font-medium text-[#1D1D1F] tracking-tight leading-tight">{shop.address}</p></div>
-              </div>
-
-              <div className="grid grid-cols-3 gap-4">
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
-                  <span className="text-[12px] font-medium text-gray-400 tracking-tight">Price</span>
-                  <span className="text-[12px] font-normal text-[#1D1D1F]">₱{shop.price}/kg</span>
-                </div>
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
-                  <span className="text-[12px] font-medium text-gray-400 tracking-tight">Turnaround time</span>
-                  <span className="text-[12px] font-normal text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
-                </div>
-                <div className="bg-[#F8F9FA] p-5 rounded-[28px] border border-black/[0.03] flex flex-col items-center justify-center gap-2 text-center">
-                  <span className="text-[12px] font-medium text-gray-400 tracking-tight">Location</span>
-                  <div className="flex flex-col items-center">
-                    <span className="text-[12px] font-normal text-[#1D1D1F]">{(shop.distance || 0).toFixed(1)} km</span>
+          <div className="px-6 pt-8 pb-8 space-y-4">
+            <div className="grid grid-cols-[0.8fr_1.2fr] gap-8 items-stretch transform transition-all duration-500">
+              {/* Left Column: Image */}
+              <div className="w-full flex">
+                <div className="w-full relative rounded-[32px] overflow-hidden border border-black/5 shadow-sm">
+                  <div className="absolute inset-0">
+                    <img src={shop.image} className="w-full h-full object-cover" alt="" />
                   </div>
                 </div>
               </div>
 
-              <button onClick={() => onNavigate(shop)} className="w-full py-5 bg-[#1D1D1F] text-white rounded-[24px] font-normal text-[12px] capitalize tracking-widest flex items-center justify-center gap-3 hover:bg-[#014421] transition-all shadow-xl shadow-[#1D1D1F]/20 active:scale-[0.98]">
-                <Navigation2 className="w-4 h-4 fill-white" /> Access navigation
-              </button>
-            </div>
+              {/* Right Column: Details */}
+              <div className="flex flex-col justify-start w-full">
+                <h1 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight leading-none mb-4 mt-2 pl-2">{shop.name}</h1>
+                <div className="space-y-2">
+                  {/* Address Card & Navigation */}
+                  <div className="bg-[#F8F9FA] p-4 rounded-[32px] border border-black/[0.03] flex items-center justify-between gap-4 group hover:bg-white hover:shadow-xl transition-all duration-300">
+                    <div className="flex-1 min-w-0 flex flex-col justify-center pl-2 space-y-1">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Location address</span>
+                      <p className="text-[14px] font-normal text-[#1D1D1F] tracking-tight leading-tight truncate" title={shop.address}>{shop.address}</p>
+                    </div>
+                  </div>
 
-            <div className="space-y-10 pt-4">
-              <div className="flex items-center justify-between">
-                <h3 className="text-[16px] font-normal text-[#1D1D1F] tracking-tighter leading-none">Ratings & Reviews</h3>
+                  {/* Information Grid (Hours & Payments) */}
+                  <div className="grid grid-cols-2 gap-2">
+                    <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Operating hours</span>
+                      <p className="text-[14px] font-normal text-[#1D1D1F]">8:00 AM - 8:00 PM</p>
+                    </div>
+                    <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Shop status</span>
+                      <p className={`text-[14px] font-normal ${shop.status === 'open' ? 'text-emerald-600' : 'text-red-500'} capitalize`}>
+                        {shop.status || 'open'}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* High-Level Stats Grid */}
+                  <div className="grid grid-cols-3 gap-2">
+                    {/* Price Card */}
+                    <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight">Price</span>
+                      <p className="text-[14px] font-normal text-[#7B1113]">₱{shop.price}/kg</p>
+                    </div>
+
+                    {/* Time Card */}
+                    <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight">Turnaround</span>
+                      <p className="text-[14px] font-normal text-[#014421]">{shop.turnaroundTime} hrs</p>
+                    </div>
+
+                    {/* Distance Card */}
+                    <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300">
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight">Distance</span>
+                      <p className="text-[14px] font-normal text-blue-900">{(shop.distance || 0).toFixed(1)} km</p>
+                    </div>
+                  </div>
+
+                  {/* Directions Button */}
+                  <button
+                    onClick={() => onNavigate(shop)}
+                    className="w-full flex items-center justify-center gap-2 px-4 py-4 bg-white border border-black/5 rounded-[24px] text-[15px] font-normal text-[#1D1D1F] shadow-sm relative overflow-hidden group"
+                  >
+                    <span>Get directions</span>
+                    <Navigation2 className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
+            </div>
+            <div className="mt-12 pt-4 border-t border-black/[0.04]">
+              <div className="flex flex-col gap-6 mt-2">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none">Ratings & Reviews</h3>
+                  <button
+                    onClick={handleWriteReview}
+                    className="px-6 py-2.5 bg-[#014421] text-white rounded-xl text-[13px] font-medium transition-all shadow-md hover:bg-[#1D1D1F] active:scale-95"
+                  >
+                    Write a review
+                  </button>
+                </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-12 pt-4">
-                <div className="bg-[#F8F9FA] p-7 rounded-[32px] border border-black/[0.02] shadow-sm space-y-6 relative h-fit">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-[12px] font-normal text-[#1D1D1F] tracking-tight">Customer Feedback</span>
+                {/* Aggregate Rating Summary */}
+                <div className="bg-white p-6 rounded-[32px] border border-black/[0.04] shadow-sm">
+                  <div className="flex flex-col md:flex-row items-center gap-12">
+                    <div className="text-center space-y-4 w-48 shrink-0">
+                      <h4 className="text-6xl font-bold text-[#1D1D1F] tracking-tighter leading-none">{shop.rating || '0.0'}</h4>
+                      <div className="flex justify-center gap-1">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className={`w-6 h-6 ${s <= Math.floor(shop.rating) ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
+                        ))}
+                      </div>
+                      <p className="text-[14px] font-normal text-gray-400">({reviews.length} reviews)</p>
+                    </div>
+
+                    <div className="flex-1 w-full space-y-3">
+                      {ratingCounts.map((rc) => (
+                        <button
+                          key={rc.stars}
+                          onClick={() => setFilter(prev => prev === rc.stars.toString() ? 'All' : rc.stars.toString())}
+                          className={`w-full flex items-center gap-6 px-4 py-1.5 rounded-xl transition-all group ${filter === rc.stars.toString() ? 'bg-[#E67E00]/10' : 'hover:bg-gray-50'}`}
+                        >
+                          <span className={`text-[14px] w-4 ${rc.stars === 5 ? 'font-bold' : 'font-normal'} ${filter === rc.stars.toString() ? 'text-[#E67E00]' : 'text-gray-400'}`}>{rc.stars}</span>
+                          <div className="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden relative">
+                            <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${filter === rc.stars.toString() ? 'bg-[#E67E00]' : 'bg-[#E67E00]/60'}`} style={{ width: `${rc.percentage}%` }} />
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Customer Feedback */}
+                <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.02] shadow-sm space-y-4 relative -mt-4">
+                  <div className="flex justify-end pt-2">
                     <button
                       onClick={() => setShowAllReviews(true)}
-                      className="flex items-center gap-1.5 text-[12px] font-normal text-gray-400 hover:translate-x-0.5 transition-all group"
+                      className="flex items-center gap-1.5 text-[14px] font-normal text-gray-400 hover:translate-x-0.5 transition-all group"
                     >
-                      Read all <ChevronRight className="w-4 h-4 text-gray-400" />
+                      Read all <ChevronRight className="w-5 h-5 text-gray-400" />
                     </button>
                   </div>
 
@@ -438,30 +536,27 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     </div>
                   ) : (
                     <div className="space-y-6 flex flex-col">
-                      {filteredReviews.slice(0, 2).map((r) => (
+                      {filteredReviews.slice(0, 1).map((r) => (
                         <div key={r._id || r.id} className="bg-white p-6 rounded-[24px] border border-black/[0.03] shadow-md space-y-4 animate-fadeUp">
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center text-[#014421] font-black border-2 border-white shadow-sm text-xs">
-                                {r.reviewerName?.[0] || r.user?.[0] || 'A'}
-                              </div>
-                              <div className="space-y-0.5">
-                                <h5 className="text-[12px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
-                                <span className="text-[9px] font-bold text-gray-300 uppercase tracking-widest leading-none">
-                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-PH', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Recently'}
+                              <div className="flex flex-col gap-1.5">
+                                <h5 className="text-[16px] font-normal text-[#1D1D1F] leading-none">{r.reviewerName || r.user || 'Anonymous'}</h5>
+                                <span className="text-[13px] font-normal text-gray-400 tracking-tight leading-none mt-2">
+                                  {r.createdAt ? new Date(r.createdAt).toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Recently'}
                                 </span>
                               </div>
                             </div>
-                            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
-                              <Star className="w-3.5 h-3.5 fill-[#E67E00]" />
-                              <span className="text-[12px] font-black leading-none">{r.rating}</span>
+                            <div className="flex items-center gap-2 px-5 py-2.5 bg-orange-50 text-[#E67E00] rounded-full border border-orange-100">
+                              <Star className="w-5 h-5 fill-[#E67E00]" />
+                              <span className="text-[14px] font-bold leading-none">{r.rating}</span>
                             </div>
                           </div>
-                          <p className="text-[12px] font-normal text-gray-600 leading-relaxed pl-13">
+                          <p className="text-[14px] font-normal text-gray-600 leading-relaxed mt-4">
                             {r.comment}
                           </p>
                           {r.images && r.images.length > 0 && (
-                            <div className="flex gap-3 pl-13 mt-2">
+                            <div className="flex gap-3 mt-4">
                               {r.images.map((img, idx) => (
                                 <div key={idx} className="w-20 h-20 rounded-2xl overflow-hidden shadow-sm border border-black/[0.03]">
                                   <img src={img} className="w-full h-full object-cover" alt="" />
@@ -474,55 +569,17 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     </div>
                   )}
                 </div>
-
-                {/* Column 2: Aggregate Rating Summary */}
-                <div className="space-y-8 pt-7">
-                  <div className="flex items-center gap-8">
-                    <div className="text-center space-y-2">
-                      <h4 className="text-7xl font-black text-[#1D1D1F] tracking-tighter leading-none">{shop.rating || '0.0'}</h4>
-                      <div className="flex justify-center gap-0.5">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className={`w-5 h-5 ${s <= Math.floor(shop.rating) ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
-                        ))}
-                      </div>
-                      <p className="text-[12px] font-normal text-gray-400">({reviews.length} reviews)</p>
-                    </div>
-
-                    <div className="flex-1 space-y-3">
-                      {ratingCounts.map((rc) => (
-                        <button
-                          key={rc.stars}
-                          onClick={() => setFilter(prev => prev === rc.stars.toString() ? 'All' : rc.stars.toString())}
-                          className={`w-full flex items-center gap-4 px-4 py-1.5 rounded-xl transition-all group ${filter === rc.stars.toString() ? 'bg-[#E67E00]/10' : 'hover:bg-gray-50'}`}
-                        >
-                          <span className={`text-[12px] font-bold w-2 ${filter === rc.stars.toString() ? 'text-[#E67E00]' : 'text-gray-400 font-medium'}`}>{rc.stars}</span>
-                          <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden relative">
-                            <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-1000 ${filter === rc.stars.toString() ? 'bg-[#E67E00]' : 'bg-[#E67E00]/60'}`} style={{ width: `${rc.percentage}%` }} />
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                  <div className="pt-4 flex justify-end">
-                    <button
-                      onClick={() => setShowForm(!showForm)}
-                      className="px-8 py-3 bg-[#014421] text-white rounded-xl text-[12px] font-normal transition-all shadow-lg shadow-[#014421]/20 active:scale-95 group flex items-center justify-center gap-2"
-                    >
-                      {showForm ? 'Cancel review' : 'Write a review'}
-                    </button>
-                  </div>
-                </div>
               </div>
             </div>
 
             {showForm && (
-              <div ref={formRef} className="pt-12 border-t border-black/[0.04] animate-fadeUp">
+              <div ref={formRef} className="mt-8 pt-8 border-t border-black/[0.04] animate-fadeUp">
                 <ReviewForm
                   shopId={shop._id || shop.id}
                   onPosted={(id, payload) => {
                     onPosted(id, payload);
-                    setShowForm(false);
                   }}
+                  onCancel={() => setShowForm(false)}
                 />
               </div>
             )}
