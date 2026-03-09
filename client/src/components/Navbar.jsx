@@ -18,7 +18,7 @@ export default function Navbar() {
         {/* Brand */}
         <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
           <div className="brand-logo shadow-[#007AFF]/20">E</div>
-          <span className="text-[#1D1D1F] font-black text-xl tracking-tighter">ELaBada</span>
+          <span className="text-[#1D1D1F] font-normal text-xl tracking-tighter">ELaBada</span>
         </Link>
 
         <div className="flex-1" />

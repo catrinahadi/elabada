@@ -151,7 +151,7 @@ body {
 }
 
 .brand-logo {
-  @apply w-12 h-12 bg-[#003366] rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-[#003366]/20;
+  @apply w-12 h-12 bg-[#003366] rounded-2xl flex items-center justify-center text-white font-normal text-2xl shadow-xl shadow-[#003366]/20;
 }
 
 .modal-overlay {

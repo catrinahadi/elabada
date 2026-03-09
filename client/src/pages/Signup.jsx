@@ -43,8 +43,8 @@ export default function Signup() {
             {/* Brand/Logo moved to upper left outside the box */}
             <div className="absolute top-10 left-10 z-10">
                 <Link to="/" className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#014421]/20">E</div>
-                    <span className="font-black text-[22px] tracking-tighter text-[#1D1D1F]">ELaBada</span>
+                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
+                    <span className="font-normal text-[22px] tracking-tighter text-[#1D1D1F]">ELaBada</span>
                 </Link>
             </div>
 

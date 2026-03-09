@@ -982,8 +982,8 @@ export default function ShopsPage() {
     <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden">
       <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
         <div className="flex items-center gap-4 mb-16 px-2">
-          <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white font-black text-2xl shadow-lg shadow-[#014421]/20">E</div>
-          <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter font-outfit">ELaBada</span>
+          <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white text-2xl shadow-lg shadow-[#014421]/20">E</div>
+          <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter font-outfit">ELaBada</span>
         </div>
 
         <nav className="flex-1 space-y-3">

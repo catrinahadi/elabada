@@ -129,8 +129,8 @@ export default function AdminDashboard() {
             {/* Sidebar - Pro Blue */}
             <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
                 <div className="flex items-center gap-4 mb-16 px-2">
-                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-[#014421]/20">E</div>
-                    <span className="text-[#1D1D1F] font-black text-2xl tracking-tighter">ELaBada</span>
+                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
+                    <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                 </div>
 
                 <nav className="flex-1 space-y-3">
