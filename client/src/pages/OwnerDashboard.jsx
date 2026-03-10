@@ -453,60 +453,56 @@ export default function OwnerDashboard() {
                                         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-20 -mt-20 blur-[100px] transition-all group-hover:bg-white/20" />
                                     </div>
 
-                                    {/* Dashboard Statistics Subgrid - Forced 2 columns on mobile to match wireframe */}
-                                    <div className="grid grid-cols-2 gap-4 md:gap-8 items-stretch md:h-[400px]">
-                                        {/* Left: Total Shops (Vertical Full Height) */}
-                                        <button
-                                            onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }}
-                                            className="bg-blue-950/[0.03] p-10 md:p-14 rounded-[40px] md:rounded-[56px] border border-blue-950/10 shadow-sm flex flex-col items-center justify-center gap-4 md:gap-8 group hover:shadow-2xl transition-all text-center relative overflow-hidden h-full"
-                                        >
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-6xl md:text-[96px] font-bold text-blue-950 tracking-tighter leading-none group-hover:scale-105 transition-transform">{shops.length}</span>
-                                                <span className="text-[12px] md:text-[16px] font-medium text-blue-900/60 mt-4">Total Shops</span>
+                                    {/* Dashboard Statistics Subgrid */}
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                                        {/* Approved */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("approved"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "approved" ? "border-[#1A6B1A]/60 shadow-md" : "border-[#1A6B1A]/25"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "approved" ? "bg-[#1A6B1A]/20" : "bg-[#1A6B1A]/10"}`}>
+                                                <CheckCircle className="w-5 h-5 text-[#1A6B1A]" />
                                             </div>
-                                            <ChevronRight className="absolute right-6 bottom-8 w-4 h-4 md:w-8 md:h-8 text-blue-950/20" />
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#1A6B1A]">{shops.filter(s => s.permitStatus === "approved").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">APPROVED</p>
+                                            </div>
                                         </button>
 
-                                        {/* Right: Pending & Approved (Stacked Vertically) */}
-                                        <div className="flex flex-col gap-4 md:gap-8">
-                                            {[
-                                                {
-                                                    label: "Pending shop",
-                                                    count: shops.filter(s => s.permitStatus === "pending").length,
-                                                    status: "pending",
-                                                    bg: "bg-[#7B1113]/[0.03]",
-                                                    border: "border-[#7B1113]/10",
-                                                    text: "text-[#7B1113]"
-                                                },
-                                                {
-                                                    label: "Approved shop",
-                                                    count: shops.filter(s => s.permitStatus === "approved").length,
-                                                    status: "approved",
-                                                    bg: "bg-[#228B22]/[0.03]",
-                                                    border: "border-[#228B22]/10",
-                                                    text: "text-[#228B22]"
-                                                },
-                                            ].map(stat => (
-                                                <button
-                                                    key={stat.label}
-                                                    onClick={() => { setSidebarTab("listings"); setStatusFilter(stat.status); }}
-                                                    className={`flex-1 p-10 md:p-14 rounded-[40px] md:rounded-[56px] border ${stat.border} ${stat.bg} shadow-sm flex flex-col items-center justify-center group hover:shadow-2xl transition-all text-center relative overflow-hidden`}
-                                                >
-                                                    <div className="flex items-center gap-2">
-                                                        <span className={`text-5xl md:text-[72px] font-bold ${stat.text} tracking-tighter leading-none`}>{stat.count}</span>
-                                                        <span className={`text-[12px] md:text-[16px] font-medium ${stat.text} opacity-70 mt-3`}>
-                                                            {stat.count === 1 ? stat.label : `${stat.label}s`}
-                                                        </span>
-                                                    </div>
-                                                    <ChevronRight className={`absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-3 h-3 md:w-6 md:h-6 ${stat.text} opacity-20`} />
-                                                </button>
-                                            ))}
-                                        </div>
+                                        {/* Rejected */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("rejected"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "rejected" ? "border-[#8B1A1A]/60 shadow-md" : "border-[#8B1A1A]/25"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "rejected" ? "bg-[#8B1A1A]/20" : "bg-[#8B1A1A]/10"}`}>
+                                                <XCircle className="w-5 h-5 text-[#8B1A1A]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#8B1A1A]">{shops.filter(s => s.permitStatus === "rejected").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">REJECTED</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Pending */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("pending"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "pending" ? "border-[#555]/60 shadow-md" : "border-[#555]/20"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "pending" ? "bg-[#555]/20" : "bg-[#555]/10"}`}>
+                                                <Clock className="w-5 h-5 text-[#555]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#3D3D3D]">{shops.filter(s => s.permitStatus === "pending").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">PENDING</p>
+                                            </div>
+                                        </button>
                                     </div>
                                 </div>
 
-                                {/* Right Column: Full-Height Notification Center (span 1) */}
-                                <div className="flex flex-col h-full">
+                                {/* Right Column: Total Shops + Notification Center (span 1) */}
+                                <div className="flex flex-col gap-8 h-full">
+                                    {/* Total Shops Card */}
+                                    <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }} className={`rounded-[28px] p-8 md:p-10 bg-white border-2 flex flex-col gap-4 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "all" ? "border-[#1A237E]/60 shadow-md" : "border-[#1A237E]/25"}`}>
+                                        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "all" ? "bg-[#1A237E]/20" : "bg-[#1A237E]/10"}`}>
+                                            <Store className="w-6 h-6 text-[#1A237E]" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-5xl md:text-6xl font-black tracking-tighter text-[#1A237E]">{shops.length}</h3>
+                                            <p className="text-[14px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-1">TOTAL SHOPS</p>
+                                        </div>
+                                    </button>
+
                                     <div className="bg-white rounded-[32px] md:rounded-[56px] border border-black/[0.04] shadow-sm flex-1 flex flex-col p-8 md:p-10 pb-1 overflow-hidden">
                                         <div className="flex items-center justify-between mb-8">
                                             <h3 className="text-[22px] font-medium text-[#1D1D1F] tracking-tighter">Notification center</h3>
@@ -583,11 +579,11 @@ export default function OwnerDashboard() {
                                 </div>
 
                                 {/* Filter Grid - Maximized and Balanced for Mobile */}
-                                <div className="grid grid-cols-3 gap-2 md:gap-8 mb-8">
+                                <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-8 mb-8">
                                     {[
                                         {
                                             id: "all",
-                                            label: "Total Shop",
+                                            label: "TOTAL SHOP",
                                             count: shops.length,
                                             bg: "bg-blue-950/[0.03]",
                                             border: "border-blue-950/10",
@@ -596,41 +592,50 @@ export default function OwnerDashboard() {
                                             color: "#172554"
                                         },
                                         {
-                                            id: "pending",
-                                            label: "Pending shop",
-                                            count: shops.filter(s => s.permitStatus === "pending").length,
-                                            bg: "bg-[#7B1113]/[0.03]",
-                                            border: "border-[#7B1113]/10",
-                                            activeBorder: "border-[#7B1113]/40",
-                                            text: "text-[#7B1113]",
-                                            color: "#7B1113"
+                                            id: "approved",
+                                            label: "APPROVED",
+                                            count: shops.filter(s => s.permitStatus === "approved").length,
+                                            bg: "bg-[#1A6B1A]/[0.03]",
+                                            border: "border-[#1A6B1A]/10",
+                                            activeBorder: "border-[#1A6B1A]/40",
+                                            text: "text-[#1A6B1A]",
+                                            color: "#1A6B1A"
                                         },
                                         {
-                                            id: "approved",
-                                            label: "Approved shop",
-                                            count: shops.filter(s => s.permitStatus === "approved").length,
-                                            bg: "bg-[#228B22]/[0.03]",
-                                            border: "border-[#228B22]/10",
-                                            activeBorder: "border-[#228B22]/40",
-                                            text: "text-[#228B22]",
-                                            color: "#228B22"
-                                        }
+                                            id: "rejected",
+                                            label: "REJECTED",
+                                            count: shops.filter(s => s.permitStatus === "rejected").length,
+                                            bg: "bg-[#8B1A1A]/[0.03]",
+                                            border: "border-[#8B1A1A]/10",
+                                            activeBorder: "border-[#8B1A1A]/40",
+                                            text: "text-[#8B1A1A]",
+                                            color: "#8B1A1A"
+                                        },
+                                        {
+                                            id: "pending",
+                                            label: "PENDING",
+                                            count: shops.filter(s => s.permitStatus === "pending").length,
+                                            bg: "bg-[#555]/[0.03]",
+                                            border: "border-[#555]/10",
+                                            activeBorder: "border-[#555]/40",
+                                            text: "text-[#555]",
+                                            color: "#555"
+                                        },
                                     ].map(card => (
                                         <button
                                             key={card.id}
                                             onClick={() => { setStatusFilter(card.id); setSelectedShopId(null); }}
-                                            className={`flex items-center justify-center py-4 md:py-10 px-2 md:px-10 rounded-2xl md:rounded-[32px] border transition-all hover:shadow-xl group relative overflow-hidden w-full
-                                                ${statusFilter === card.id && !selectedShopId ? `${card.bg} ${card.activeBorder} shadow-sm border-2` : `${card.bg} ${card.border}`}
-                                            `}
-                                            style={{ color: card.color }}
+                                            className={`group p-6 md:p-10 rounded-[32px] md:rounded-[48px] border-2 transition-all flex flex-col justify-between gap-6 relative overflow-hidden ${card.bg} ${statusFilter === card.id ? `${card.activeBorder} shadow-2xl scale-[1.02]` : `${card.border} hover:${card.activeBorder} shadow-sm cursor-pointer`}`}
                                         >
-                                            <div className="flex items-center gap-1.5 md:gap-6 relative z-10 w-full justify-center">
-                                                <span className={`text-[16px] md:text-6xl font-bold tracking-tighter leading-none shrink-0`}>{card.count}</span>
-                                                <span className={`text-[16px] md:text-[20px] font-medium opacity-80 whitespace-nowrap`}>
-                                                    {card.count === 1 ? card.label : `${card.label}s`}
+                                            <div className="flex flex-col gap-4">
+                                                <span className={`text-4xl md:text-6xl font-black ${card.text} tracking-tighter leading-none`}>
+                                                    {card.count}
+                                                </span>
+                                                <span className={`text-[12px] md:text-[14px] font-black uppercase tracking-widest ${card.text} opacity-80 whitespace-nowrap`}>
+                                                    {card.label}
                                                 </span>
                                             </div>
-                                            <ChevronRight className={`hidden md:block w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
+                                            <ChevronRight className={`hidden md:block w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10 ${card.text}`} />
                                         </button>
                                     ))}
                                 </div>
