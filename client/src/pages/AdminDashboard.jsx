@@ -153,7 +153,7 @@ export default function AdminDashboard() {
                     </div>
 
                     {/* PREMIUM STAT TILES */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4">
                         {/* Total Establishments */}
                         <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
                             <div className="w-12 h-12 rounded-2xl bg-[#00336610] flex items-center justify-center shadow-inner">
@@ -204,12 +204,12 @@ export default function AdminDashboard() {
 
                         {/* Shop List Section */}
                         <div className="space-y-6">
-                            <div className="flex gap-4 mb-4">
+                            <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-3 mb-4 -mx-4 px-4">
                                 {['all', 'pending', 'approved', 'rejected'].map((s) => (
                                     <button
                                         key={s}
                                         onClick={() => setFilterStatus(s)}
-                                        className={`px-8 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 ${filterStatus === s ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
+                                        className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${filterStatus === s ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
                                     >
                                         {s === 'all' ? 'All Registry' : s}
                                     </button>
