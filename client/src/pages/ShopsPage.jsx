@@ -1033,14 +1033,13 @@ export default function ShopsPage() {
 
         {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
-          <div className="px-6 md:px-10 pt-6 md:pt-10 pb-3 shrink-0">
-            <div className="flex flex-col lg:flex-row items-stretch gap-6 md:gap-8">
-              <div className="flex-1 bg-[#0D3A2C] rounded-[32px] md:rounded-[56px] p-6 md:p-12 text-white shadow-2xl relative flex flex-col min-h-[240px] md:min-h-[320px]">
-                <div className="absolute inset-x-0 top-0 bottom-0 md:inset-0 flex items-center px-6 md:px-12 pb-14 z-10 pointer-events-none mt-8 md:mt-0">
-                  <h2 className="text-4xl md:text-[60px] font-normal tracking-tighter leading-tight md:leading-none font-outfit pointer-events-auto">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
+          <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
+            <div className="flex flex-row items-stretch gap-4 md:gap-8 min-h-[160px] md:min-h-[200px]">
+              <div className="flex-1 bg-[#0D3A2C] rounded-[28px] md:rounded-[56px] p-5 md:p-12 text-white shadow-2xl relative flex flex-col justify-center min-h-[180px] md:min-h-[320px]">
+                <div className="relative z-10 md:pb-14">
+                  <h2 className="text-[35px] md:text-[60px] font-normal tracking-tighter leading-tight md:leading-none font-outfit mt-1 ml-1">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
                 <div className="mt-auto relative z-30 self-end w-full max-w-xl flex-shrink-0 pointer-events-auto">
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-6 h-6" /></div>
                   <input
                     type="text"
                     placeholder="Search Shops"
@@ -1048,8 +1047,9 @@ export default function ShopsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="w-full h-16 bg-white rounded-[24px] border border-black/[0.05] pl-16 pr-6 text-[12px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
+                    className="w-full h-11 md:h-16 bg-white rounded-xl md:rounded-[24px] border border-black/[0.05] pl-10 md:pl-16 pr-4 text-[10px] md:text-[12px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
                   />
+                  <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-4 h-4 md:w-6 h-6" /></div>
                   {searchQuery && suggestions.length > 0 && showSuggestions && (
                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
                       {suggestions.map(s => (
@@ -1075,12 +1075,12 @@ export default function ShopsPage() {
                 </div>
                 <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               </div>
-              <div className="flex flex-row lg:flex-col justify-center gap-4 lg:gap-6 pb-6 md:pb-14">
-                <button onClick={() => setSidebarTab("computation")} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105">
-                  <Sliders className="w-6 h-6 md:w-8 md:h-8 text-white transition-all" />
+              <div className="flex flex-col justify-center gap-3 md:gap-6 py-2">
+                <button onClick={() => setSidebarTab("computation")} className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                  <Sliders className="w-5 h-5 md:w-8 md:h-8 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[32px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105">
-                  <LocateFixed className="w-6 h-6 md:w-8 md:h-8 text-white transition-all" />
+                <button onClick={() => setSidebarTab("map")} className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[32px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                  <LocateFixed className="w-5 h-5 md:w-8 md:h-8 text-white transition-all" />
                 </button>
               </div>
             </div>
@@ -1131,12 +1131,12 @@ export default function ShopsPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pb-12">
                 {filteredShops.map(s => (
                   <div
                     key={s.id || s._id}
                     onClick={() => s.status === 'open' && handleSelectShop(s)}
-                    className={`bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-4 cursor-pointer ${s.status === 'open' ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
+                    className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer ${s.status === 'open' ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
                   >
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-2">
                       <img src={s.image} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />
