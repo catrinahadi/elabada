@@ -582,8 +582,8 @@ export default function OwnerDashboard() {
                                     </button>
                                 </div>
 
-                                {/* Filter Row - Horizontally Scrollable on Mobile */}
-                                <div className="flex overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 gap-3 md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0">
+                                {/* Filter Grid - Maximized and Balanced for Mobile */}
+                                <div className="grid grid-cols-3 gap-2 md:gap-8 mb-8">
                                     {[
                                         {
                                             id: "all",
@@ -619,16 +619,18 @@ export default function OwnerDashboard() {
                                         <button
                                             key={card.id}
                                             onClick={() => { setStatusFilter(card.id); setSelectedShopId(null); }}
-                                            className={`flex items-center justify-between py-5 md:py-10 px-4 md:px-10 min-w-[140px] md:min-w-0 rounded-2xl md:rounded-[32px] border transition-all hover:shadow-xl group relative overflow-hidden shrink-0 
+                                            className={`flex items-center justify-center py-4 md:py-10 px-2 md:px-10 rounded-2xl md:rounded-[32px] border transition-all hover:shadow-xl group relative overflow-hidden w-full
                                                 ${statusFilter === card.id && !selectedShopId ? `${card.bg} ${card.activeBorder} shadow-sm border-2` : `${card.bg} ${card.border}`}
                                             `}
                                             style={{ color: card.color }}
                                         >
-                                            <div className="flex items-center gap-3 md:gap-6 relative z-10">
-                                                <span className={`text-2xl md:text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
-                                                <span className={`text-[10px] md:text-[20px] font-medium opacity-80`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
+                                            <div className="flex items-center gap-1.5 md:gap-6 relative z-10 w-full justify-center">
+                                                <span className={`text-[16px] md:text-6xl font-bold tracking-tighter leading-none shrink-0`}>{card.count}</span>
+                                                <span className={`text-[16px] md:text-[20px] font-medium opacity-80 whitespace-nowrap`}>
+                                                    {card.count === 1 ? card.label : `${card.label}s`}
+                                                </span>
                                             </div>
-                                            <ChevronRight className={`w-4 h-4 md:w-8 md:h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
+                                            <ChevronRight className={`hidden md:block w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
                                         </button>
                                     ))}
                                 </div>
