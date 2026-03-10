@@ -441,20 +441,66 @@ export default function OwnerDashboard() {
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                                 {/* Left Side: Banner + Stats (span 2) */}
                                 <div className="lg:col-span-2 flex flex-col gap-8">
-                                    {/* Welcome Banner */}
-                                    <div className="bg-[#7B1113] rounded-[40px] md:rounded-[56px] p-10 md:p-16 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[255px] md:min-h-[300px] flex-1">
+                                    {/* Welcome Banner - Always top */}
+                                    <div className="bg-[#7B1113] rounded-[40px] md:rounded-[56px] p-10 md:p-16 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[255px] md:min-h-[300px] flex-none">
                                         <div className="relative z-10 space-y-4 md:space-y-6">
-
-                                            <h2 className="text-4xl md:text-8xl font-normal tracking-tighter leading-tight md:leading-none text-white transition-transform group-hover:scale-[1.01]">Welcome, {user?.name?.split(' ')[0] || 'Executive'}</h2>
-                                            <p className="text-white/70 text-[14px] font-medium max-w-md leading-relaxed">
+                                            <h2 className="text-[35px] md:text-8xl font-normal tracking-tighter leading-tight md:leading-none text-white transition-transform group-hover:scale-[1.01]">Welcome, {user?.name?.split(' ')[0] || 'Executive'}</h2>
+                                            <p className="text-white/70 text-[14px] font-normal max-w-md leading-relaxed">
                                                 Manage your laundry network with real-time analytics and compliance tracking.
                                             </p>
                                         </div>
                                         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-20 -mt-20 blur-[100px] transition-all group-hover:bg-white/20" />
                                     </div>
 
-                                    {/* Dashboard Statistics Subgrid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
+                                    {/* Mobile Stats Grid - 2x2 visible only on mobile */}
+                                    <div className="grid grid-cols-2 gap-4 lg:hidden">
+                                        {/* Total Shops (Mobile version) */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "all" ? "border-[#1A237E]/60 shadow-md" : "border-[#1A237E]/25"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "all" ? "bg-[#1A237E]/20" : "bg-[#1A237E]/10"}`}>
+                                                <Store className="w-5 h-5 text-[#1A237E]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#1A237E]">{shops.length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-0.5">TOTAL SHOPS</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Approved (Mobile version) */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("approved"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "approved" ? "border-[#1A6B1A]/60 shadow-md" : "border-[#1A6B1A]/25"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "approved" ? "bg-[#1A6B1A]/20" : "bg-[#1A6B1A]/10"}`}>
+                                                <CheckCircle className="w-5 h-5 text-[#1A6B1A]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#1A6B1A]">{shops.filter(s => s.permitStatus === "approved").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">APPROVED</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Rejected (Mobile version) */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("rejected"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "rejected" ? "border-[#8B1A1A]/60 shadow-md" : "border-[#8B1A1A]/25"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "rejected" ? "bg-[#8B1A1A]/20" : "bg-[#8B1A1A]/10"}`}>
+                                                <XCircle className="w-5 h-5 text-[#8B1A1A]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#8B1A1A]">{shops.filter(s => s.permitStatus === "rejected").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">REJECTED</p>
+                                            </div>
+                                        </button>
+
+                                        {/* Pending (Mobile version) */}
+                                        <button onClick={() => { setSidebarTab("listings"); setStatusFilter("pending"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "pending" ? "border-[#555]/60 shadow-md" : "border-[#555]/20"}`}>
+                                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "pending" ? "bg-[#555]/20" : "bg-[#555]/10"}`}>
+                                                <Clock className="w-5 h-5 text-[#555]" />
+                                            </div>
+                                            <div>
+                                                <h3 className="text-4xl font-black tracking-tighter text-[#3D3D3D]">{shops.filter(s => s.permitStatus === "pending").length}</h3>
+                                                <p className="text-[14px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">PENDING</p>
+                                            </div>
+                                        </button>
+                                    </div>
+
+                                    {/* Desktop Statistics Subgrid - Visible only on desktop */}
+                                    <div className="hidden lg:grid grid-cols-3 gap-4 lg:gap-8 items-stretch">
                                         {/* Approved */}
                                         <button onClick={() => { setSidebarTab("listings"); setStatusFilter("approved"); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "approved" ? "border-[#1A6B1A]/60 shadow-md" : "border-[#1A6B1A]/25"}`}>
                                             <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "approved" ? "bg-[#1A6B1A]/20" : "bg-[#1A6B1A]/10"}`}>
@@ -492,8 +538,8 @@ export default function OwnerDashboard() {
 
                                 {/* Right Column: Total Shops + Notification Center (span 1) */}
                                 <div className="flex flex-col gap-8 h-full">
-                                    {/* Total Shops Card */}
-                                    <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }} className={`rounded-[28px] p-8 md:p-10 bg-white border-2 flex flex-col gap-4 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "all" ? "border-[#1A237E]/60 shadow-md" : "border-[#1A237E]/25"}`}>
+                                    {/* Total Shops Card - HIDDEN on mobile because it's in the 2x2 grid above */}
+                                    <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }} className={`hidden lg:flex rounded-[28px] p-8 md:p-10 bg-white border-2 flex-col gap-4 text-left transition-all duration-200 hover:shadow-md ${statusFilter === "all" ? "border-[#1A237E]/60 shadow-md" : "border-[#1A237E]/25"}`}>
                                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center transition-colors ${statusFilter === "all" ? "bg-[#1A237E]/20" : "bg-[#1A237E]/10"}`}>
                                             <Store className="w-6 h-6 text-[#1A237E]" />
                                         </div>
@@ -505,7 +551,7 @@ export default function OwnerDashboard() {
 
                                     <div className="bg-white rounded-[32px] md:rounded-[56px] border border-black/[0.04] shadow-sm flex-1 flex flex-col p-8 md:p-10 pb-1 overflow-hidden">
                                         <div className="flex items-center justify-between mb-8">
-                                            <h3 className="text-[22px] font-medium text-[#1D1D1F] tracking-tighter">Notification center</h3>
+                                            <h3 className="text-[16px] md:text-[22px] font-medium text-[#1D1D1F] tracking-tighter">Notification center</h3>
                                         </div>
 
                                         {/* Filter Tabs - Inspired by AI Notification Center */}
