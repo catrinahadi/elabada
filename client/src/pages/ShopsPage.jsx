@@ -697,7 +697,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                           </div>
                           <div>
                             <p className="text-sm font-black text-[#1D1D1F]">{info.label}</p>
-                            <p className="text-[10px] font-bold text-[#1D1D1F]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
+                            <p className="text-[10px] font-normal text-[#1D1D1F]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
                           </div>
                         </div>
                         <div className="text-right">

@@ -681,7 +681,6 @@ export default function OwnerDashboard() {
                                                     {card.label}
                                                 </span>
                                             </div>
-                                            <ChevronRight className={`hidden md:block w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10 ${card.text}`} />
                                         </button>
                                     ))}
                                 </div>
@@ -740,7 +739,9 @@ export default function OwnerDashboard() {
                                                             <div className="flex items-center gap-1.5 mb-1">
                                                                 <h4 className="text-[13px] md:text-[16px] font-bold text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
                                                                 {shop.permitStatus === 'approved' && (
-                                                                    <CheckCircle className="w-3.5 h-3.5 text-[#228B22]" />
+                                                                    <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
+                                                                        <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
+                                                                    </div>
                                                                 )}
                                                             </div>
                                                             <div className="flex items-center gap-1 text-[#8E8E93]">
@@ -761,7 +762,7 @@ export default function OwnerDashboard() {
 
                                                     <div className="mt-auto pt-2 flex items-center justify-between">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[14px] md:text-[18px] font-black text-[#7B1113] tracking-tighter">₱{shop.price}<span className="text-[10px] font-bold ml-0.5 opacity-80">/kg</span></span>
+                                                            <span className="text-[14px] md:text-[18px] font-normal text-[#7B1113] tracking-tighter">₱{shop.price}<span className="text-[10px] font-normal ml-0.5 opacity-80">/kg</span></span>
                                                         </div>
                                                     </div>
 
