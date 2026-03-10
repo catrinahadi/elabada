@@ -10,7 +10,7 @@ import {
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
-  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu,
+  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
   Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
@@ -779,6 +779,7 @@ export default function ShopsPage() {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [activeImageGallery, setActiveImageGallery] = useState(null); // { images: [], index: 0 }
+  const [isMapSheetExpanded, setIsMapSheetExpanded] = useState(false);
 
 
   // Detect actual user location on mount
@@ -1024,12 +1025,14 @@ export default function ShopsPage() {
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
         {/* Mobile Navbar Header */}
-        <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7] border-b border-black/[0.05] shrink-0 z-50">
-          <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-[#1D1D1F]">
-            <Menu className="w-6 h-6" />
-          </button>
-          <div className="w-6" /> {/* Spacer */}
-        </div>
+        {sidebarTab !== "map" && (
+          <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7] border-b border-black/[0.05] shrink-0 z-50">
+            <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-[#1D1D1F]">
+              <Menu className="w-6 h-6" />
+            </button>
+            <div className="w-6" /> {/* Spacer */}
+          </div>
+        )}
 
         {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
@@ -1423,7 +1426,7 @@ export default function ShopsPage() {
               </MapContainer>
             </div>
 
-            <div className="absolute inset-0 z-10 pointer-events-none p-4 md:p-10 flex flex-col">
+            <div className="absolute inset-0 z-10 pointer-events-none p-4 pt-6 md:p-10 flex flex-col">
               <div className="flex flex-col md:flex-row items-stretch md:items-start justify-between pointer-events-auto gap-4">
                 <div className="flex items-center gap-4 md:gap-6">
                   <button
@@ -1454,7 +1457,9 @@ export default function ShopsPage() {
                 </div>
               </div>
 
-              <div className={`mt-auto md:mt-6 self-center md:self-end pointer-events-none w-full md:w-[420px] max-h-[50%] md:max-h-[85%] flex flex-col transition-all duration-500 ${activeRouteShopId ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}`}>
+              <div className={`mt-auto md:mt-6 self-center md:self-end pointer-events-none w-full md:w-[420px] max-h-[85vh] md:max-h-[85%] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] z-[40]
+                ${activeRouteShopId ? 'translate-y-[calc(100%-120px)] md:translate-y-0' : (isMapSheetExpanded ? 'translate-y-0' : 'translate-y-[calc(100%-80px)] md:translate-y-0')}
+              `}>
                 {(() => {
                   const query = mapSearchQuery.toLowerCase().trim();
                   const filtered = query
@@ -1462,76 +1467,104 @@ export default function ShopsPage() {
                     : rankedShops;
                   return (
                     <>
-                      <div className="px-8 pb-10 pointer-events-auto relative">
-                        <div className="absolute -inset-x-24 -inset-y-16 bg-white opacity-80 blur-[100px] rounded-full -z-10 pointer-events-none" />
-                        <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none">{filtered.length} Shops Around You</h3>
+                      <div className="px-6 pb-6 pointer-events-auto relative bg-white/95 backdrop-blur-xl rounded-t-[40px] md:rounded-t-none md:bg-transparent md:backdrop-filter-none border-t border-black/[0.05] md:border-t-0 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] md:shadow-none">
+                        <div className="md:hidden flex flex-col items-center py-3 mb-2" onClick={() => setIsMapSheetExpanded(!isMapSheetExpanded)}>
+                          <div className="w-12 h-1.5 bg-black/10 rounded-full mb-3" />
+                          <button className="text-[#1D1D1F] transition-transform duration-300" style={{ transform: isMapSheetExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                            <ChevronUp className="w-6 h-6" />
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none mt-2 md:mt-0">{filtered.length} Shops Around You</h3>
+                          {activeRouteShopId && (
+                            <button
+                              onClick={() => { setActiveRouteShopId(null); setIsMapSheetExpanded(true); }}
+                              className="md:hidden text-[12px] font-bold text-[#7B1113]"
+                            >
+                              Show List
+                            </button>
+                          )}
+                        </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto">
-                        <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-5 no-scrollbar pointer-events-auto">
-                          {filtered.map((s, i) => {
-                            const isActive = activeRouteShopId === s.id;
-                            return (
-                              <div
-                                key={s.id}
-                                onClick={() => {
-                                  setActiveRouteShopId(isActive ? null : s.id);
-                                }}
-                                className={`relative p-7 rounded-[40px] bg-white border transition-all duration-300 cursor-pointer ${isActive ? 'border-[#014421] ring-2 ring-[#014421]/20 shadow-2xl shadow-[#014421]/15 z-10' : 'border-black/[0.1] hover:border-black/20'}`}
-                              >
-                                <div className="flex items-start gap-6">
-                                  {/* Left Side: Info */}
-                                  <div className="flex-1 min-w-0">
-                                    <div className="flex items-start gap-4">
-                                      <span className="text-[14px] font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2">
-                                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
-                                          {s.permitStatus === 'approved' && (
-                                            <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
-                                              <Check className="w-3 h-3 text-white stroke-[4]" />
+                      <div className={`flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto bg-white/95 backdrop-blur-xl md:bg-transparent md:backdrop-filter-none transition-all duration-500 ${activeRouteShopId && !isMapSheetExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
+                        <div className="px-4 pb-8 space-y-5">
+                          {filtered
+                            .sort((a, b) => {
+                              if (activeRouteShopId === a.id) return -1;
+                              if (activeRouteShopId === b.id) return 1;
+                              return 0;
+                            })
+                            .map((s, i) => {
+                              const isActive = activeRouteShopId === s.id;
+                              if (activeRouteShopId && !isActive && !isMapSheetExpanded) return null;
+
+                              return (
+                                <div
+                                  key={s.id}
+                                  onClick={() => {
+                                    if (isActive && !isMapSheetExpanded) {
+                                      setIsMapSheetExpanded(true);
+                                      return;
+                                    }
+                                    setActiveRouteShopId(isActive ? null : s.id);
+                                    if (!isActive) setIsMapSheetExpanded(false);
+                                  }}
+                                  className={`relative p-5 md:p-7 rounded-[32px] md:rounded-[40px] bg-white border transition-all duration-300 cursor-pointer ${isActive ? 'border-[#014421] ring-2 ring-[#014421]/20 shadow-2xl z-10' : 'border-black/[0.1] hover:border-black/20'}`}
+                                >
+                                  <div className="flex items-start gap-6">
+                                    {/* Left Side: Info */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start gap-4">
+                                        <span className="text-[14px] font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
+                                        <div className="flex-1 min-w-0">
+                                          <div className="flex items-center gap-2">
+                                            <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                                            {s.permitStatus === 'approved' && (
+                                              <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
+                                                <Check className="w-3 h-3 text-white stroke-[4]" />
+                                              </div>
+                                            )}
+                                          </div>
+
+                                        </div>
+                                      </div>
+
+                                      <div className="mt-3 space-y-2">
+                                        <div className="flex items-center gap-1.5">
+                                          <div className="flex items-center gap-0.5">
+                                            {[...Array(5)].map((_, idx) => (
+                                              <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                            ))}
+                                          </div>
+                                          <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
+                                        </div>
+
+                                        <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
+                                          <div className="flex items-center gap-6">
+                                            <div className="flex items-center gap-2">
+                                              <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
                                             </div>
-                                          )}
-                                        </div>
-
-                                      </div>
-                                    </div>
-
-                                    <div className="mt-3 space-y-2">
-                                      <div className="flex items-center gap-1.5">
-                                        <div className="flex items-center gap-0.5">
-                                          {[...Array(5)].map((_, idx) => (
-                                            <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
-                                          ))}
-                                        </div>
-                                        <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
-                                      </div>
-
-                                      <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-                                        <div className="flex items-center gap-6">
-                                          <div className="flex items-center gap-2">
-                                            <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
+                                            <div className="flex items-center gap-2">
+                                              <Clock className="w-4 h-4 text-[#1D1D1F]" />
+                                              <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                            </div>
                                           </div>
-                                          <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4 text-[#1D1D1F]" />
-                                            <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
+                                            {(s.distance || 0).toFixed(1)} km
                                           </div>
                                         </div>
                                       </div>
-                                      <div className="flex items-center gap-2">
-                                        <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                          {(s.distance || 0).toFixed(1)} km
-                                        </div>
-                                      </div>
                                     </div>
-                                  </div>
 
-                                  <div className="w-32 h-32 rounded-[32px] overflow-hidden shrink-0 shadow-inner">
-                                    <img src={s.image} className="w-full h-full object-cover" alt={s.name} />
+                                    <div className="w-32 h-32 rounded-[32px] overflow-hidden shrink-0 shadow-inner">
+                                      <img src={s.image} className="w-full h-full object-cover" alt={s.name} />
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            );
-                          })}
+                              );
+                            })}
                         </div>
                       </div>
                     </>
