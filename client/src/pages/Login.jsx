@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Eye, EyeOff, ArrowRight, ShieldCheck, User, Lock } from "lucide-react";
@@ -13,6 +13,13 @@ export default function Login() {
     const [showPw, setShowPw] = useState(false);
     const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
+
+    // Clear fields when role changes
+    useEffect(() => {
+        setUsername("");
+        setPassword("");
+        setError("");
+    }, [selectedRole]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -61,12 +68,7 @@ export default function Login() {
                             <button
                                 key={r.key}
                                 type="button"
-                                onClick={() => {
-                                    setSelectedRole(r.key);
-                                    setUsername("");
-                                    setPassword("");
-                                    setError("");
-                                }}
+                                onClick={() => setSelectedRole(r.key)}
                                 className={`flex-1 py-3 rounded-xl text-[14px] font-normal transition-all ${selectedRole === r.key
                                     ? "bg-white text-[#014421] shadow-sm"
                                     : "text-[#8E8E93] hover:text-[#1D1D1F]"
