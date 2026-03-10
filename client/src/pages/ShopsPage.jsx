@@ -118,7 +118,6 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [images, setImages] = useState([]);
-  const [previews, setPreviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef(null);
@@ -136,14 +135,17 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
       return;
     }
 
-    setImages(prev => [...prev, ...files].slice(0, 3));
-    const newPreviews = files.map(file => URL.createObjectURL(file));
-    setPreviews(prev => [...prev, ...newPreviews].slice(0, 3));
+    files.forEach(file => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImages(prev => [...prev, reader.result].slice(0, 3));
+      };
+      reader.readAsDataURL(file);
+    });
   };
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
-    setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleTagClick = (tag) => {
@@ -155,28 +157,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
     try {
-      let uploadedImageUrls = [];
-
-      if (images.length > 0) {
-        const formData = new FormData();
-        images.forEach(image => {
-          formData.append('images', image);
-        });
-
-        const uploadRes = await api.post('/upload/images', formData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        uploadedImageUrls = uploadRes.data.urls;
-      }
-
-      await onPosted(shopId, {
-        rating,
-        comment,
-        reviewerName: user?.name || "Verified Customer",
-        images: uploadedImageUrls,
-        userId: user?._id || user?.id
-      });
-
+      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images, userId: user?._id || user?.id });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -251,7 +232,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
         <div className="space-y-3 px-2">
           <p className="text-[14px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
           <div className="flex gap-4">
-            {previews.map((img, idx) => (
+            {images.map((img, idx) => (
               <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
                 <img src={img} className="w-full h-full object-cover" alt="" />
                 <button
@@ -1248,7 +1229,7 @@ export default function ShopsPage() {
                     <div className="px-2 py-3 space-y-3 flex-1 flex flex-col">
                       <div className="flex justify-between items-center gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate">{s.name}</h4>
+                          <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate">{s.name}</h4>
                           {s.permitStatus === 'approved' && (
                             <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
                               <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
@@ -1423,7 +1404,7 @@ export default function ShopsPage() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 overflow-hidden">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <h4 className="text-[14px] font-[950] text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal">{s.name}</h4>
+                                    <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal">{s.name}</h4>
                                     {s.permitStatus === 'approved' && (
                                       <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
                                         <Check className="w-3 h-3 text-white stroke-[4]" />
@@ -1612,10 +1593,10 @@ export default function ShopsPage() {
                                     {/* Left Side: Info */}
                                     <div className="flex-1 min-w-0">
                                       <div className="flex items-start gap-4">
-                                        <span className="text-[14px] font-[950] text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
+                                        <span className="text-[14px] font-normal text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
                                         <div className="flex-1 min-w-0">
                                           <div className="flex items-center gap-2">
-                                            <h4 className="text-[14px] font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                                            <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
                                             {s.permitStatus === 'approved' && (
                                               <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
                                                 <Check className="w-3 h-3 text-white stroke-[4]" />

@@ -144,15 +144,14 @@ export default function AdminDashboard() {
                 </div>
 
                 <nav className="flex-1 space-y-3">
-                    <div className="pb-3 px-4 text-[10px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">System Engine</div>
-                    <button onClick={() => setIsSidebarOpen(false)} className="sidebar-link w-full active bg-[#014421] text-white shadow-lg shadow-[#014421]/20 text-[14px] font-normal">
-                        <LayoutDashboard className="w-5 h-5" /> Overview
+                    <button onClick={() => setIsSidebarOpen(false)} className="w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group text-white bg-[#014421] shadow-lg shadow-[#014421]/20">
+                        <LayoutDashboard className="w-5 h-5 text-white" /> Overview
                     </button>
                 </nav>
 
                 <div className="mt-auto pt-8 border-t border-black/[0.05]">
-                    <button onClick={handleLogout} className="sidebar-link w-full text-[#800000] hover:bg-[#80000008] transition-colors text-[14px] font-normal">
-                        <LogOut className="w-5 h-5" /> Log Out
+                    <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#800000] hover:bg-[#800000]/[0.05] transition-all flex items-center gap-4 text-[14px] font-normal">
+                        <LogOut className="w-5 h-5" /> Log out
                     </button>
                 </div>
             </aside>
@@ -164,7 +163,7 @@ export default function AdminDashboard() {
                         <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-[#1D1D1F]">
                             <Menu className="w-6 h-6" />
                         </button>
-                        <h1 className="text-xl md:text-3xl font-black text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
+                        <h1 className="text-xl md:text-3xl font-normal text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
                     </div>
                     <div className="w-8" /> {/* Spacer */}
                 </header>
@@ -182,7 +181,7 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-black tracking-tighter text-[#3D3D3D]">{pendingShops.length}</h3>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">Pending</p>
+                                <p className="text-[14px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">PENDING</p>
                             </div>
                         </button>
                         {/* Approved */}
@@ -194,7 +193,7 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-black tracking-tighter text-[#1A6B1A]">{approvedShops.length}</h3>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">Approved</p>
+                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">APPROVED</p>
                             </div>
                         </button>
                         {/* Rejected */}
@@ -206,7 +205,7 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-black tracking-tighter text-[#8B1A1A]">{rejectedShops.length}</h3>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">Rejected</p>
+                                <p className="text-[14px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">REJECTED</p>
                             </div>
                         </button>
                         {/* Users */}
@@ -216,7 +215,7 @@ export default function AdminDashboard() {
                             </div>
                             <div>
                                 <h3 className="text-4xl font-black tracking-tighter text-[#1A237E]">{stats.users?.total || 0}</h3>
-                                <p className="text-[9px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-0.5">Users</p>
+                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-0.5">USERS</p>
                             </div>
                         </div>
                     </div>
@@ -249,9 +248,9 @@ export default function AdminDashboard() {
                                     >
                                         <div className="flex items-center justify-between">
                                             <div className="flex-1 min-w-0">
-                                                <h4 className="text-base font-black text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
-                                                <p className="text-[10px] font-bold text-[#1D1D1F] mt-0.5 flex items-center gap-1">
-                                                    <MapPin className="w-3 h-3 shrink-0" /> {shop.address}
+                                                <h4 className="text-[14px] font-normal text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
+                                                <p className="text-[14px] font-normal text-[#1D1D1F] mt-0.5 flex items-center gap-1">
+                                                    <MapPin className="w-4 h-4 shrink-0" /> {shop.address}
                                                 </p>
                                             </div>
                                             <ChevronRight className={`w-5 h-5 ${c.chevron} shrink-0 ml-4 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
@@ -261,24 +260,22 @@ export default function AdminDashboard() {
                                             <div className={`mt-5 pt-5 border-t ${c.sep} flex flex-col gap-4`} onClick={e => e.stopPropagation()}>
                                                 {/* Vertical details */}
                                                 <div className="flex flex-col gap-2">
-                                                    <p className="text-[8px] font-black text-[#1D1D1F] uppercase tracking-widest">Details</p>
-                                                    <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                                                        <Calendar className="w-3 h-3 text-[#003366] shrink-0" />
-                                                        {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
+                                                    <p className="text-[14px] font-normal text-[#1D1D1F]">
+                                                        <span className="opacity-60">Date:</span> {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
                                                     </p>
                                                     {shop.ownerName && (
-                                                        <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                                                            <Users className="w-3 h-3 text-[#003366] shrink-0" /> {shop.ownerName}
+                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
+                                                            <span className="opacity-60">Shop Owner:</span> {shop.ownerName}
                                                         </p>
                                                     )}
                                                     {shop.price && (
-                                                        <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                                                            <span className="text-[#003366] font-black text-xs shrink-0">₱</span> ₱{shop.price}/kg
+                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
+                                                            <span className="opacity-60">Price:</span> ₱{shop.price}/kg
                                                         </p>
                                                     )}
                                                     {shop.turnaroundTime && (
-                                                        <p className="text-[11px] font-bold text-[#1D1D1F] flex items-center gap-1.5">
-                                                            <Clock className="w-3 h-3 text-[#003366] shrink-0" /> {shop.turnaroundTime} hr turnaround
+                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
+                                                            <span className="opacity-60">Turnaround time:</span> {shop.turnaroundTime} hr
                                                         </p>
                                                     )}
                                                 </div>
