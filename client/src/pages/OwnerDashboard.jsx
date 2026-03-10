@@ -15,7 +15,7 @@ import { useAuth } from "../context/AuthContext";
 import api from "../services/api";
 import {
     LayoutDashboard, Store, MessageSquare,
-    LogOut, ChevronRight,
+    LogOut, ChevronRight, ArrowLeft,
     TrendingUp, Star, MoreVertical,
     Edit3, Trash2, ArrowUpRight, Clock,
     FileText, Check, MapPin, XCircle, CheckCircle, Plus,
@@ -555,7 +555,62 @@ export default function OwnerDashboard() {
                         )}
 
                         {sidebarTab === "listings" && (
-                            <div className="space-y-8 animate-fadeUp">
+                            <div className="space-y-12 animate-fadeUp">
+                                <div className="flex items-center mb-8">
+                                    <button
+                                        onClick={() => { setSidebarTab("overview"); setStatusFilter("all"); }}
+                                        className="text-[#1D1D1F] flex items-center justify-center transition-all active:scale-95 p-2"
+                                    >
+                                        <ArrowLeft className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                {/* Filter Grid */}
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    {[
+                                        {
+                                            id: "all",
+                                            label: "Total Shop",
+                                            count: shops.length,
+                                            bg: "bg-blue-950/[0.03]",
+                                            border: "border-blue-950/10",
+                                            text: "text-blue-950",
+                                            accent: "text-blue-950/30"
+                                        },
+                                        {
+                                            id: "pending",
+                                            label: "Pending shop",
+                                            count: shops.filter(s => s.permitStatus === "pending").length,
+                                            bg: "bg-[#7B1113]/[0.03]",
+                                            border: "border-[#7B1113]/10",
+                                            text: "text-[#7B1113]",
+                                            accent: "text-[#7B1113]/30"
+                                        },
+                                        {
+                                            id: "approved",
+                                            label: "Approved shop",
+                                            count: shops.filter(s => s.permitStatus === "approved").length,
+                                            bg: "bg-[#228B22]/[0.03]",
+                                            border: "border-[#228B22]/10",
+                                            text: "text-[#228B22]",
+                                            accent: "text-[#228B22]/30"
+                                        }
+                                    ].map(card => (
+                                        <button
+                                            key={card.id}
+                                            onClick={() => setStatusFilter(card.id)}
+                                            className={`flex items-center justify-between p-10 rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden ${statusFilter === card.id ? 'ring-2 ring-offset-4 ring-current' : ''}`}
+                                            style={{ color: card.id === 'all' ? '#172554' : card.id === 'pending' ? '#7B1113' : '#228B22' }}
+                                        >
+                                            <div className="flex items-center gap-6 relative z-10">
+                                                <span className={`text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
+                                                <span className={`text-[20px] font-medium`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
+                                            </div>
+                                            <ChevronRight className={`w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
+                                        </button>
+                                    ))}
+                                </div>
+
                                 {loadingShops ? (
                                     <div className="flex items-center justify-center h-64">
                                         <Loader className="w-8 h-8 animate-spin text-[#014421]" />
@@ -657,23 +712,35 @@ export default function OwnerDashboard() {
                         )}
 
                         {sidebarTab === "notifications" && (
-                            <div className="bg-white rounded-[48px] p-12 border border-black/[0.04] shadow-sm animate-fadeUp">
-                                <h2 className="text-3xl font-medium text-[#1D1D1F] mb-8 tracking-tighter">All notifications</h2>
-                                <div className="space-y-6">
-                                    {notifications.length === 0 ? (
-                                        <p className="text-sm text-[#8E8E93]">No notifications yet.</p>
-                                    ) : notifications.map(notif => (
-                                        <div
-                                            key={notif.id}
-                                            onClick={() => setSidebarTab("listings")}
-                                            className="p-10 rounded-[42px] bg-[#F8F9FA] flex justify-between items-center gap-8 group hover:bg-white border border-black/[0.02] shadow-sm hover:shadow-2xl hover:shadow-black/[0.06] hover:-translate-y-1 transition-all cursor-pointer"
-                                        >
-                                            <p className="text-[16px] font-medium text-[#1D1D1F] leading-relaxed max-w-3xl">
-                                                {notif.description}
-                                            </p>
-                                            <span className="text-[13px] font-medium text-[#8E8E93] shrink-0">{notif.time}</span>
-                                        </div>
-                                    ))}
+                            <div className="space-y-8 animate-fadeUp">
+                                <div className="flex items-center gap-6 mb-12">
+                                    <button
+                                        onClick={() => { setSidebarTab("overview"); }}
+                                        className="text-[#1D1D1F] flex items-center justify-center transition-all active:scale-95 p-2"
+                                    >
+                                        <ArrowLeft className="w-6 h-6" />
+                                    </button>
+                                    <h2 className="text-3xl font-normal text-[#1D1D1F] tracking-tighter">
+                                        All notifications
+                                    </h2>
+                                </div>
+                                <div className="bg-white rounded-[48px] p-12 border border-black/[0.04] shadow-sm">
+                                    <div className="space-y-6">
+                                        {notifications.length === 0 ? (
+                                            <p className="text-sm text-[#8E8E93]">No notifications yet.</p>
+                                        ) : notifications.map(notif => (
+                                            <div
+                                                key={notif.id}
+                                                onClick={() => setSidebarTab("listings")}
+                                                className="p-10 rounded-[42px] bg-[#F8F9FA] flex justify-between items-center gap-8 group hover:bg-white border border-black/[0.02] shadow-sm hover:shadow-2xl hover:shadow-black/[0.06] hover:-translate-y-1 transition-all cursor-pointer"
+                                            >
+                                                <p className="text-[16px] font-medium text-[#1D1D1F] leading-relaxed max-w-3xl">
+                                                    {notif.description}
+                                                </p>
+                                                <span className="text-[13px] font-medium text-[#8E8E93] shrink-0">{notif.time}</span>
+                                            </div>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         )}
