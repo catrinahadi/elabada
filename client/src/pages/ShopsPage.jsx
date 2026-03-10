@@ -1470,9 +1470,6 @@ export default function ShopsPage() {
                       <div className="px-6 pb-6 pointer-events-auto relative bg-white/95 backdrop-blur-xl rounded-t-[40px] md:rounded-t-none md:bg-transparent md:backdrop-filter-none border-t border-black/[0.05] md:border-t-0 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] md:shadow-none">
                         <div className="md:hidden flex flex-col items-center py-3 mb-2" onClick={() => setIsMapSheetExpanded(!isMapSheetExpanded)}>
                           <div className="w-12 h-1.5 bg-black/10 rounded-full mb-3" />
-                          <button className="text-[#1D1D1F] transition-transform duration-300" style={{ transform: isMapSheetExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }}>
-                            <ChevronUp className="w-6 h-6" />
-                          </button>
                         </div>
                         <div className="flex items-center justify-between">
                           <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none mt-2 md:mt-0">{filtered.length} Shops Around You</h3>
