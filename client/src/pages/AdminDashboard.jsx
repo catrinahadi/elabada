@@ -74,8 +74,12 @@ export default function AdminDashboard() {
     const [expandedShops, setExpandedShops] = useState(new Set());
     const [filterStatus, setFilterStatus] = useState("pending");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    const [openDropdownId, setOpenDropdownId] = useState(null);
 
     useEffect(() => {
+        const handleClickOutside = () => setOpenDropdownId(null);
+        window.addEventListener('click', handleClickOutside);
+
         api.get("/admin/shops")
             .then(({ data }) => setShops(data.map(s => ({
                 ...s,
@@ -86,6 +90,8 @@ export default function AdminDashboard() {
         api.get("/admin/stats")
             .then(({ data }) => setStats(data))
             .catch(err => console.error("Failed to load stats:", err.message));
+
+        return () => window.removeEventListener('click', handleClickOutside);
     }, []);
 
     const approvedShops = useMemo(() => shops.filter(s => s.permitStatus === "approved"), [shops]);
@@ -127,185 +133,202 @@ export default function AdminDashboard() {
 
     return (
         <div className="flex bg-[#F8F9FA] min-h-screen text-[#1D1D1F] relative">
-            {/* Mobile Backdrop */}
-            {isSidebarOpen && (
-                <div
-                    className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity"
-                    onClick={() => setIsSidebarOpen(false)}
-                />
-            )}
 
-            {/* Sidebar - Conditional classes for responsiveness */}
-            <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
-                ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
-                <div className="flex items-center gap-4 mb-16 px-2">
-                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
-                    <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
-                </div>
-
-                <nav className="flex-1 space-y-3">
-                    <button onClick={() => setIsSidebarOpen(false)} className="w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group text-white bg-[#014421] shadow-lg shadow-[#014421]/20">
-                        <LayoutDashboard className="w-5 h-5 text-white" /> Overview
-                    </button>
-                </nav>
-
-                <div className="mt-auto pt-8 border-t border-black/[0.05]">
-                    <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#800000] hover:bg-[#800000]/[0.05] transition-all flex items-center gap-4 text-[14px] font-normal">
-                        <LogOut className="w-5 h-5" /> Log out
-                    </button>
-                </div>
-            </aside>
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
-                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl border-b border-black/[0.05] lg:border-none">
+                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-[#1D1D1F]">
-                            <Menu className="w-6 h-6" />
-                        </button>
-                        <h1 className="text-xl md:text-3xl font-normal text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
+                        <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
+                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                     </div>
-                    <div className="w-8" /> {/* Spacer */}
+                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] p-3 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal">
+                        <LogOut className="w-4 h-4" /> Log out
+                    </button>
                 </header>
 
-                <div className="p-6 md:p-12 space-y-8 md:space-y-10 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                <div className="p-6 md:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                    <div className="px-4">
+                        <h2 className="text-4xl font-normal tracking-tight text-[#1D1D1F]">Admin Dashboard</h2>
+                    </div>
 
-                    {/* COMPACT STAT TILES — 4 across */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        {/* Pending */}
-                        <button onClick={() => { setFilterStatus("pending"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "pending" ? "border-[#555]/60 shadow-md" : "border-[#555]/20"
-                            }`}>
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "pending" ? "bg-[#555]/20" : "bg-[#555]/10"
-                                }`}>
-                                <Clock className="w-5 h-5 text-[#555]" />
+                    {/* PREMIUM STAT TILES */}
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 px-4">
+                        {/* Total Establishments */}
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-[#00336610] flex items-center justify-center shadow-inner">
+                                <Store className="w-6 h-6 text-[#003366]" />
                             </div>
                             <div>
-                                <h3 className="text-4xl font-black tracking-tighter text-[#3D3D3D]">{pendingShops.length}</h3>
-                                <p className="text-[14px] font-black uppercase tracking-widest text-[#555]/50 mt-0.5">PENDING</p>
+                                <h3 className="text-5xl font-black tracking-tighter text-[#003366]">{shops.length}</h3>
+                                <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">Total Establishments</p>
                             </div>
-                        </button>
-                        {/* Approved */}
-                        <button onClick={() => { setFilterStatus("approved"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "approved" ? "border-[#1A6B1A]/60 shadow-md" : "border-[#1A6B1A]/25"
-                            }`}>
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "approved" ? "bg-[#1A6B1A]/20" : "bg-[#1A6B1A]/10"
-                                }`}>
-                                <CheckCircle className="w-5 h-5 text-[#1A6B1A]" />
+                        </div>
+                        {/* Active Listings */}
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-[#228B2210] flex items-center justify-center">
+                                <CheckCircle className="w-6 h-6 text-[#228B22]" />
                             </div>
                             <div>
-                                <h3 className="text-4xl font-black tracking-tighter text-[#1A6B1A]">{approvedShops.length}</h3>
-                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A6B1A]/50 mt-0.5">APPROVED</p>
+                                <h3 className="text-5xl font-black tracking-tighter text-[#228B22]">{approvedShops.length}</h3>
+                                <p className="text-[12px] font-bold text-[#228B22] uppercase tracking-[0.1em] mt-1">Active Listings</p>
                             </div>
-                        </button>
-                        {/* Rejected */}
-                        <button onClick={() => { setFilterStatus("rejected"); setExpandedShops(new Set()); }} className={`rounded-[28px] p-6 bg-white border-2 flex flex-col gap-3 text-left transition-all duration-200 hover:shadow-md ${filterStatus === "rejected" ? "border-[#8B1A1A]/60 shadow-md" : "border-[#8B1A1A]/25"
-                            }`}>
-                            <div className={`w-10 h-10 rounded-2xl flex items-center justify-center transition-colors ${filterStatus === "rejected" ? "bg-[#8B1A1A]/20" : "bg-[#8B1A1A]/10"
-                                }`}>
-                                <XCircle className="w-5 h-5 text-[#8B1A1A]" />
+                        </div>
+                        {/* Rejected Requests */}
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-[#80000010] flex items-center justify-center">
+                                <XCircle className="w-6 h-6 text-[#800000]" />
                             </div>
                             <div>
-                                <h3 className="text-4xl font-black tracking-tighter text-[#8B1A1A]">{rejectedShops.length}</h3>
-                                <p className="text-[14px] font-black uppercase tracking-widest text-[#8B1A1A]/50 mt-0.5">REJECTED</p>
+                                <h3 className="text-5xl font-black tracking-tighter text-[#800000]">{rejectedShops.length}</h3>
+                                <p className="text-[12px] font-bold text-[#800000] uppercase tracking-[0.1em] mt-1">Rejected Requests</p>
                             </div>
-                        </button>
-                        {/* Users */}
-                        <div className="rounded-[28px] p-6 bg-white border-2 border-[#1A237E]/25 flex flex-col gap-3">
-                            <div className="w-10 h-10 rounded-2xl flex items-center justify-center bg-[#1A237E]/10">
-                                <Users className="w-5 h-5 text-[#1A237E]" />
+                        </div>
+                        {/* Awaiting Review */}
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
+                            <div className="w-12 h-12 rounded-2xl bg-[#F59E0B15] flex items-center justify-center">
+                                <Clock className="w-6 h-6 text-[#F59E0B]" />
                             </div>
                             <div>
-                                <h3 className="text-4xl font-black tracking-tighter text-[#1A237E]">{stats.users?.total || 0}</h3>
-                                <p className="text-[14px] font-black uppercase tracking-widest text-[#1A237E]/50 mt-0.5">USERS</p>
+                                <h3 className="text-5xl font-black tracking-tighter text-[#F59E0B] font-outfit">{pendingShops.length}</h3>
+                                <p className="text-[12px] font-bold text-[#F59E0B] uppercase tracking-[0.1em] mt-1">Awaiting Review</p>
                             </div>
                         </div>
                     </div>
 
-                    {filteredList.length === 0 ? (
-                        <div className="rounded-[28px] border-2 border-dashed border-black/10 p-16 text-center">
-                            <p className="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-widest">No {filterStatus} shops</p>
+                    <div className="pt-10 space-y-8 px-4">
+                        <div className="space-y-1">
+                            <h2 className="text-3xl font-normal text-[#1D1D1F] tracking-tight">Registry Management</h2>
                         </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
-                            {filteredList.map(shop => {
-                                const isExpanded = expandedShops.has(shop._id);
-                                const toggleExpand = () => setExpandedShops(prev => {
-                                    const next = new Set(prev);
-                                    isExpanded ? next.delete(shop._id) : next.add(shop._id);
-                                    return next;
-                                });
-                                const colors = {
-                                    approved: { border: "border-[#1A6B1A]", activeBorder: "border-[#1A6B1A]/40", dimBorder: "border-[#1A6B1A]/15", sep: "border-[#1A6B1A]/10", chevron: "text-[#1A6B1A]/40" },
-                                    pending: { border: "border-[#555]", activeBorder: "border-[#555]/40", dimBorder: "border-[#555]/15", sep: "border-[#555]/10", chevron: "text-[#555]/40" },
-                                    rejected: { border: "border-[#8B1A1A]", activeBorder: "border-[#8B1A1A]/40", dimBorder: "border-[#8B1A1A]/15", sep: "border-[#8B1A1A]/10", chevron: "text-[#8B1A1A]/40" },
-                                };
-                                const c = colors[filterStatus];
-                                return (
+
+
+                        {/* Shop List Section */}
+                        <div className="space-y-6">
+                            <div className="flex gap-4 mb-4">
+                                {['all', 'pending', 'approved', 'rejected'].map((s) => (
+                                    <button
+                                        key={s}
+                                        onClick={() => setFilterStatus(s)}
+                                        className={`px-8 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 ${filterStatus === s ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
+                                    >
+                                        {s === 'all' ? 'All Registry' : s}
+                                    </button>
+                                ))}
+                            </div>
+
+
+
+                            <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-12">
+                                {/* Table Header */}
+                                <div className="hidden lg:grid grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
+                                    <span>Ref #</span>
+                                    <span>Establishment</span>
+                                    <span>Locale</span>
+                                    <span>Price</span>
+                                    <span>Lead Time</span>
+                                    <span>Timestamp</span>
+                                    <span className="text-right">Actions</span>
+                                </div>
+
+
+                                {filteredList.map((shop, idx) => (
                                     <div
                                         key={shop._id}
-                                        onClick={toggleExpand}
-                                        className={`bg-white rounded-[24px] p-6 border-2 transition-all duration-300 cursor-pointer overflow-hidden ${isExpanded ? `${c.activeBorder} shadow-lg` : `${c.dimBorder} hover:${c.activeBorder} hover:shadow-md`
-                                            }`}
+                                        className="bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
                                     >
-                                        <div className="flex items-center justify-between">
-                                            <div className="flex-1 min-w-0">
-                                                <h4 className="text-[14px] font-normal text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
-                                                <p className="text-[14px] font-normal text-[#1D1D1F] mt-0.5 flex items-center gap-1">
-                                                    <MapPin className="w-4 h-4 shrink-0" /> {shop.address}
-                                                </p>
+                                        <span className="text-[14px] font-normal text-[#1D1D1F]/20 lg:block hidden tracking-tight tabular-nums truncate">
+                                            {(idx + 1).toString().padStart(2, '0')}
+                                        </span>
+
+                                        {/* Establishment */}
+                                        <div className="flex items-center gap-4 min-w-0">
+                                            <div className="w-12 h-12 rounded-2xl bg-[#F8F9FA] flex items-center justify-center shrink-0 border border-black/[0.03]">
+                                                <Store className="w-5 h-5 text-[#1D1D1F]" />
                                             </div>
-                                            <ChevronRight className={`w-5 h-5 ${c.chevron} shrink-0 ml-4 transition-transform duration-300 ${isExpanded ? 'rotate-90' : ''}`} />
+                                            <div className="flex flex-col min-w-0">
+                                                <h4 className="text-[15px] font-normal text-[#1D1D1F] tracking-tight truncate leading-tight">{shop.name}</h4>
+                                                <span className="text-[13px] text-[#8E8E93] truncate">Owner: {shop.ownerName}</span>
+                                            </div>
                                         </div>
 
-                                        {isExpanded && (
-                                            <div className={`mt-5 pt-5 border-t ${c.sep} flex flex-col gap-4`} onClick={e => e.stopPropagation()}>
-                                                {/* Vertical details */}
-                                                <div className="flex flex-col gap-2">
-                                                    <p className="text-[14px] font-normal text-[#1D1D1F]">
-                                                        <span className="opacity-60">Date:</span> {shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}
-                                                    </p>
-                                                    {shop.ownerName && (
-                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
-                                                            <span className="opacity-60">Shop Owner:</span> {shop.ownerName}
-                                                        </p>
-                                                    )}
-                                                    {shop.price && (
-                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
-                                                            <span className="opacity-60">Price:</span> ₱{shop.price}/kg
-                                                        </p>
-                                                    )}
-                                                    {shop.turnaroundTime && (
-                                                        <p className="text-[14px] font-normal text-[#1D1D1F]">
-                                                            <span className="opacity-60">Turnaround time:</span> {shop.turnaroundTime} hr
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                {/* Icon action row */}
-                                                <div className="flex items-center gap-2">
-                                                    <button title="Edit" className="p-2.5 rounded-xl bg-[#F0F4FF] text-[#1A237E] hover:bg-[#1A237E] hover:text-white transition-all">
-                                                        <Edit3 className="w-4 h-4" />
-                                                    </button>
-                                                    {filterStatus !== 'approved' && (
-                                                        <button title="Approve" onClick={() => handleApprove(shop._id)} className="p-2.5 rounded-xl bg-[#E1FFE1] text-[#228B22] hover:bg-[#228B22] hover:text-white transition-all">
-                                                            <CheckCircle className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                    {filterStatus !== 'rejected' && (
-                                                        <button title="Reject" onClick={() => handleReject(shop._id)} className="p-2.5 rounded-xl bg-[#FFF0F0] text-[#FF3B30] hover:bg-[#FF3B30] hover:text-white transition-all">
-                                                            <XCircle className="w-4 h-4" />
-                                                        </button>
-                                                    )}
-                                                </div>
-                                                {/* View Permit — full width */}
-                                                <button onClick={() => setViewingPermit(shop)} className="w-full py-3 rounded-xl bg-[#1D1D1F] text-white hover:bg-[#003366] transition-all text-[9px] font-black uppercase tracking-wider flex items-center justify-center gap-2">
-                                                    <FileText className="w-3.5 h-3.5" /> View permit
-                                                </button>
+                                        {/* Locale */}
+                                        <div className="flex flex-col min-w-0">
+                                            <p className="text-[14px] font-normal text-[#1D1D1F] truncate flex items-center gap-2 opacity-60">
+                                                <MapPin className="w-4 h-4 shrink-0 text-[#8E8E93]" /> {shop.address}
+                                            </p>
+                                        </div>
+
+                                        {/* Price */}
+                                        <div className="flex flex-col">
+                                            <span className="text-[14px] font-normal text-[#1D1D1F]">₱{shop.price || 0}<span className="text-[#8E8E93] text-xs"> /kg</span></span>
+                                        </div>
+
+                                        {/* Lead Time */}
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
+                                                <Clock className="w-4 h-4 text-[#8E8E93]" />
+                                                <span>{shop.turnaroundTime || 0} hrs</span>
                                             </div>
-                                        )}
+                                        </div>
+
+                                        {/* Timestamp */}
+                                        <div className="flex flex-col">
+                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
+                                                <Calendar className="w-4 h-4 text-[#8E8E93]" />
+                                                <span>{shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center gap-4 lg:justify-end w-full lg:w-auto mt-4 lg:mt-0">
+                                            <button
+                                                onClick={() => setViewingPermit(shop)}
+                                                className="h-11 px-6 rounded-[20px] border-2 border-[#003366] text-[#003366] bg-transparent hover:bg-[#003366] hover:text-white transition-all text-[14px] font-normal flex items-center gap-2.5"
+                                            >
+                                                <FileText className="w-4 h-4" /> Review Permit
+                                            </button>
+
+                                            <div className="relative" onClick={e => e.stopPropagation()}>
+                                                <button
+                                                    onClick={() => setOpenDropdownId(openDropdownId === shop._id ? null : shop._id)}
+                                                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-[#F8F9FA] border border-black/[0.05] hover:bg-black hover:text-white ${openDropdownId === shop._id ? 'bg-black text-white' : 'text-[#8E8E93]'}`}
+                                                >
+                                                    <MoreVertical className="w-5 h-5" />
+                                                </button>
+
+                                                {openDropdownId === shop._id && (
+                                                    <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.05] py-3 z-[100] overflow-hidden animate-scaleIn">
+                                                        {(shop.permitStatus === 'pending' || filterStatus === 'all') && (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => { handleApprove(shop._id); setOpenDropdownId(null); }}
+                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#228B22] hover:bg-[#228B22]/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                                >
+                                                                    <CheckCircle className="w-4 h-4" /> Approve Listing
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => { handleReject(shop._id); setOpenDropdownId(null); }}
+                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#800000] hover:bg-[#800000]/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                                >
+                                                                    <XCircle className="w-4 h-4" /> Reject Request
+                                                                </button>
+                                                            </>
+                                                        )}
+                                                        <button
+                                                            onClick={() => { handleDelete(shop._id); setOpenDropdownId(null); }}
+                                                            className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#1D1D1F] hover:bg-black/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                        >
+                                                            <Trash2 className="w-4 h-4" /> Permanently Delete
+                                                        </button>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
                                     </div>
-                                );
-                            })}
+                                ))}
+
+                            </div>
                         </div>
-                    )}
+                    </div>
                 </div>
             </main>
 
