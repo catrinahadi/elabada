@@ -894,6 +894,10 @@ export default function ShopsPage() {
 
   const handleLogout = () => { logout(); navigate("/login"); };
 
+  // unified drag/drop state
+  const [touchDragIndex, setTouchDragIndex] = useState(null);
+  const touchTimer = useRef(null);
+
   const onDragStart = (index) => setDragIndex(index);
   const onDragOver = (e) => e.preventDefault();
   const onDrop = (index) => {
@@ -902,8 +906,68 @@ export default function ShopsPage() {
     const item = newPriorities.splice(dragIndex, 1)[0];
     newPriorities.splice(index, 0, item);
     setPriorities(newPriorities);
-    // Weight ranges are independent — dragging priorities does NOT change them
     setDragIndex(null);
+  };
+
+  const handleTouchStart = (index) => {
+    touchTimer.current = setTimeout(() => {
+      setTouchDragIndex(index);
+      // Vibrate if supported to indicate pick up
+      if (window.navigator && window.navigator.vibrate) {
+        window.navigator.vibrate(50);
+      }
+    }, 400); // 400ms long press
+  };
+
+  const handleTouchMove = (e, index) => {
+    if (touchDragIndex === null) {
+      if (touchTimer.current) clearTimeout(touchTimer.current);
+      return;
+    }
+    // Prevent scrolling while dragging
+    e.preventDefault();
+  };
+
+  const handleTouchEnd = (e, targetIndex) => {
+    if (touchTimer.current) clearTimeout(touchTimer.current);
+
+    if (touchDragIndex !== null) {
+      // Find what element we dropped on
+      const touch = e.changedTouches[0];
+      const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+
+      if (targetElement) {
+        // Look for the closest priority item container
+        const priorityContainer = targetElement.closest('[data-priority-index]');
+        if (priorityContainer) {
+          const dropIndex = parseInt(priorityContainer.getAttribute('data-priority-index'), 10);
+
+          if (!isNaN(dropIndex) && touchDragIndex !== dropIndex) {
+            const newPriorities = [...priorities];
+            const item = newPriorities.splice(touchDragIndex, 1)[0];
+            newPriorities.splice(dropIndex, 0, item);
+            setPriorities(newPriorities);
+            setIsApplied(false);
+          }
+        }
+      }
+      setTouchDragIndex(null);
+    }
+  };
+
+  const handleTouchCancel = () => {
+    if (touchTimer.current) clearTimeout(touchTimer.current);
+    setTouchDragIndex(null);
+  };
+
+  const movePriority = (index, direction) => {
+    if ((direction === -1 && index === 0) || (direction === 1 && index === priorities.length - 1)) return;
+    const newPriorities = [...priorities];
+    const temp = newPriorities[index];
+    newPriorities[index] = newPriorities[index + direction];
+    newPriorities[index + direction] = temp;
+    setPriorities(newPriorities);
+    setIsApplied(false);
   };
 
   // Auto-weights from priority order combined with weight ranges
@@ -951,7 +1015,7 @@ export default function ShopsPage() {
     const query = searchQuery.toLowerCase().trim();
     if (query) {
       result = result.filter(s =>
-        s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query)
+        s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query)
       );
     }
 
@@ -969,13 +1033,13 @@ export default function ShopsPage() {
   const suggestions = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
     if (!query) return [];
-    return rankedShops.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+    return rankedShops.filter(s => s?.name?.toLowerCase().includes(query)).slice(0, 5);
   }, [rankedShops, searchQuery]);
 
   const mapSuggestions = useMemo(() => {
     const query = mapSearchQuery.toLowerCase().trim();
     if (!query) return [];
-    return rankedShops.filter(s => s.name.toLowerCase().includes(query)).slice(0, 5);
+    return rankedShops.filter(s => s?.name?.toLowerCase().includes(query)).slice(0, 5);
   }, [rankedShops, mapSearchQuery]);
 
 
@@ -1052,7 +1116,7 @@ export default function ShopsPage() {
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="w-full h-11 md:h-16 bg-white rounded-xl md:rounded-[24px] border border-black/[0.05] pl-10 md:pl-16 pr-4 text-[10px] md:text-[12px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
                   />
-                  <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-4 h-4 md:w-6 h-6" /></div>
+                  <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 pointer-events-none"><Search className="w-4 h-4 md:w-6 md:h-6" /></div>
                   {searchQuery && suggestions.length > 0 && showSuggestions && (
                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
                       {suggestions.map(s => (
@@ -1076,7 +1140,7 @@ export default function ShopsPage() {
                     </div>
                   )}
                 </div>
-                <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
+                <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none z-0" />
               </div>
               <div className="flex flex-col justify-center gap-3 md:gap-6 py-2">
                 <button onClick={() => setSidebarTab("computation")} className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
@@ -1270,15 +1334,32 @@ export default function ShopsPage() {
                             </div>
                             <div>
                               <p className="text-sm font-bold text-[#1D1D1F] font-outfit">What matters most?</p>
-                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Drag items to reorder them. The item at the top is given the most importance (40%) when calculating your shop recommendations.</p>
+                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Drag items to reorder them on desktop, or long-press and drag on mobile. The item at the top is given the most importance (40%) when calculating your shop recommendations.</p>
                             </div>
                           </div>
                         )}
                       </div>
                       <div className="space-y-4">
                         {priorities.map((key, index) => (
-                          <div key={key} draggable onDragStart={() => onDragStart(index)} onDragOver={onDragOver} onDrop={() => { onDrop(index); setIsApplied(false); }} className="flex items-center justify-between gap-6 bg-[#F8F9FA] p-5 rounded-[36px] border border-black/[0.01] group transition-all hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing">
-                            <div className="flex-1 min-w-0">
+                          <div
+                            key={key}
+                            data-priority-index={index}
+                            draggable
+                            onDragStart={() => onDragStart(index)}
+                            onDragOver={onDragOver}
+                            onDrop={() => { onDrop(index); setIsApplied(false); }}
+                            onTouchStart={() => handleTouchStart(index)}
+                            onTouchMove={(e) => handleTouchMove(e, index)}
+                            onTouchEnd={(e) => handleTouchEnd(e, index)}
+                            onTouchCancel={handleTouchCancel}
+                            className={`flex items-center justify-between gap-6 p-5 rounded-[36px] border border-black/[0.01] group transition-all select-none
+                              ${touchDragIndex === index ? 'bg-white shadow-2xl scale-105 opacity-90 z-50 relative' : 'bg-[#F8F9FA] hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing'}
+                            `}
+                            style={{
+                              touchAction: touchDragIndex !== null ? 'none' : 'auto' // Prevent scrolling only while actively dragging
+                            }}
+                          >
+                            <div className="flex-1 min-w-0 pointer-events-none">
                               <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight font-outfit leading-none whitespace-normal">
                                 {key === 'price' ? (<>Price <span className="text-xs text-[#1D1D1F]">(per kg)</span></>) :
                                   key === 'time' ? 'Turnaround Time' :
@@ -1286,7 +1367,7 @@ export default function ShopsPage() {
                                       key === 'distance' ? (<>Distance <span className="text-xs text-[#1D1D1F]">(km)</span></>) : key}
                               </p>
                             </div>
-                            <span className="text-[14px] font-normal text-[#014421] font-outfit leading-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
+                            <span className="text-[14px] font-normal text-[#014421] font-outfit leading-none pointer-events-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
                           </div>
                         ))}
                         {/* Total row */}
@@ -1463,7 +1544,7 @@ export default function ShopsPage() {
                 {(() => {
                   const query = mapSearchQuery.toLowerCase().trim();
                   const filtered = query
-                    ? rankedShops.filter(s => s.name.toLowerCase().includes(query) || s.address.toLowerCase().includes(query))
+                    ? rankedShops.filter(s => s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query))
                     : rankedShops;
                   return (
                     <>
