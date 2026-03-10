@@ -19,7 +19,7 @@ export default function Login() {
         setError("");
         setLoading(true);
 
-        const result = await login(username.trim(), password);
+        const result = await login(username.trim(), password, selectedRole);
         setLoading(false);
 
         if (!result.ok) {
@@ -61,7 +61,12 @@ export default function Login() {
                             <button
                                 key={r.key}
                                 type="button"
-                                onClick={() => setSelectedRole(r.key)}
+                                onClick={() => {
+                                    setSelectedRole(r.key);
+                                    setUsername("");
+                                    setPassword("");
+                                    setError("");
+                                }}
                                 className={`flex-1 py-3 rounded-xl text-[14px] font-normal transition-all ${selectedRole === r.key
                                     ? "bg-white text-[#014421] shadow-sm"
                                     : "text-[#8E8E93] hover:text-[#1D1D1F]"

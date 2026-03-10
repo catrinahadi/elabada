@@ -66,7 +66,13 @@ export default function Signup() {
                             <button
                                 key={role}
                                 type="button"
-                                onClick={() => setSelectedRole(role)}
+                                onClick={() => {
+                                    setSelectedRole(role);
+                                    setName("");
+                                    setUsername("");
+                                    setPassword("");
+                                    setError("");
+                                }}
                                 className={`flex-1 py-3.5 rounded-xl text-[14px] font-normal transition-all ${selectedRole === role
                                     ? "bg-white text-[#014421] shadow-sm"
                                     : "text-[#8E8E93] hover:text-[#1D1D1F]"

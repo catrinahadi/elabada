@@ -17,9 +17,9 @@ export function AuthProvider({ children }) {
         setLoading(false);
     }, []);
 
-    const login = async (email, password) => {
+    const login = async (email, password, role) => {
         try {
-            const { data } = await api.post("/auth/login", { email, password });
+            const { data } = await api.post("/auth/login", { email, password, role });
             localStorage.setItem("elabada_token", data.token);
             localStorage.setItem("elabada_user", JSON.stringify(data.user));
             setUser(data.user);

@@ -6,9 +6,9 @@ const Customer = require("../models/Customer");
 
 exports.login = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role: requestedRole } = req.body;
 
-        // Perform all role lookups in parallel
+        // Perform lookups in parallel
         const [admin, owner, customer] = await Promise.all([
             Admin.findOne({ email }),
             Owner.findOne({ email }),
@@ -17,6 +17,15 @@ exports.login = async (req, res) => {
 
         let user = admin || owner || customer;
         let role = admin ? "admin" : (owner ? "owner" : (customer ? "customer" : null));
+
+        if (!user) {
+            return res.status(401).json({ message: "Account not found with this email." });
+        }
+
+        // Verify if the found user matches the requested role if provided
+        if (requestedRole && role !== requestedRole) {
+            return res.status(401).json({ message: `Access denied. This account is registered as a ${role}.` });
+        }
 
         if (!user) return res.status(401).json({ message: "Invalid username or password." });
 
