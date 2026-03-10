@@ -287,6 +287,7 @@ export default function OwnerDashboard() {
     const [editingShop, setEditingShop] = useState(null);
     const [submitting, setSubmitting] = useState(false);
     const [statusFilter, setStatusFilter] = useState("all");
+    const [selectedShopId, setSelectedShopId] = useState(null);
     const [readNotifications, setReadNotifications] = useState(() => {
         const saved = localStorage.getItem('owner_read_notifs');
         return saved ? JSON.parse(saved) : [];
@@ -518,7 +519,7 @@ export default function OwnerDashboard() {
                                             ) : notifications.map((notif, idx) => (
                                                 <div
                                                     key={notif.id}
-                                                    onClick={() => { markAsRead(notif.id); setSidebarTab("listings"); }}
+                                                    onClick={() => { markAsRead(notif.id); setSidebarTab("listings"); setSelectedShopId(notif.id); }}
                                                     className="group transition-all cursor-pointer bg-white border border-black/[0.04] shadow-sm hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1 py-8 px-6 rounded-2xl relative overflow-hidden"
                                                 >
                                                     <div className="space-y-3">
@@ -558,7 +559,7 @@ export default function OwnerDashboard() {
                             <div className="space-y-12 animate-fadeUp">
                                 <div className="flex items-center mb-8">
                                     <button
-                                        onClick={() => { setSidebarTab("overview"); setStatusFilter("all"); }}
+                                        onClick={() => { setSidebarTab("overview"); setStatusFilter("all"); setSelectedShopId(null); }}
                                         className="text-[#1D1D1F] flex items-center justify-center transition-all active:scale-95 p-2"
                                     >
                                         <ArrowLeft className="w-6 h-6" />
@@ -598,8 +599,8 @@ export default function OwnerDashboard() {
                                     ].map(card => (
                                         <button
                                             key={card.id}
-                                            onClick={() => setStatusFilter(card.id)}
-                                            className={`flex items-center justify-between p-10 rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden ${statusFilter === card.id ? 'ring-2 ring-offset-4 ring-current' : ''}`}
+                                            onClick={() => { setStatusFilter(card.id); setSelectedShopId(null); }}
+                                            className={`flex items-center justify-between p-10 rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden ${statusFilter === card.id && !selectedShopId ? 'ring-2 ring-offset-4 ring-current' : ''}`}
                                             style={{ color: card.id === 'all' ? '#172554' : card.id === 'pending' ? '#7B1113' : '#228B22' }}
                                         >
                                             <div className="flex items-center gap-6 relative z-10">
@@ -625,7 +626,10 @@ export default function OwnerDashboard() {
                                     </div>
                                 ) : (
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
-                                        {shops.filter(s => statusFilter === "all" ? true : s.permitStatus === statusFilter).map(shop => (
+                                        {shops.filter(s => {
+                                            if (selectedShopId) return s._id === selectedShopId;
+                                            return statusFilter === "all" ? true : s.permitStatus === statusFilter;
+                                        }).map(shop => (
                                             <div key={shop._id} className="bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm hover:shadow-xl transition-all overflow-hidden p-4 group">
                                                 <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-4">
                                                     <img
@@ -731,7 +735,7 @@ export default function OwnerDashboard() {
                                         ) : notifications.map(notif => (
                                             <div
                                                 key={notif.id}
-                                                onClick={() => setSidebarTab("listings")}
+                                                onClick={() => { setSidebarTab("listings"); setSelectedShopId(notif.id); }}
                                                 className="p-10 rounded-[42px] bg-[#F8F9FA] flex justify-between items-center gap-8 group hover:bg-white border border-black/[0.02] shadow-sm hover:shadow-2xl hover:shadow-black/[0.06] hover:-translate-y-1 transition-all cursor-pointer"
                                             >
                                                 <p className="text-[16px] font-medium text-[#1D1D1F] leading-relaxed max-w-3xl">
