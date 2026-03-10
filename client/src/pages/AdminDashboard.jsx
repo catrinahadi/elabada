@@ -8,7 +8,7 @@ import {
     CheckCircle, XCircle, Clock, MoreVertical,
     Trash2, Edit3, ChevronRight, ArrowUpRight,
     FileText, Eye, AlertCircle, TrendingUp,
-    MapPin, Calendar, ArrowLeft, Phone
+    MapPin, Calendar, ArrowLeft, Phone, Menu, ShieldCheck, X
 } from "lucide-react";
 
 // Mock data as fallback
@@ -16,22 +16,22 @@ const INITIAL_SHOPS = [];
 
 function PermitModal({ shop, onClose }) {
     return (
-        <div className="modal-overlay flex items-center justify-center p-6 z-[100]">
-            <div className="bg-white rounded-[40px] w-full max-w-3xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col max-h-[90vh]">
-                <div className="p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
+        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[100]">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-3xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col h-[95vh] md:h-auto max-h-[90vh]">
+                <div className="p-6 md:p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
                     <div>
-                        <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Business Permit Verification</h2>
-                        <p className="text-xs font-bold text-[#1D1D1F] uppercase tracking-widest">Document Registry #{(shop.id || shop._id || "").toUpperCase()}</p>
+                        <h2 className="text-xl md:text-2xl font-black text-[#1D1D1F] tracking-tight">Verification</h2>
+                        <p className="text-[10px] font-bold text-[#1D1D1F] uppercase tracking-widest leading-none mt-1">Registry #{(shop.id || shop._id || "").toUpperCase()}</p>
                     </div>
-                    <button onClick={onClose} className="btn-icon bg-white text-black border-none hover:bg-black hover:text-white transition-colors">
-                        <XCircle className="w-6 h-6" />
+                    <button onClick={onClose} className="p-2 -mr-2 text-black hover:bg-black/5 rounded-full transition-colors">
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
-                <div className="flex-1 overflow-y-auto p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
-                    <div className="bg-white p-4 rounded-[32px] shadow-sm border border-black/[0.03]">
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
+                    <div className="bg-white p-4 rounded-[24px] md:rounded-[32px] shadow-sm border border-black/[0.03]">
                         <img src={shop.permitUrl || shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
                     </div>
-                    <div className="grid grid-cols-2 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between border-b border-black/[0.05] pb-2">
@@ -73,6 +73,7 @@ export default function AdminDashboard() {
     const [viewingPermit, setViewingPermit] = useState(null);
     const [expandedShops, setExpandedShops] = useState(new Set());
     const [filterStatus, setFilterStatus] = useState("pending");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
     useEffect(() => {
         api.get("/admin/shops")
@@ -125,9 +126,18 @@ export default function AdminDashboard() {
     };
 
     return (
-        <div className="flex bg-[#F8F9FA] min-h-screen text-[#1D1D1F]">
-            {/* Sidebar - Pro Blue */}
-            <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+        <div className="flex bg-[#F8F9FA] min-h-screen text-[#1D1D1F] relative">
+            {/* Mobile Backdrop */}
+            {isSidebarOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Conditional classes for responsiveness */}
+            <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
+                ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
                 <div className="flex items-center gap-4 mb-16 px-2">
                     <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
                     <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
@@ -135,7 +145,7 @@ export default function AdminDashboard() {
 
                 <nav className="flex-1 space-y-3">
                     <div className="pb-3 px-4 text-[10px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">System Engine</div>
-                    <button className="sidebar-link w-full active bg-[#014421] text-white shadow-lg shadow-[#014421]/20 text-[14px] font-normal">
+                    <button onClick={() => setIsSidebarOpen(false)} className="sidebar-link w-full active bg-[#014421] text-white shadow-lg shadow-[#014421]/20 text-[14px] font-normal">
                         <LayoutDashboard className="w-5 h-5" /> Overview
                     </button>
                 </nav>
@@ -149,11 +159,17 @@ export default function AdminDashboard() {
 
             {/* Main Content */}
             <main className="flex-1 flex flex-col">
-                <header className="h-24 px-12 flex items-center sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
-                    <h1 className="text-3xl font-black text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
+                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl border-b border-black/[0.05] lg:border-none">
+                    <div className="flex items-center gap-4">
+                        <button onClick={() => setIsSidebarOpen(true)} className="lg:hidden p-2 -ml-2 text-[#1D1D1F]">
+                            <Menu className="w-6 h-6" />
+                        </button>
+                        <h1 className="text-xl md:text-3xl font-black text-[#1D1D1F] tracking-tighter">Admin Dashboard</h1>
+                    </div>
+                    <div className="w-8" /> {/* Spacer */}
                 </header>
 
-                <div className="p-12 space-y-10 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                <div className="p-6 md:p-12 space-y-8 md:space-y-10 max-w-[1600px] w-full mx-auto animate-fadeUp">
 
                     {/* COMPACT STAT TILES — 4 across */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -210,7 +226,7 @@ export default function AdminDashboard() {
                             <p className="text-[11px] font-bold text-[#1D1D1F] uppercase tracking-widest">No {filterStatus} shops</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
                             {filteredList.map(shop => {
                                 const isExpanded = expandedShops.has(shop._id);
                                 const toggleExpand = () => setExpandedShops(prev => {

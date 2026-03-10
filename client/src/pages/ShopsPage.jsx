@@ -10,7 +10,7 @@ import {
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
-  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2,
+  LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu,
   Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
@@ -316,8 +316,8 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
   if (showAllReviews) {
     return (
-      <div className="modal-overlay flex items-center justify-center p-8 z-[1000]">
-        <div className="bg-white rounded-[40px] w-full max-w-[1000px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+      <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000]">
+        <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-[1000px] h-[95vh] md:h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
           <div className="sticky top-0 bg-white z-20">
             <div className="p-6 border-b border-black/5">
               <button onClick={() => setShowAllReviews(false)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
@@ -393,8 +393,8 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   }
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-8 z-[1000]">
-      <div className="bg-white rounded-[40px] w-full max-w-[1000px] h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
+    <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000]">
+      <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-[1000px] h-[95vh] md:h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
         <div className="sticky top-0 bg-white z-20">
           <div className="p-6 border-b border-black/5 flex items-center justify-between">
             <button onClick={onClose} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
@@ -411,9 +411,9 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
         <div className="flex-1 overflow-y-auto no-scrollbar">
           <div className="px-6 pt-8 pb-8 space-y-4">
-            <div className="grid grid-cols-[0.8fr_1.2fr] gap-8 items-stretch transform transition-all duration-500">
+            <div className="grid grid-cols-1 md:grid-cols-[0.8fr_1.2fr] gap-8 items-stretch transform transition-all duration-500">
               {/* Left Column: Image */}
-              <div className="w-full flex">
+              <div className="w-full flex h-64 md:h-auto">
                 <div className="w-full relative rounded-[32px] overflow-hidden border border-black/5 shadow-sm">
                   <div className="absolute inset-0">
                     <img src={shop.image} className="w-full h-full object-cover" alt="" />
@@ -620,9 +620,9 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
   };
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-4 z-[400] backdrop-blur-md">
-      <div className="bg-white rounded-[48px] w-full max-w-[1400px] shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
-        <div className="p-10 border-b border-black/[0.03] flex flex-col items-start gap-8 bg-gradient-to-r from-white to-[#F8F9FA]">
+    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[400] backdrop-blur-md">
+      <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[1400px] h-[95vh] md:h-auto shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
+        <div className="p-6 md:p-10 border-b border-black/[0.03] flex flex-col items-start gap-6 md:gap-8 bg-gradient-to-r from-white to-[#F8F9FA]">
           <button onClick={onClose} className="p-2 -ml-2 hover:bg-black/5 rounded-full transition-all group">
             <ArrowLeft className="w-8 h-8 text-[#1D1D1F]" />
           </button>
@@ -632,12 +632,12 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
               <div className="bg-[#014421] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Analysis</div>
               <p className="text-[11px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">How we calculated your match</p>
             </div>
-            <h3 className="text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
+            <h3 className="text-2xl md:text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
           </div>
         </div>
 
-        <div className="p-10">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <div className="p-6 md:p-10 overflow-y-auto no-scrollbar">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
             {/* Simple Explanation Side */}
             <div className="space-y-8">
               <div className="bg-[#014421] p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
@@ -745,6 +745,7 @@ export default function ShopsPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [sidebarTab, setSidebarTab] = useState("overview");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [selectedShop, setSelectedShop] = useState(null);
   // Automatic weights derived from drag order: rank 1=40%, 2=30%, 3=20%, 4=10%
   const POSITION_WEIGHTS = [0.40, 0.30, 0.20, 0.10];
@@ -979,26 +980,35 @@ export default function ShopsPage() {
 
 
   return (
-    <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden">
-      <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)]">
+    <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden relative">
+      {/* Mobile Backdrop */}
+      {isSidebarOpen && (
+        <div
+          className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar - Conditional classes for responsiveness */}
+      <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
+        ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
         <div className="flex items-center gap-4 mb-16 px-2">
           <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white text-2xl shadow-lg shadow-[#014421]/20">E</div>
           <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter font-outfit">ELaBada</span>
         </div>
 
         <nav className="flex-1 space-y-3">
-
-          <button onClick={() => setSidebarTab("overview")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("overview"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <LayoutDashboard className={`w-5 h-5 ${sidebarTab === "overview" ? "text-white" : "text-[#014421]"}`} />
             Overview
           </button>
 
-          <button onClick={() => setSidebarTab("map")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("map"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <MapIcon className={`w-5 h-5 ${sidebarTab === "map" ? "text-white" : "text-[#014421]"}`} />
             Location
           </button>
 
-          <button onClick={() => setSidebarTab("computation")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("computation"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <BarChart3 className={`w-5 h-5 ${sidebarTab === "computation" ? "text-white" : "text-[#014421]"}`} />
             Computation
           </button>
@@ -1013,14 +1023,21 @@ export default function ShopsPage() {
       </aside>
 
       <main className="flex-1 flex flex-col h-screen overflow-hidden relative">
+        {/* Mobile Navbar Header */}
+        <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7] border-b border-black/[0.05] shrink-0 z-50">
+          <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-[#1D1D1F]">
+            <Menu className="w-6 h-6" />
+          </button>
+          <div className="w-6" /> {/* Spacer */}
+        </div>
 
         {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
-          <div className="px-10 pt-10 pb-3 shrink-0">
-            <div className="flex items-stretch gap-8">
-              <div className="flex-1 bg-[#0D3A2C] rounded-[56px] p-12 text-white shadow-2xl relative flex flex-col min-h-[320px]">
-                <div className="absolute inset-0 flex items-center px-12 pb-14 z-10 pointer-events-none">
-                  <h2 className="text-[60px] font-normal tracking-tighter leading-none font-outfit pointer-events-auto">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
+          <div className="px-6 md:px-10 pt-6 md:pt-10 pb-3 shrink-0">
+            <div className="flex flex-col lg:flex-row items-stretch gap-6 md:gap-8">
+              <div className="flex-1 bg-[#0D3A2C] rounded-[32px] md:rounded-[56px] p-6 md:p-12 text-white shadow-2xl relative flex flex-col min-h-[240px] md:min-h-[320px]">
+                <div className="absolute inset-x-0 top-0 bottom-0 md:inset-0 flex items-center px-6 md:px-12 pb-14 z-10 pointer-events-none mt-8 md:mt-0">
+                  <h2 className="text-4xl md:text-[60px] font-normal tracking-tighter leading-tight md:leading-none font-outfit pointer-events-auto">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
                 <div className="mt-auto relative z-30 self-end w-full max-w-xl flex-shrink-0 pointer-events-auto">
                   <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-6 h-6" /></div>
@@ -1058,12 +1075,12 @@ export default function ShopsPage() {
                 </div>
                 <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2" />
               </div>
-              <div className="flex flex-col justify-center gap-6 pb-14">
-                <button onClick={() => setSidebarTab("computation")} className="w-20 h-20 rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 hover:-translate-y-1">
-                  <Sliders className="w-8 h-8 text-white transition-all" />
+              <div className="flex flex-row lg:flex-col justify-center gap-4 lg:gap-6 pb-6 md:pb-14">
+                <button onClick={() => setSidebarTab("computation")} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105">
+                  <Sliders className="w-6 h-6 md:w-8 md:h-8 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-20 h-20 rounded-[32px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 hover:-translate-y-1">
-                  <LocateFixed className="w-8 h-8 text-white transition-all" />
+                <button onClick={() => setSidebarTab("map")} className="w-16 h-16 md:w-20 md:h-20 rounded-2xl md:rounded-[32px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105">
+                  <LocateFixed className="w-6 h-6 md:w-8 md:h-8 text-white transition-all" />
                 </button>
               </div>
             </div>
@@ -1071,10 +1088,10 @@ export default function ShopsPage() {
         )}
 
         {/* ── SCROLLABLE CONTENT (shops grid / computation) ── */}
-        <div className={`flex-1 overflow-y-auto no-scrollbar animate-fadeUp ${sidebarTab === "overview" ? "px-10 pb-10 pt-3" : "p-10"}`}>
+        <div className={`flex-1 overflow-y-auto no-scrollbar animate-fadeUp ${sidebarTab === "overview" ? "px-6 md:px-10 pb-10 pt-3" : "p-6 md:p-10"}`}>
 
           {sidebarTab === "overview" && (
-            <div className="space-y-6 px-12">
+            <div className="space-y-6 lg:px-12">
               <div className="flex flex-col gap-6 pt-8">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
@@ -1114,7 +1131,7 @@ export default function ShopsPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
                 {filteredShops.map(s => (
                   <div
                     key={s.id || s._id}
@@ -1182,12 +1199,12 @@ export default function ShopsPage() {
           )}
 
           {sidebarTab === "computation" && (
-            <div className="max-w-[1700px] mx-auto animate-fadeUp py-8 px-6">
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 items-start">
+            <div className="max-w-[1700px] mx-auto animate-fadeUp py-4 md:py-8 px-2 md:px-6">
+              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12 items-start">
                 <div className="xl:col-span-8 space-y-10">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
                     {/* Weight ranges — first */}
-                    <div className="bg-white p-14 rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
+                    <div className="bg-white p-8 md:p-14 rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
                           <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
@@ -1232,7 +1249,7 @@ export default function ShopsPage() {
                       </div>
                     </div>
                     {/* Rank your priorities — second */}
-                    <div className="bg-white rounded-[64px] border border-black/[0.03] shadow-2xl p-14 flex flex-col space-y-12">
+                    <div className="bg-white rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl p-8 md:p-14 flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
                           <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
@@ -1406,64 +1423,38 @@ export default function ShopsPage() {
               </MapContainer>
             </div>
 
-            <div className="absolute inset-0 z-10 pointer-events-none p-10 flex flex-col">
-              <div className="flex items-start justify-between pointer-events-auto">
-                <div className="flex items-center gap-6">
+            <div className="absolute inset-0 z-10 pointer-events-none p-4 md:p-10 flex flex-col">
+              <div className="flex flex-col md:flex-row items-stretch md:items-start justify-between pointer-events-auto gap-4">
+                <div className="flex items-center gap-4 md:gap-6">
                   <button
                     onClick={() => { setSidebarTab("overview"); setActiveRouteShopId(null); }}
-                    className="flex items-center justify-center w-16 h-16 rounded-[24px] bg-white/90 backdrop-blur-xl text-[#1D1D1F] shadow-2xl hover:bg-[#1D1D1F] hover:text-white transition-all active:scale-95"
+                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/90 backdrop-blur-xl text-[#1D1D1F] shadow-2xl hover:bg-[#1D1D1F] hover:text-white transition-all"
                   >
-                    <ArrowLeft className="w-6 h-6" />
+                    <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
                   <button
                     onClick={refreshLocation}
-                    className="flex items-center justify-center w-16 h-16 rounded-[24px] bg-white/90 backdrop-blur-xl text-[#014421] shadow-2xl hover:bg-[#014421] hover:text-white transition-all active:scale-95"
+                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/90 backdrop-blur-xl text-[#014421] shadow-2xl hover:bg-[#014421] hover:text-white transition-all shadow-md"
                     title="Detect my current location"
                   >
-                    <LocateFixed className="w-6 h-6" />
+                    <LocateFixed className="w-5 h-5 md:w-6 md:h-6" />
                   </button>
-                  <div className="relative w-[450px]">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40"><Search className="w-5 h-5" /></div>
+                  <div className="relative flex-1 md:w-[450px]">
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 md:opacity-40"><Search className="w-5 h-5" /></div>
                     <input
                       type="text"
-                      placeholder="Search laundry nearby..."
+                      placeholder="Search laundry..."
                       value={mapSearchQuery}
                       onChange={(e) => setMapSearchQuery(e.target.value)}
                       onFocus={() => setShowMapSuggestions(true)}
                       onBlur={() => setTimeout(() => setShowMapSuggestions(false), 200)}
-                      className="w-full h-16 bg-white/90 backdrop-blur-xl rounded-[32px] pl-16 pr-6 text-[12px] font-normal shadow-2xl outline-none focus:ring-4 focus:ring-[#014421]/10 transition-all placeholder:text-gray-500 text-gray-500"
+                      className="w-full h-12 md:h-16 bg-white/90 backdrop-blur-xl rounded-[24px] md:rounded-[32px] pl-16 pr-6 text-[12px] font-normal shadow-2xl outline-none transition-all placeholder:text-gray-500 text-gray-500"
                     />
-                    {mapSearchQuery && mapSuggestions.length > 0 && showMapSuggestions && (
-                      <div className="absolute top-full left-0 right-0 mt-3 bg-white/95 backdrop-blur-2xl rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp pointer-events-auto">
-                        {mapSuggestions.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => {
-                              setMapSearchQuery(s.name);
-                              setShowMapSuggestions(false);
-                              setActiveRouteShopId(s.id);
-                            }}
-                            className="w-full px-8 py-5 flex items-center justify-between hover:bg-[#F8F9FA] transition-all border-b border-black/[0.02] last:border-0 group"
-                          >
-                            <div className="flex items-center gap-4">
-                              <div className="w-10 h-10 rounded-2xl bg-[#1D1D1F]/5 flex items-center justify-center text-[#1D1D1F] group-hover:bg-[#1D1D1F] group-hover:text-white transition-all">
-                                <Store className="w-5 h-5" />
-                              </div>
-                              <div className="text-left">
-                                <p className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{s.name}</p>
-                                <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate max-w-[200px]">{s.address}</p>
-                              </div>
-                            </div>
-                            <ArrowUpRight className="w-4 h-4 text-[#1D1D1F] group-hover:text-[#1D1D1F] transition-all" />
-                          </button>
-                        ))}
-                      </div>
-                    )}
                   </div>
                 </div>
               </div>
 
-              <div className="mt-6 self-end pointer-events-none w-[420px] max-h-[85%] flex flex-col">
+              <div className={`mt-auto md:mt-6 self-center md:self-end pointer-events-none w-full md:w-[420px] max-h-[50%] md:max-h-[85%] flex flex-col transition-all duration-500 ${activeRouteShopId ? 'translate-y-0' : 'translate-y-full md:translate-y-0'}`}>
                 {(() => {
                   const query = mapSearchQuery.toLowerCase().trim();
                   const filtered = query

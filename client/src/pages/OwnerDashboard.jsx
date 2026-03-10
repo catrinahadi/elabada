@@ -19,7 +19,7 @@ import {
     TrendingUp, Star, MoreVertical,
     Edit3, Trash2, ArrowUpRight, Clock,
     FileText, Check, MapPin, XCircle, CheckCircle, Plus,
-    Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera, LocateFixed, Info, Search, ShieldCheck, Bell
+    Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera, LocateFixed, Info, Search, ShieldCheck, Bell, Menu
 } from "lucide-react";
 
 const API_BASE = "http://localhost:5000";
@@ -40,8 +40,8 @@ const Field = ({ label, value, onChange, type = "text", placeholder, step }) => 
 
 function ConfirmationModal({ title, message, onConfirm, onCancel }) {
     return (
-        <div className="modal-overlay flex items-center justify-center p-6 z-[100]">
-            <div className="bg-white rounded-[40px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn p-10 flex flex-col items-center text-center space-y-6">
+        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[100]">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn p-8 md:p-10 flex flex-col items-center text-center space-y-6">
                 <div className="w-20 h-20 rounded-[32px] bg-[#80000010] flex items-center justify-center">
                     <AlertTriangle className="w-10 h-10 text-[#800000]" />
                 </div>
@@ -168,8 +168,8 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const isLoading = loading || uploading;
 
     return (
-        <div className="modal-overlay flex items-center justify-center p-6 z-[200] backdrop-blur-sm">
-            <div className="bg-white rounded-[40px] w-full max-w-2xl shadow-[0_40px_100px_rgba(0,0,0,0.25)] animate-scaleIn overflow-hidden border border-black/5">
+        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[200] backdrop-blur-sm">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-2xl h-[95vh] md:h-auto shadow-[0_40px_100px_rgba(0,0,0,0.25)] animate-scaleIn overflow-hidden border border-black/5 flex flex-col">
                 <div className="px-8 pt-8 pb-4 flex items-center justify-between border-b border-black/[0.05]">
                     <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">{initialData ? "Update shop" : "Register new shop"}</h2>
                     <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] flex items-center justify-center hover:bg-[#7B1113] hover:text-white transition-all active:scale-95">
@@ -177,7 +177,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto no-scrollbar">
+                <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto no-scrollbar">
                     <div className="flex gap-5 items-start">
                         <div className="shrink-0 w-36 h-36">
                             <UploadBox
@@ -280,6 +280,7 @@ export default function OwnerDashboard() {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
     const [sidebarTab, setSidebarTab] = useState("overview");
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [shops, setShops] = useState([]);
     const [loadingShops, setLoadingShops] = useState(true);
     const [deletingId, setDeletingId] = useState(null);
@@ -389,21 +390,31 @@ export default function OwnerDashboard() {
         });
 
     return (
-        <div className="flex bg-[#F1F4F2] min-h-screen text-[#1D1D1F] font-outfit">
-            <aside className="w-[320px] min-w-[320px] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 sticky top-0 h-screen z-20 shadow-[4px_0_24px_rgba(0,0,0,0.02)] transition-all">
+        <div className="flex bg-[#F1F4F2] min-h-screen text-[#1D1D1F] font-outfit relative">
+            {/* Mobile Backdrop */}
+            {isSidebarOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-black/40 backdrop-blur-sm z-[90] transition-opacity"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
+
+            {/* Sidebar - Conditional classes for responsiveness */}
+            <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
+                ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
                 <div className="flex items-center gap-4 mb-16 px-2">
                     <div className="w-10 h-10 bg-[#7B1113] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#7B1113]/20">E</div>
                     <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                 </div>
 
                 <nav className="flex-1 space-y-3">
-                    <button onClick={() => { setSidebarTab("overview"); setStatusFilter("all"); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "overview" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
+                    <button onClick={() => { setSidebarTab("overview"); setStatusFilter("all"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "overview" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
                         <LayoutDashboard className="w-5 h-5" /> Overview
                     </button>
-                    <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "listings" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
+                    <button onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "listings" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
                         <Store className="w-5 h-5" /> My shops
                     </button>
-                    <button onClick={() => setSidebarTab("notifications")} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "notifications" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
+                    <button onClick={() => { setSidebarTab("notifications"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] font-normal transition-all group ${sidebarTab === "notifications" ? "text-white bg-[#7B1113] shadow-lg shadow-[#7B1113]/20" : "text-[#7B1113]/60 hover:bg-[#7B1113]/5"}`}>
                         <Bell className="w-5 h-5" /> Notifications
                     </button>
                 </nav>
@@ -416,18 +427,25 @@ export default function OwnerDashboard() {
             </aside>
 
             <main className="flex-1 flex flex-col">
+                {/* Mobile Navbar Header */}
+                <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7] border-b border-black/[0.05] shrink-0 z-50">
+                    <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-[#7B1113]">
+                        <Menu className="w-6 h-6" />
+                    </button>
+                    <div className="w-6" /> {/* Spacer */}
+                </div>
                 <div className="flex-1 overflow-y-auto">
 
-                    <div className="p-12 space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                    <div className="p-6 md:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
                         {sidebarTab === "overview" && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                                 {/* Left Side: Banner + Stats (span 2) */}
                                 <div className="lg:col-span-2 flex flex-col gap-8">
                                     {/* Welcome Banner */}
-                                    <div className="bg-[#7B1113] rounded-[56px] p-12 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[300px] flex-1">
-                                        <div className="relative z-10 space-y-6">
+                                    <div className="bg-[#7B1113] rounded-[32px] md:rounded-[56px] p-8 md:p-12 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[220px] md:min-h-[300px] flex-1">
+                                        <div className="relative z-10 space-y-4 md:space-y-6">
 
-                                            <h2 className="text-8xl font-normal tracking-tighter leading-none text-white transition-transform group-hover:scale-[1.01]">Welcome, {user?.name?.split(' ')[0] || 'Executive'}</h2>
+                                            <h2 className="text-4xl md:text-8xl font-normal tracking-tighter leading-tight md:leading-none text-white transition-transform group-hover:scale-[1.01]">Welcome, {user?.name?.split(' ')[0] || 'Executive'}</h2>
                                             <p className="text-white/70 text-[14px] font-medium max-w-md leading-relaxed">
                                                 Manage your laundry network with real-time analytics and compliance tracking.
                                             </p>
@@ -436,13 +454,13 @@ export default function OwnerDashboard() {
                                     </div>
 
                                     {/* Dashboard Statistics Subgrid */}
-                                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch h-[400px]">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-stretch md:h-[400px]">
                                         {/* Left: Total Shops (Vertical Full Height) */}
                                         <button
                                             onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }}
-                                            className="bg-blue-950/[0.03] p-12 rounded-[56px] border border-blue-950/10 shadow-sm flex flex-col items-center justify-center gap-6 group hover:shadow-2xl hover:shadow-blue-900/5 hover:-translate-y-1 transition-all text-center relative overflow-hidden"
+                                            className="bg-blue-950/[0.03] p-8 md:p-12 rounded-[32px] md:rounded-[56px] border border-blue-950/10 shadow-sm flex flex-col items-center justify-center gap-4 md:gap-6 group hover:shadow-2xl transition-all text-center relative overflow-hidden"
                                         >
-                                            <span className="text-[84px] font-bold text-blue-950 tracking-tighter leading-none group-hover:scale-105 transition-transform">{shops.length}</span>
+                                            <span className="text-6xl md:text-[84px] font-bold text-blue-950 tracking-tighter leading-none group-hover:scale-105 transition-transform">{shops.length}</span>
                                             <div className="flex flex-col items-center">
                                                 <span className="text-[20px] font-medium text-blue-900">Total Shops</span>
                                             </div>
@@ -450,7 +468,7 @@ export default function OwnerDashboard() {
                                         </button>
 
                                         {/* Right: Pending & Approved (Stacked Vertically) */}
-                                        <div className="flex flex-col gap-8">
+                                        <div className="flex flex-col gap-6 md:gap-8">
                                             {[
                                                 {
                                                     label: "Pending shop",
@@ -472,10 +490,10 @@ export default function OwnerDashboard() {
                                                 <button
                                                     key={stat.label}
                                                     onClick={() => { setSidebarTab("listings"); setStatusFilter(stat.status); }}
-                                                    className={`flex-1 p-10 rounded-[56px] border ${stat.border} ${stat.bg} shadow-sm flex items-center justify-between group hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1 transition-all text-left w-full relative overflow-hidden`}
+                                                    className={`flex-1 p-8 md:p-10 rounded-[32px] md:rounded-[56px] border ${stat.border} ${stat.bg} shadow-sm flex items-center justify-between group hover:shadow-2xl transition-all text-left w-full relative overflow-hidden`}
                                                 >
-                                                    <div className="flex items-center gap-6">
-                                                        <span className={`text-[48px] font-bold ${stat.text} tracking-tighter leading-none shrink-0`}>{stat.count}</span>
+                                                    <div className="flex items-center gap-4 md:gap-6">
+                                                        <span className={`text-4xl md:text-[48px] font-bold ${stat.text} tracking-tighter leading-none shrink-0`}>{stat.count}</span>
                                                         <div className="flex flex-col justify-center">
                                                             <span className={`text-[20px] font-medium ${stat.text}`}>
                                                                 {stat.count === 1 ? stat.label : `${stat.label}s`}
@@ -491,7 +509,7 @@ export default function OwnerDashboard() {
 
                                 {/* Right Column: Full-Height Notification Center (span 1) */}
                                 <div className="flex flex-col h-full">
-                                    <div className="bg-white rounded-[56px] border border-black/[0.04] shadow-sm flex-1 flex flex-col p-10 pb-1 overflow-hidden">
+                                    <div className="bg-white rounded-[32px] md:rounded-[56px] border border-black/[0.04] shadow-sm flex-1 flex flex-col p-8 md:p-10 pb-1 overflow-hidden">
                                         <div className="flex items-center justify-between mb-8">
                                             <h3 className="text-[22px] font-medium text-[#1D1D1F] tracking-tighter">Notification center</h3>
                                         </div>
@@ -600,12 +618,12 @@ export default function OwnerDashboard() {
                                         <button
                                             key={card.id}
                                             onClick={() => { setStatusFilter(card.id); setSelectedShopId(null); }}
-                                            className={`flex items-center justify-between p-10 rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl hover:-translate-y-1 group relative overflow-hidden ${statusFilter === card.id && !selectedShopId ? 'ring-2 ring-offset-4 ring-current' : ''}`}
+                                            className={`flex items-center justify-between p-8 md:p-10 rounded-[28px] md:rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl group relative overflow-hidden ${statusFilter === card.id && !selectedShopId ? 'ring-2 ring-offset-4 ring-current' : ''}`}
                                             style={{ color: card.id === 'all' ? '#172554' : card.id === 'pending' ? '#7B1113' : '#228B22' }}
                                         >
-                                            <div className="flex items-center gap-6 relative z-10">
-                                                <span className={`text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
-                                                <span className={`text-[20px] font-medium`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
+                                            <div className="flex items-center gap-4 md:gap-6 relative z-10">
+                                                <span className={`text-4xl md:text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
+                                                <span className={`text-lg md:text-[20px] font-medium`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
                                             </div>
                                             <ChevronRight className={`w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
                                         </button>
@@ -617,7 +635,7 @@ export default function OwnerDashboard() {
                                         <Loader className="w-8 h-8 animate-spin text-[#014421]" />
                                     </div>
                                 ) : shops.length === 0 ? (
-                                    <div className="flex flex-col items-center justify-center h-64 text-center space-y-4 bg-white rounded-[48px] border-2 border-dashed border-black/[0.08] p-16">
+                                    <div className="flex flex-col items-center justify-center min-h-[300px] text-center space-y-4 bg-white rounded-[32px] md:rounded-[48px] border-2 border-dashed border-black/[0.08] p-8 md:p-16">
                                         <Store className="w-12 h-12 text-[#1D1D1F]/30" />
                                         <p className="text-sm font-bold text-[#1D1D1F]">No shops yet. Register your first shop to get started.</p>
                                         <button onClick={() => setShowAddShop(true)} className="mt-2 px-8 py-3 bg-[#014421] text-white rounded-2xl text-xs font-black hover:bg-[#1D1D1F] transition-all flex items-center gap-2">
@@ -625,7 +643,7 @@ export default function OwnerDashboard() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 pb-12">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
                                         {shops.filter(s => {
                                             if (selectedShopId) return s._id === selectedShopId;
                                             return statusFilter === "all" ? true : s.permitStatus === statusFilter;
@@ -728,7 +746,7 @@ export default function OwnerDashboard() {
                                         All notifications
                                     </h2>
                                 </div>
-                                <div className="bg-white rounded-[48px] p-12 border border-black/[0.04] shadow-sm">
+                                <div className="bg-white rounded-[32px] md:rounded-[48px] p-6 md:p-12 border border-black/[0.04] shadow-sm">
                                     <div className="space-y-6">
                                         {notifications.length === 0 ? (
                                             <p className="text-sm text-[#8E8E93]">No notifications yet.</p>
@@ -736,9 +754,9 @@ export default function OwnerDashboard() {
                                             <div
                                                 key={notif.id}
                                                 onClick={() => { setSidebarTab("listings"); setSelectedShopId(notif.id); }}
-                                                className="p-10 rounded-[42px] bg-[#F8F9FA] flex justify-between items-center gap-8 group hover:bg-white border border-black/[0.02] shadow-sm hover:shadow-2xl hover:shadow-black/[0.06] hover:-translate-y-1 transition-all cursor-pointer"
+                                                className="p-6 md:p-10 rounded-[28px] md:rounded-[42px] bg-[#F8F9FA] flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-8 group hover:bg-white border border-black/[0.02] shadow-sm hover:shadow-2xl transition-all cursor-pointer"
                                             >
-                                                <p className="text-[16px] font-medium text-[#1D1D1F] leading-relaxed max-w-3xl">
+                                                <p className="text-[14px] md:text-[16px] font-medium text-[#1D1D1F] leading-relaxed max-w-3xl">
                                                     {notif.description}
                                                 </p>
                                                 <span className="text-[13px] font-medium text-[#8E8E93] shrink-0">{notif.time}</span>
