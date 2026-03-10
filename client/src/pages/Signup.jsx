@@ -49,7 +49,7 @@ export default function Signup() {
     return (
         <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center p-6 font-outfit relative">
             {/* Brand/Logo - Responsive Positioning */}
-            <div className="absolute top-8 left-1/2 -translate-x-1/2 md:translate-x-0 md:top-10 md:left-10 z-10">
+            <div className="absolute top-8 left-8 md:top-10 md:left-10 z-10">
                 <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
                     <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
                     <span className="font-normal text-[22px] tracking-tighter text-[#1D1D1F]">ELaBada</span>

@@ -428,7 +428,7 @@ export default function OwnerDashboard() {
 
             <main className="flex-1 flex flex-col">
                 {/* Mobile Navbar Header */}
-                <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7] border-b border-black/[0.05] shrink-0 z-50">
+                <div className="lg:hidden h-16 flex items-center justify-between px-6 bg-[#FAFAF7]/80 backdrop-blur-md border-b border-black/[0.05] shrink-0 z-50 sticky top-0">
                     <button onClick={() => setIsSidebarOpen(true)} className="p-2 -ml-2 text-[#7B1113]">
                         <Menu className="w-6 h-6" />
                     </button>
@@ -436,13 +436,13 @@ export default function OwnerDashboard() {
                 </div>
                 <div className="flex-1 overflow-y-auto">
 
-                    <div className="p-6 md:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                    <div className="p-4 md:p-10 lg:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
                         {sidebarTab === "overview" && (
                             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-stretch">
                                 {/* Left Side: Banner + Stats (span 2) */}
                                 <div className="lg:col-span-2 flex flex-col gap-8">
                                     {/* Welcome Banner */}
-                                    <div className="bg-[#7B1113] rounded-[32px] md:rounded-[56px] p-8 md:p-12 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[220px] md:min-h-[300px] flex-1">
+                                    <div className="bg-[#7B1113] rounded-[40px] md:rounded-[56px] p-10 md:p-16 text-white border border-white/10 shadow-xl relative overflow-hidden group flex flex-col justify-center min-h-[255px] md:min-h-[300px] flex-1">
                                         <div className="relative z-10 space-y-4 md:space-y-6">
 
                                             <h2 className="text-4xl md:text-8xl font-normal tracking-tighter leading-tight md:leading-none text-white transition-transform group-hover:scale-[1.01]">Welcome, {user?.name?.split(' ')[0] || 'Executive'}</h2>
@@ -453,22 +453,22 @@ export default function OwnerDashboard() {
                                         <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-20 -mt-20 blur-[100px] transition-all group-hover:bg-white/20" />
                                     </div>
 
-                                    {/* Dashboard Statistics Subgrid */}
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 items-stretch md:h-[400px]">
+                                    {/* Dashboard Statistics Subgrid - Forced 2 columns on mobile to match wireframe */}
+                                    <div className="grid grid-cols-2 gap-4 md:gap-8 items-stretch md:h-[400px]">
                                         {/* Left: Total Shops (Vertical Full Height) */}
                                         <button
                                             onClick={() => { setSidebarTab("listings"); setStatusFilter("all"); }}
-                                            className="bg-blue-950/[0.03] p-8 md:p-12 rounded-[32px] md:rounded-[56px] border border-blue-950/10 shadow-sm flex flex-col items-center justify-center gap-4 md:gap-6 group hover:shadow-2xl transition-all text-center relative overflow-hidden"
+                                            className="bg-blue-950/[0.03] p-10 md:p-14 rounded-[40px] md:rounded-[56px] border border-blue-950/10 shadow-sm flex flex-col items-center justify-center gap-4 md:gap-8 group hover:shadow-2xl transition-all text-center relative overflow-hidden h-full"
                                         >
-                                            <span className="text-6xl md:text-[84px] font-bold text-blue-950 tracking-tighter leading-none group-hover:scale-105 transition-transform">{shops.length}</span>
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[20px] font-medium text-blue-900">Total Shops</span>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-6xl md:text-[96px] font-bold text-blue-950 tracking-tighter leading-none group-hover:scale-105 transition-transform">{shops.length}</span>
+                                                <span className="text-[12px] md:text-[16px] font-medium text-blue-900/60 mt-4">Total Shops</span>
                                             </div>
-                                            <ChevronRight className="absolute right-10 top-1/2 -translate-y-1/2 w-8 h-8 text-blue-950/30 group-hover:text-blue-950 group-hover:translate-x-1 transition-all" />
+                                            <ChevronRight className="absolute right-6 bottom-8 w-4 h-4 md:w-8 md:h-8 text-blue-950/20" />
                                         </button>
 
                                         {/* Right: Pending & Approved (Stacked Vertically) */}
-                                        <div className="flex flex-col gap-6 md:gap-8">
+                                        <div className="flex flex-col gap-4 md:gap-8">
                                             {[
                                                 {
                                                     label: "Pending shop",
@@ -490,17 +490,15 @@ export default function OwnerDashboard() {
                                                 <button
                                                     key={stat.label}
                                                     onClick={() => { setSidebarTab("listings"); setStatusFilter(stat.status); }}
-                                                    className={`flex-1 p-8 md:p-10 rounded-[32px] md:rounded-[56px] border ${stat.border} ${stat.bg} shadow-sm flex items-center justify-between group hover:shadow-2xl transition-all text-left w-full relative overflow-hidden`}
+                                                    className={`flex-1 p-10 md:p-14 rounded-[40px] md:rounded-[56px] border ${stat.border} ${stat.bg} shadow-sm flex flex-col items-center justify-center group hover:shadow-2xl transition-all text-center relative overflow-hidden`}
                                                 >
-                                                    <div className="flex items-center gap-4 md:gap-6">
-                                                        <span className={`text-4xl md:text-[48px] font-bold ${stat.text} tracking-tighter leading-none shrink-0`}>{stat.count}</span>
-                                                        <div className="flex flex-col justify-center">
-                                                            <span className={`text-[20px] font-medium ${stat.text}`}>
-                                                                {stat.count === 1 ? stat.label : `${stat.label}s`}
-                                                            </span>
-                                                        </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-5xl md:text-[72px] font-bold ${stat.text} tracking-tighter leading-none`}>{stat.count}</span>
+                                                        <span className={`text-[12px] md:text-[16px] font-medium ${stat.text} opacity-70 mt-3`}>
+                                                            {stat.count === 1 ? stat.label : `${stat.label}s`}
+                                                        </span>
                                                     </div>
-                                                    <ChevronRight className={`w-8 h-8 ${stat.text} opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all`} />
+                                                    <ChevronRight className={`absolute right-4 md:right-10 top-1/2 -translate-y-1/2 w-3 h-3 md:w-6 md:h-6 ${stat.text} opacity-20`} />
                                                 </button>
                                             ))}
                                         </div>
@@ -584,8 +582,8 @@ export default function OwnerDashboard() {
                                     </button>
                                 </div>
 
-                                {/* Filter Grid */}
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                {/* Filter Row - Horizontally Scrollable on Mobile */}
+                                <div className="flex overflow-x-auto no-scrollbar -mx-4 px-4 pb-2 gap-3 md:grid md:grid-cols-3 md:gap-8 md:mx-0 md:px-0">
                                     {[
                                         {
                                             id: "all",
@@ -593,8 +591,9 @@ export default function OwnerDashboard() {
                                             count: shops.length,
                                             bg: "bg-blue-950/[0.03]",
                                             border: "border-blue-950/10",
+                                            activeBorder: "border-blue-950/40",
                                             text: "text-blue-950",
-                                            accent: "text-blue-950/30"
+                                            color: "#172554"
                                         },
                                         {
                                             id: "pending",
@@ -602,8 +601,9 @@ export default function OwnerDashboard() {
                                             count: shops.filter(s => s.permitStatus === "pending").length,
                                             bg: "bg-[#7B1113]/[0.03]",
                                             border: "border-[#7B1113]/10",
+                                            activeBorder: "border-[#7B1113]/40",
                                             text: "text-[#7B1113]",
-                                            accent: "text-[#7B1113]/30"
+                                            color: "#7B1113"
                                         },
                                         {
                                             id: "approved",
@@ -611,21 +611,24 @@ export default function OwnerDashboard() {
                                             count: shops.filter(s => s.permitStatus === "approved").length,
                                             bg: "bg-[#228B22]/[0.03]",
                                             border: "border-[#228B22]/10",
+                                            activeBorder: "border-[#228B22]/40",
                                             text: "text-[#228B22]",
-                                            accent: "text-[#228B22]/30"
+                                            color: "#228B22"
                                         }
                                     ].map(card => (
                                         <button
                                             key={card.id}
                                             onClick={() => { setStatusFilter(card.id); setSelectedShopId(null); }}
-                                            className={`flex items-center justify-between p-8 md:p-10 rounded-[28px] md:rounded-[32px] border ${card.border} ${card.bg} shadow-sm transition-all hover:shadow-2xl group relative overflow-hidden ${statusFilter === card.id && !selectedShopId ? 'ring-2 ring-offset-4 ring-current' : ''}`}
-                                            style={{ color: card.id === 'all' ? '#172554' : card.id === 'pending' ? '#7B1113' : '#228B22' }}
+                                            className={`flex items-center justify-between py-5 md:py-10 px-4 md:px-10 min-w-[140px] md:min-w-0 rounded-2xl md:rounded-[32px] border transition-all hover:shadow-xl group relative overflow-hidden shrink-0 
+                                                ${statusFilter === card.id && !selectedShopId ? `${card.bg} ${card.activeBorder} shadow-sm border-2` : `${card.bg} ${card.border}`}
+                                            `}
+                                            style={{ color: card.color }}
                                         >
-                                            <div className="flex items-center gap-4 md:gap-6 relative z-10">
-                                                <span className={`text-4xl md:text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
-                                                <span className={`text-lg md:text-[20px] font-medium`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
+                                            <div className="flex items-center gap-3 md:gap-6 relative z-10">
+                                                <span className={`text-2xl md:text-6xl font-bold tracking-tighter leading-none`}>{card.count}</span>
+                                                <span className={`text-[10px] md:text-[20px] font-medium opacity-80`}>{card.count === 1 ? card.label : `${card.label}s`}</span>
                                             </div>
-                                            <ChevronRight className={`w-8 h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
+                                            <ChevronRight className={`w-4 h-4 md:w-8 md:h-8 opacity-30 group-hover:opacity-100 group-hover:translate-x-1 transition-all relative z-10`} />
                                         </button>
                                     ))}
                                 </div>
@@ -643,12 +646,12 @@ export default function OwnerDashboard() {
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-6 pb-12">
+                                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pb-12">
                                         {shops.filter(s => {
                                             if (selectedShopId) return s._id === selectedShopId;
                                             return statusFilter === "all" ? true : s.permitStatus === statusFilter;
                                         }).map(shop => (
-                                            <div key={shop._id} className="bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm hover:shadow-xl transition-all overflow-hidden p-4 group">
+                                            <div key={shop._id} className="bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm hover:shadow-xl transition-all overflow-hidden p-3 md:p-4 group">
                                                 <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-4">
                                                     <img
                                                         src={shop.image || DEFAULT_IMG}
@@ -678,37 +681,34 @@ export default function OwnerDashboard() {
                                                     </div>
                                                 </div>
 
-                                                <div className="px-1 space-y-4 flex-1 flex flex-col mt-4">
-                                                    <div className="flex justify-between items-center gap-2">
-                                                        <div className="flex items-center gap-1.5 min-w-0">
-                                                            <h4 className="text-[16px] font-medium text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{shop.name}</h4>
-                                                            {shop.permitStatus === 'approved' && (
-                                                                <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
-                                                                    <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
-                                                                </div>
-                                                            )}
+                                                <div className="px-1 space-y-2 flex-1 flex flex-col mt-4">
+                                                    <div className="flex justify-between items-start gap-2">
+                                                        <div className="flex flex-col min-w-0">
+                                                            <div className="flex items-center gap-1.5 mb-1">
+                                                                <h4 className="text-[13px] md:text-[16px] font-bold text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
+                                                                {shop.permitStatus === 'approved' && (
+                                                                    <CheckCircle className="w-3.5 h-3.5 text-[#228B22]" />
+                                                                )}
+                                                            </div>
+                                                            <div className="flex items-center gap-1 text-[#8E8E93]">
+                                                                <MapPin className="w-3 h-3 shrink-0" />
+                                                                <p className="text-[10px] md:text-[12px] font-medium truncate">{shop.address}</p>
+                                                            </div>
                                                         </div>
-                                                        <div className="flex items-center gap-1 shrink-0">
-                                                            <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
-                                                            <span className="text-[12px] font-medium text-[#1D1D1F]">{shop.rating || 0}</span>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-1.5 text-[#1D1D1F] mt-1">
-                                                        <MapPin className="w-3.5 h-3.5 shrink-0 opacity-40" />
-                                                        <p className="text-[12px] font-medium truncate">{shop.address}</p>
-                                                    </div>
-
-                                                    <div className="flex items-center gap-4 py-1">
-                                                        <div className="flex items-center gap-1.5">
-                                                            <Clock className="w-3.5 h-3.5 text-[#1D1D1F] opacity-40" />
-                                                            <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{shop.turnaroundTime} hr</span>
+                                                        <div className="flex items-center gap-1 shrink-0 mt-0.5">
+                                                            <Star className="w-3 h-3 fill-orange-400 text-orange-400" />
+                                                            <span className="text-[11px] font-bold text-[#1D1D1F]">{shop.rating || 0}</span>
                                                         </div>
                                                     </div>
 
-                                                    <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
+                                                    <div className="flex items-center gap-1.5 text-[#8E8E93] py-0.5">
+                                                        <Clock className="w-3 h-3 shrink-0" />
+                                                        <span className="text-[10px] md:text-[12px] font-medium">{shop.turnaroundTime} hr</span>
+                                                    </div>
+
+                                                    <div className="mt-auto pt-2 flex items-center justify-between">
                                                         <div className="flex flex-col">
-                                                            <span className="text-[16px] font-black text-[#7B1113] tracking-tighter font-outfit leading-none">₱{shop.price}<span className="text-[12px] font-bold text-[#7B1113] lowercase ml-0.5 opacity-80">/kg</span></span>
+                                                            <span className="text-[14px] md:text-[18px] font-black text-[#7B1113] tracking-tighter">₱{shop.price}<span className="text-[10px] font-bold ml-0.5 opacity-80">/kg</span></span>
                                                         </div>
                                                     </div>
 
