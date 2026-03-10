@@ -26,33 +26,56 @@ const API_BASE = "http://localhost:5000";
 
 const Field = ({ label, value, onChange, type = "text", placeholder, step }) => (
     <div className="space-y-1.5">
-        <label className="block text-[11px] font-medium text-[#1D1D1F]">{label}</label>
+        <label className="block text-[14px] font-normal text-[#1D1D1F]">{label}</label>
         <input
             type={type}
             step={step}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-sm text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+            className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-[14px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
         />
     </div>
 );
 
 function ConfirmationModal({ title, message, onConfirm, onCancel }) {
     return (
-        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[100]">
-            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn p-8 md:p-10 flex flex-col items-center text-center space-y-6">
-                <div className="w-20 h-20 rounded-[32px] bg-[#80000010] flex items-center justify-center">
-                    <AlertTriangle className="w-10 h-10 text-[#800000]" />
+        <div className="modal-overlay fixed inset-0 lg:left-[320px] flex items-center justify-center p-4 md:p-6 z-[300] backdrop-blur-sm">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-lg overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn p-6 md:p-8 flex flex-col items-center text-center space-y-4">
+                <div className="w-16 h-16 rounded-[24px] bg-[#80000010] flex items-center justify-center">
+                    <AlertTriangle className="w-8 h-8 text-[#800000]" />
                 </div>
                 <div>
-                    <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">{title}</h2>
-                    <p className="text-sm font-bold text-[#1D1D1F] mt-2">{message}</p>
+                    <h2 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">{title}</h2>
+                    <p className="text-[14px] font-normal text-[#8E8E93] mt-1 leading-relaxed">{message}</p>
                 </div>
-                <div className="grid grid-cols-2 gap-4 w-full pt-4">
-                    <button onClick={onCancel} className="py-4 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] font-medium text-sm hover:bg-[#E5E5EA] transition-colors">Cancel</button>
-                    <button onClick={onConfirm} className="py-4 rounded-2xl bg-[#800000] text-white font-medium text-sm hover:bg-black transition-colors shadow-lg shadow-[#800000]/20">Confirm delete</button>
+                <div className="grid grid-cols-2 gap-3 w-full pt-2">
+                    <button onClick={onCancel} className="py-4 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] font-normal text-[14px] hover:bg-[#E5E5EA] transition-colors">Cancel</button>
+                    <button onClick={onConfirm} className="py-4 rounded-2xl bg-[#800000] text-white font-normal text-[14px] hover:bg-black transition-colors shadow-lg shadow-[#800000]/20">Confirm</button>
                 </div>
+            </div>
+        </div>
+    );
+}
+
+function Toast({ message, onClose }) {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <div className="fixed top-8 left-1/2 -translate-x-1/2 lg:top-auto lg:bottom-12 lg:right-12 lg:left-auto lg:translate-x-0 z-[500] animate-fadeUp">
+            <div className="bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.03] p-5 pr-8 flex items-center gap-4 min-w-[320px]">
+                <div className="w-10 h-10 rounded-2xl bg-[#228B2210] flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-5 h-5 text-[#228B22]" />
+                </div>
+                <div>
+                    <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight">{message}</p>
+                </div>
+                <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1D1D1F]/20 hover:text-[#1D1D1F]">
+                    <X className="w-4 h-4" />
+                </button>
             </div>
         </div>
     );
@@ -79,8 +102,8 @@ function UploadBox({ label, hint, onFileSelected, preview, small = false, extraC
                     <div className={`rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#7B1113] ${small ? "w-9 h-9" : "w-10 h-10"}`}>
                         <UploadCloud className={small ? "w-4 h-4" : "w-5 h-5"} />
                     </div>
-                    <p className="text-[10px] font-medium text-[#1D1D1F] text-center">{label}</p>
-                    {hint && <p className="text-[9px] text-[#1D1D1F] text-center">{hint}</p>}
+                    <p className="text-[14px] font-normal text-[#1D1D1F] text-center">{label}</p>
+                    {hint && <p className="text-[14px] font-normal text-[#1D1D1F] text-center">{hint}</p>}
                 </>
             )}
             <input ref={inputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleChange} />
@@ -168,18 +191,21 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const isLoading = loading || uploading;
 
     return (
-        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[200] backdrop-blur-sm">
-            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-2xl h-[95vh] md:h-auto shadow-[0_40px_100px_rgba(0,0,0,0.25)] animate-scaleIn overflow-hidden border border-black/5 flex flex-col">
+        <div className="modal-overlay fixed inset-0 lg:left-[320px] flex items-center justify-center p-4 md:p-6 z-[200] backdrop-blur-sm">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-2xl h-auto max-h-[95vh] shadow-[0_40px_100px_rgba(0,0,0,0.25)] animate-scaleIn overflow-hidden border border-black/5 flex flex-col">
                 <div className="px-8 pt-8 pb-4 flex items-center justify-between border-b border-black/[0.05]">
-                    <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">{initialData ? "Update shop" : "Register new shop"}</h2>
+                    {!initialData && (
+                        <h2 className="text-2xl font-black text-[#1D1D1F] tracking-tight">Register new shop</h2>
+                    )}
+                    <div className="flex-1" />
                     <button onClick={onClose} className="w-10 h-10 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] flex items-center justify-center hover:bg-[#7B1113] hover:text-white transition-all active:scale-95">
-                        <X className="w-4 h-4" />
+                        <X className="w-[14px] h-[14px]" />
                     </button>
                 </div>
 
                 <form onSubmit={handleSubmit} className="p-6 md:p-8 space-y-6 flex-1 overflow-y-auto no-scrollbar">
                     <div className="flex gap-5 items-start">
-                        <div className="shrink-0 w-36 h-36">
+                        <div className="shrink-0 w-52 h-52">
                             <UploadBox
                                 label="Upload"
                                 hint="JPG / PNG"
@@ -190,13 +216,13 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
                         <div className="flex-1 space-y-3">
                             <Field label="Shop name" value={form.name} onChange={e => set("name", e.target.value)} placeholder="Official business name" />
-                            <Field label="Price per kilo (₱)" value={form.price} onChange={e => set("price", e.target.value)} type="number" placeholder="45" />
+                            <Field label={<>Price per kilo <span className="text-[#8E8E93]">(₱)</span></>} value={form.price} onChange={e => set("price", e.target.value)} type="number" placeholder="45" />
                         </div>
                     </div>
 
                     <div className="space-y-4">
                         <div className="space-y-1.5">
-                            <label className="block text-[11px] font-medium text-[#1D1D1F]">Business address</label>
+                            <label className="block text-[14px] font-normal text-[#1D1D1F]">Business address</label>
                             <div className="relative w-full">
                                 <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-40" />
                                 <input
@@ -204,13 +230,13 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     value={form.address}
                                     onChange={e => set("address", e.target.value)}
                                     placeholder="Type your shop address..."
-                                    className="w-full h-11 bg-[#F8F9FA] rounded-[14px] pl-11 pr-4 text-sm text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+                                    className="w-full h-11 bg-[#F8F9FA] rounded-[14px] pl-11 pr-4 text-[14px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
                                 />
                             </div>
                         </div>
 
                         <div className="space-y-2">
-                            <label className="block text-[10px] font-black text-[#1D1D1F]">Pin exact location</label>
+                            <label className="block text-[14px] font-normal text-[#1D1D1F]">Pin exact location</label>
                             <div className="h-60 rounded-[32px] overflow-hidden border border-black/5 shadow-inner bg-[#F1F4F2] relative group">
                                 <MapContainer
                                     center={[parseFloat(form.latitude), parseFloat(form.longitude)]}
@@ -228,7 +254,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     />
                                 </MapContainer>
                                 <div className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1000] bg-white/90 backdrop-blur-md px-4 py-2 rounded-full shadow-xl border border-black/5 pointer-events-none opacity-0 group-hover:opacity-100 transition-all duration-500">
-                                    <p className="text-[9px] font-black text-[#1D1D1F] whitespace-nowrap">Drag pin or click map to adjust</p>
+                                    <p className="text-[14px] font-normal text-[#1D1D1F] whitespace-nowrap">Drag pin or click map to adjust</p>
                                 </div>
                             </div>
                         </div>
@@ -236,7 +262,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
 
                     <div className="flex gap-5 items-stretch">
                         <div className="flex-1 space-y-3">
-                            <Field label="Turnaround time (hours)" value={form.turnaroundTime} onChange={e => set("turnaroundTime", e.target.value)} type="number" placeholder="24" />
+                            <Field label={<>Turnaround time <span className="text-[#8E8E93]">(hrs)</span></>} value={form.turnaroundTime} onChange={e => set("turnaroundTime", e.target.value)} type="number" placeholder="24" />
                             <div className="grid grid-cols-2 gap-3 opacity-60">
                                 <Field label="Latitude" value={form.latitude} onChange={e => set("latitude", e.target.value)} type="text" placeholder="14.167" />
                                 <Field label="Longitude" value={form.longitude} onChange={e => set("longitude", e.target.value)} type="text" placeholder="121.241" />
@@ -244,7 +270,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
                         {!initialData && (
                             <div className="w-52 shrink-0 flex flex-col">
-                                <label className="block text-[11px] font-medium text-[#1D1D1F] mb-1.5">Business permit</label>
+                                <label className="block text-[14px] font-normal text-[#1D1D1F] mb-1.5">Business permit</label>
                                 <UploadBox
                                     label={permitFile ? "Uploaded!" : "Upload permit"}
                                     hint="JPG / PNG / PDF"
@@ -253,7 +279,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     extraClass="flex-1"
                                 />
                                 {permitFile && !permitPreview && (
-                                    <p className="text-[9px] font-medium text-[#228B22] mt-1 flex items-center gap-1">
+                                    <p className="text-[14px] font-normal text-[#228B22] mt-1 flex items-center gap-1">
                                         <CheckCircle className="w-3 h-3" /> PDF attached
                                     </p>
                                 )}
@@ -265,9 +291,9 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-4 rounded-[20px] bg-[#7B1113] text-white text-sm hover:bg-black transition-all shadow-lg shadow-[#7B1113]/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                            className="w-full py-4 rounded-[20px] bg-[#7B1113] text-white text-[14px] font-normal hover:bg-black transition-all shadow-lg shadow-[#7B1113]/20 flex items-center justify-center gap-2 disabled:opacity-50"
                         >
-                            {isLoading ? "Processing…" : "Submit"}
+                            {isLoading ? "Processing…" : (initialData ? "Update" : "Submit")}
                         </button>
                     </div>
                 </form>
@@ -287,6 +313,7 @@ export default function OwnerDashboard() {
     const [showAddShop, setShowAddShop] = useState(false);
     const [editingShop, setEditingShop] = useState(null);
     const [submitting, setSubmitting] = useState(false);
+    const [successMsg, setSuccessMsg] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
     const [selectedShopId, setSelectedShopId] = useState(null);
     const [readNotifications, setReadNotifications] = useState(() => {
@@ -324,6 +351,7 @@ export default function OwnerDashboard() {
             await api.post("/shops", { ...formData, ownerId: user.id, ownerName: user.name });
             await fetchShops();
             setShowAddShop(false);
+            setSuccessMsg("Your shop has been registered and is pending review.");
         } catch (err) {
             console.error("Failed to add shop:", err.message);
         } finally {
@@ -338,6 +366,7 @@ export default function OwnerDashboard() {
             await api.put(`/shops/${id}`, formData);
             await fetchShops();
             setEditingShop(null);
+            setSuccessMsg("Shop details have been updated successfully.");
         } catch (err) {
             console.error("Failed to update shop:", err.message);
         } finally {
@@ -826,10 +855,17 @@ export default function OwnerDashboard() {
 
             {deletingId && (
                 <ConfirmationModal
-                    title="Delete shop?"
-                    message="This will permanently remove the shop and all its data."
+                    title="Delete Shop"
+                    message="This will permanently delete your shop listing. This action cannot be undone."
                     onConfirm={confirmDelete}
                     onCancel={() => setDeletingId(null)}
+                />
+            )}
+
+            {successMsg && (
+                <Toast
+                    message={successMsg}
+                    onClose={() => setSuccessMsg(null)}
                 />
             )}
 
