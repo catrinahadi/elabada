@@ -118,6 +118,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
   const [images, setImages] = useState([]);
+  const [previews, setPreviews] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef(null);
@@ -135,17 +136,14 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
       return;
     }
 
-    files.forEach(file => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImages(prev => [...prev, reader.result].slice(0, 3));
-      };
-      reader.readAsDataURL(file);
-    });
+    setImages(prev => [...prev, ...files].slice(0, 3));
+    const newPreviews = files.map(file => URL.createObjectURL(file));
+    setPreviews(prev => [...prev, ...newPreviews].slice(0, 3));
   };
 
   const removeImage = (index) => {
     setImages(prev => prev.filter((_, i) => i !== index));
+    setPreviews(prev => prev.filter((_, i) => i !== index));
   };
 
   const handleTagClick = (tag) => {
@@ -157,7 +155,28 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
     try {
-      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images, userId: user?._id || user?.id });
+      let uploadedImageUrls = [];
+
+      if (images.length > 0) {
+        const formData = new FormData();
+        images.forEach(image => {
+          formData.append('images', image);
+        });
+
+        const uploadRes = await api.post('/upload/images', formData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedImageUrls = uploadRes.data.urls;
+      }
+
+      await onPosted(shopId, {
+        rating,
+        comment,
+        reviewerName: user?.name || "Verified Customer",
+        images: uploadedImageUrls,
+        userId: user?._id || user?.id
+      });
+
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -232,7 +251,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
         <div className="space-y-3 px-2">
           <p className="text-[14px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
           <div className="flex gap-4">
-            {images.map((img, idx) => (
+            {previews.map((img, idx) => (
               <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
                 <img src={img} className="w-full h-full object-cover" alt="" />
                 <button
