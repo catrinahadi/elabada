@@ -197,6 +197,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
             onSubmit(finalForm);
         } catch (err) {
             console.error("Upload error:", err.message);
+            alert("Upload failed: " + (err.response?.data?.message || err.message));
             setUploading(false);
         }
     };
