@@ -305,7 +305,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
                     </div>
 
-                    <div className="pt-5">
+                    <div className="py-5">
                         <button
                             type="submit"
                             disabled={isLoading}
