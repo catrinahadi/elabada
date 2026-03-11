@@ -1540,9 +1540,10 @@ export default function ShopsPage() {
               `}>
                 {(() => {
                   const query = mapSearchQuery.toLowerCase().trim();
-                  const filtered = query
-                    ? rankedShops.filter(s => s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query))
-                    : rankedShops;
+                  const filtered = (query
+                    ? shopsWithDistance.filter(s => s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query))
+                    : [...shopsWithDistance]
+                  ).sort((a, b) => a.distance - b.distance);
                   return (
                     <>
                       <div className="px-6 pb-6 pointer-events-auto relative bg-white/95 backdrop-blur-xl rounded-t-[40px] md:rounded-t-none md:bg-transparent md:backdrop-filter-none border-t border-black/[0.05] md:border-t-0 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] md:shadow-none">
@@ -1551,27 +1552,13 @@ export default function ShopsPage() {
                         </div>
                         <div className="flex items-center justify-between">
                           <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none mt-2 md:mt-0">{filtered.length} Shops Around You</h3>
-                          {activeRouteShopId && (
-                            <button
-                              onClick={() => { setActiveRouteShopId(null); setIsMapSheetExpanded(true); }}
-                              className="md:hidden text-[12px] font-bold text-[#7B1113]"
-                            >
-                              Show List
-                            </button>
-                          )}
                         </div>
                       </div>
-                      <div className={`flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto bg-white/95 backdrop-blur-xl md:bg-transparent md:backdrop-filter-none transition-all duration-500 ${activeRouteShopId && !isMapSheetExpanded ? 'max-h-[120px] overflow-hidden' : ''}`}>
+                      <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto bg-white/95 backdrop-blur-xl md:bg-transparent md:backdrop-filter-none transition-all duration-500">
                         <div className="px-4 pb-8 space-y-5">
                           {filtered
-                            .sort((a, b) => {
-                              if (activeRouteShopId === a.id) return -1;
-                              if (activeRouteShopId === b.id) return 1;
-                              return 0;
-                            })
                             .map((s, i) => {
                               const isActive = activeRouteShopId === s.id;
-                              if (activeRouteShopId && !isActive && !isMapSheetExpanded) return null;
 
                               return (
                                 <div
