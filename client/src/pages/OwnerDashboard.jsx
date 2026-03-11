@@ -217,7 +217,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-10 pb-10 space-y-3 pt-4">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-10 pb-10 space-y-3 pt-4 no-scrollbar">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
                         {/* Left Column: Visuals & Core Info */}
                         <div className="space-y-3">
