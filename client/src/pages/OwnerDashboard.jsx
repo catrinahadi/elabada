@@ -394,25 +394,14 @@ export default function OwnerDashboard() {
         <div className="min-h-screen bg-[#F8F9FA] text-[#1D1D1F] font-outfit pb-20">
             {/* Header - Hidden when modal is open */}
             {!isModalOpen && (
-                <header className="bg-white/80 backdrop-blur-md sticky top-0 z-[100] border-b border-black/[0.05]">
-                    <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-20 flex items-center justify-between">
-                        <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 bg-[#7B1113] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#7B1113]/20 transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate("/")}>E</div>
-                        </div>
-
-                        <div className="flex items-center gap-8">
-                            <div className="hidden md:flex flex-col items-end">
-                                <span className="text-[14px] font-bold text-[#1D1D1F] uppercase tracking-tight">{user?.name || 'Executive'}</span>
-                                <span className="text-[10px] font-medium text-[#8E8E93] uppercase tracking-widest opacity-60">Shop Owner</span>
-                            </div>
-                            <button
-                                onClick={handleLogout}
-                                className="text-[14px] font-bold text-[#7B1113] hover:text-[#1D1D1F] transition-all flex items-center gap-2 group"
-                            >
-                                <LogOut className="w-4 h-4" /> Log out
-                            </button>
-                        </div>
+                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
+                    <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20 transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate("/")}>E</div>
+                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                     </div>
+                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] p-3 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal">
+                        <LogOut className="w-4 h-4" /> Log out
+                    </button>
                 </header>
             )}
 
