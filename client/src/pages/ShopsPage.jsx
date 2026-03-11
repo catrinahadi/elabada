@@ -27,37 +27,6 @@ L.Icon.Default.mergeOptions({
 
 const DEFAULT_SHOP_IMAGE = "https://images.unsplash.com/photo-1586671267731-da2cf3ceeb80?w=400&h=250&fit=crop";
 
-const initialShops = [
-  {
-    id: "mock1",
-    name: "EcoFresh Laundry",
-    address: "Lopez Avenue, Los Baños",
-    price: 45,
-    turnaroundTime: 24,
-    rating: 4.8,
-    reviewCount: 156,
-    status: "open",
-    permitStatus: "approved",
-    image: DEFAULT_SHOP_IMAGE,
-    latitude: 14.1670,
-    longitude: 121.2435
-  },
-  {
-    id: "mock2",
-    name: "Bubble Burst",
-    address: "Batong Malake, Los Baños",
-    price: 50,
-    turnaroundTime: 12,
-    rating: 4.5,
-    reviewCount: 89,
-    status: "open",
-    permitStatus: "approved",
-    image: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=250&fit=crop",
-    latitude: 14.1685,
-    longitude: 121.2445
-  }
-];
-
 const UP_GREEN_DARK = "#014421";
 const UP_GREEN_LIGHT = "#0F4D32";
 const UP_MAROON = "#7B1113";
@@ -759,7 +728,7 @@ export default function ShopsPage() {
   const [showComputation, setShowComputation] = useState(null);
   const [showAllNearby, setShowAllNearby] = useState(false);
   const [userLocation, setUserLocation] = useState(DEFAULT_LOCATION);
-  const [shops, setShops] = useState(initialShops);
+  const [shops, setShops] = useState([]);
   const [shopReviews, setShopReviews] = useState({});
   const [activeRouteShopId, setActiveRouteShopId] = useState(null);
   const [routePath, setRoutePath] = useState([]);
@@ -769,7 +738,7 @@ export default function ShopsPage() {
   const [showMapSuggestions, setShowMapSuggestions] = useState(false);
 
   // New Filter & Sort State
-  const [activeSort, setActiveSort] = useState('topsis');
+  const [activeSort, setActiveSort] = useState('price');
   const [filters, setFilters] = useState({
     rating: 0,
     price: 100,
@@ -1179,7 +1148,7 @@ export default function ShopsPage() {
                       {showSortDropdown && (
                         <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-[24px] shadow-2xl border border-black/[0.05] py-3 z-[150] animate-fadeUp">
                           {[
-                            { id: 'topsis', label: 'Best Match' },
+                            ...(isApplied ? [{ id: 'topsis', label: 'Best Match' }] : []),
                             { id: 'price', label: 'Lowest Price' },
                             { id: 'rating', label: 'Highest Rating' },
                             { id: 'distance', label: 'Nearest' }
@@ -1379,7 +1348,7 @@ export default function ShopsPage() {
                         </div>
                       </div>
                       <div className="pt-8 border-t border-black/[0.03]">
-                        <button onClick={() => setIsApplied(true)} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-normal text-[12px] capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
+                        <button onClick={() => { setIsApplied(true); setActiveSort('topsis'); }} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-normal text-[12px] capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
                       </div>
                     </div>
                   </div>
