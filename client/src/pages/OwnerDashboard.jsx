@@ -405,19 +405,17 @@ export default function OwnerDashboard() {
                 </header>
             )}
 
-            <main className="max-w-[1400px] mx-auto px-6 md:px-12 py-10 space-y-12">
+            <main className="max-w-[1400px] mx-auto px-6 md:px-12 py-[15px] space-y-12">
                 {/* Heading & Welcome Section */}
                 <div className="space-y-8 animate-fadeUp">
-                    <h1 className="text-2xl md:text-4xl font-normal tracking-tighter text-[#1D1D1F]">Registry Management</h1>
 
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="space-y-2">
                             <h2 className="text-[32px] md:text-6xl font-normal tracking-tighter leading-tight text-[#1D1D1F]">Welcome back, {user?.name?.split(' ')[0] || 'Executive'}</h2>
-                            <p className="text-[#8E8E93] text-[15px] font-medium max-w-sm leading-relaxed">Manage your laundry establishments and monitor their listing status in real-time.</p>
                         </div>
                         <button
                             onClick={() => setShowAddShop(true)}
-                            className="bg-[#014421] text-white px-8 py-5 rounded-[24px] text-[14px] font-bold hover:bg-[#1D1D1F] transition-all flex items-center justify-center gap-2 shadow-xl shadow-[#014421]/10 self-start md:self-auto group active:scale-95"
+                            className="bg-[#014421] text-white px-8 py-5 rounded-[24px] text-[14px] font-normal hover:bg-[#1D1D1F] transition-all flex items-center justify-center gap-2 shadow-xl shadow-[#014421]/10 self-end md:self-auto group active:scale-95"
                         >
                             <Plus className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" /> Register New Shop
                         </button>
@@ -425,83 +423,77 @@ export default function OwnerDashboard() {
                 </div>
 
                 {/* Stats Grid - Now non-clickable divs */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 animate-fadeUp" style={{ animationDelay: "50ms" }}>
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 animate-fadeUp" style={{ animationDelay: "50ms" }}>
                     {[
                         {
-                            label: "TOTAL ESTABLISHMENTS",
+                            label: "Total Establishments",
                             count: shops.length,
                             icon: Store,
-                            color: "#0D3E5E",
-                            bg: "bg-[#0D3E5E]/10"
+                            color: "#003366",
+                            bg: "bg-[#00336610]"
                         },
                         {
-                            label: "ACTIVE LISTINGS",
+                            label: "Active Listings",
                             count: shops.filter(s => s.permitStatus === "approved").length,
                             icon: CheckCircle,
-                            color: "#1A6B1A",
-                            bg: "bg-[#1A6B1A]/10"
+                            color: "#228B22",
+                            bg: "bg-[#228B2210]"
                         },
                         {
-                            label: "REJECTED REQUESTS",
+                            label: "Rejected Requests",
                             count: shops.filter(s => s.permitStatus === "rejected").length,
                             icon: XCircle,
-                            color: "#8B1A1A",
-                            bg: "bg-[#8B1A1A]/10"
+                            color: "#800000",
+                            bg: "bg-[#80000010]"
                         },
                         {
-                            label: "AWAITING REVIEW",
+                            label: "Awaiting Review",
                             count: shops.filter(s => s.permitStatus === "pending").length,
                             icon: Clock,
-                            color: "#C2780E",
-                            bg: "bg-[#C2780E]/10"
+                            color: "#F59E0B",
+                            bg: "bg-[#F59E0B15]"
                         }
                     ].map((stat, idx) => (
                         <div
                             key={idx}
-                            className="bg-white rounded-[32px] p-8 md:p-10 border border-black/[0.05] shadow-sm flex flex-col items-start gap-4 transition-all hover:shadow-md group relative overflow-hidden"
+                            className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4 transition-all hover:shadow-md group"
                         >
-                            <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center mb-2`}>
-                                <stat.icon className="w-6 h-6 transition-transform group-hover:scale-110" style={{ color: stat.color }} />
+                            <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center`}>
+                                <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
                             </div>
-                            <div className="space-y-1">
-                                <h3 className="text-5xl md:text-7xl font-black tracking-tighter leading-none" style={{ color: stat.color }}>
-                                    {stat.count}
-                                </h3>
-                                <p className="text-[11px] md:text-[13px] font-black uppercase tracking-widest opacity-40 leading-none" style={{ color: stat.color }}>
-                                    {stat.label}
-                                </p>
+                            <div>
+                                <h3 className="text-5xl font-black tracking-tighter" style={{ color: stat.color }}>{stat.count}</h3>
+                                <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">{stat.label}</p>
                             </div>
                         </div>
                     ))}
                 </div>
 
                 {/* Registry Management Table */}
-                <div className="bg-white rounded-[40px] md:rounded-[56px] border border-black/[0.04] shadow-sm overflow-hidden flex flex-col animate-fadeUp" style={{ animationDelay: "100ms" }}>
-                    <div className="p-8 md:p-10 border-b border-black/[0.04] flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div>
-                            <h3 className="text-[20px] md:text-[24px] font-bold text-[#1D1D1F] tracking-tight">Active Registries</h3>
-                            <p className="text-[13px] font-medium text-[#8E8E93]">View and manage your registered establishments</p>
-                        </div>
-
-                        <div className="flex bg-[#F1F3F4] p-1.5 rounded-2xl md:ml-auto overflow-x-auto no-scrollbar shrink-0 border border-black/[0.03]">
-                            {[
-                                { id: "all", label: "Total Establishments" },
-                                { id: "pending", label: "Pending" },
-                                { id: "approved", label: "Approved" },
-                                { id: "rejected", label: "Rejected" }
-                            ].map((f) => (
-                                <button
-                                    key={f.id}
-                                    onClick={() => { setStatusFilter(f.id); setSelectedShopId(null); }}
-                                    className={`px-6 py-2.5 text-[13px] font-bold rounded-xl whitespace-nowrap transition-all ${statusFilter === f.id ? 'bg-[#0D3E5E] text-white shadow-lg shadow-[#0D3E5E]/30' : 'text-[#8E8E93] hover:text-[#1D1D1F] bg-white border border-black/[0.05] ml-1'}`}
-                                >
-                                    {f.label}
-                                </button>
-                            ))}
-                        </div>
+                <div className="pt-[15px] space-y-8 animate-fadeUp" style={{ animationDelay: "100ms" }}>
+                    <div className="space-y-1">
+                        <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tight">Active Registries</h2>
                     </div>
 
-                    <div className="overflow-x-auto">
+                    <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-3 mb-4 -mx-4 px-4">
+                        {[
+                            { id: "all", label: "Total Establishments" },
+                            { id: "pending", label: "Pending" },
+                            { id: "approved", label: "Approved" },
+                            { id: "rejected", label: "Rejected" }
+                        ].map((f) => (
+                            <button
+                                key={f.id}
+                                onClick={() => { setStatusFilter(f.id); setSelectedShopId(null); }}
+                                className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${statusFilter === f.id ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
+                            >
+                                {f.label}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="bg-white rounded-[40px] md:rounded-[56px] border border-black/[0.04] shadow-sm overflow-hidden flex flex-col">
+                        <div className="overflow-x-auto">
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-black/[0.03]">
@@ -539,9 +531,6 @@ export default function OwnerDashboard() {
                                         </td>
                                         <td className="py-8 px-4">
                                             <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 bg-[#F8F9FA] rounded-[18px] flex items-center justify-center text-[#1D1D1F] border border-black/[0.03] group-hover:scale-105 transition-transform duration-500">
-                                                    <Store className="w-5 h-5 opacity-40" />
-                                                </div>
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-1.5">
                                                         <span className="text-[14px] font-bold text-[#1D1D1F] tracking-tight">{shop.name}</span>
@@ -556,8 +545,7 @@ export default function OwnerDashboard() {
                                             </div>
                                         </td>
                                         <td className="py-8 px-4">
-                                            <div className="flex items-center gap-2 text-[#8E8E93]">
-                                                <MapPin className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                            <div className="flex items-center text-[#8E8E93]">
                                                 <span className="text-[12px] font-medium max-w-[200px] truncate">{shop.address}</span>
                                             </div>
                                         </td>
@@ -565,14 +553,12 @@ export default function OwnerDashboard() {
                                             <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">₱{shop.price}<span className="text-[10px] opacity-40 ml-0.5 tracking-normal">/kg</span></span>
                                         </td>
                                         <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2 text-[#8E8E93]">
-                                                <Clock className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                            <div className="flex items-center text-[#8E8E93]">
                                                 <span className="text-[12px] font-medium">{shop.turnaroundTime} hrs</span>
                                             </div>
                                         </td>
                                         <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center gap-2 text-[#8E8E93]">
-                                                <FileText className="w-3.5 h-3.5 opacity-40 shrink-0" />
+                                            <div className="flex items-center text-[#8E8E93]">
                                                 <span className="text-[12px] font-medium">{new Date(shop.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                             </div>
                                         </td>
@@ -605,6 +591,7 @@ export default function OwnerDashboard() {
                         </table>
                     </div>
                 </div>
+            </div>
             </main>
 
             {/* Modals & Feedback */}
