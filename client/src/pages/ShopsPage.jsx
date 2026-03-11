@@ -398,10 +398,17 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
               <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
             </button>
             {showMatchScore && shop.score && (
-              <div className="bg-[#F8F9FA] px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-2">
-                <span className="text-[14px] font-normal text-gray-400">Match:</span>
+              <button 
+                onClick={() => onShowComputation(shop)}
+                className="bg-[#F8F9FA] px-4 py-2 rounded-2xl border border-black/5 flex items-center gap-2 hover:bg-[#014421]/5 hover:border-[#014421]/20 transition-all cursor-help group shadow-sm active:scale-95"
+                title="Click to see how this match was calculated"
+              >
+                <div className="w-5 h-5 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0 group-hover:bg-[#014421]/10">
+                  <TrendingUp className="w-3 h-3 text-[#014421]" />
+                </div>
+                <span className="text-[14px] font-normal text-gray-400 group-hover:text-[#1D1D1F]">Match:</span>
                 <span className="text-[14px] font-normal text-[#1D1D1F]">{(shop.score * 100).toFixed(0)}%</span>
-              </div>
+              </button>
             )}
           </div>
         </div>
@@ -601,133 +608,192 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 }
 
 function ComputationDetailsModal({ shop, weights, onClose }) {
+  const [showFormula, setShowFormula] = useState(false);
+
   const getExplanation = (detail) => {
-    const { criterion, rating, actualValue, isBenefit } = detail;
+    const { criterion, rating, actualValue, isBenefit, weight } = detail;
     const labels = {
       price: 'Price',
       turnaroundTime: 'Turnaround Time',
       rating: 'Rating',
-      distance: 'Location'
+      distance: 'Distance'
     };
 
     const percentage = Math.round(rating * 100);
-    let quality = '';
-    if (percentage > 80) quality = 'Excellent';
-    else if (percentage > 60) quality = 'Very Good';
-    else if (percentage > 40) quality = 'Good';
-    else quality = 'Average';
+    const weightPercent = Math.round(weight * 100);
+    
+    // Format actual value for display
+    let formattedValue = actualValue;
+    if (criterion === 'price') formattedValue = `₱${actualValue}`;
+    else if (criterion === 'rating') formattedValue = `${actualValue} / 5`;
 
-    const desc = isBenefit
-      ? `Higher is better. This shop's ${labels[criterion]} of ${actualValue} ranks as "${quality}" compared to others.`
-      : `Lower is better. This shop's ${labels[criterion]} of ${actualValue} ranks as "${quality}" compared to others.`;
-
-    return { label: labels[criterion], quality, percentage, desc };
+    return { 
+      label: labels[criterion], 
+      percentage, 
+      weightPercent,
+      actualValue: formattedValue,
+      icon: criterion === 'price' ? DollarSign :
+            criterion === 'turnaroundTime' ? Timer :
+            criterion === 'rating' ? Star : MapPin,
+      unit: criterion === 'price' ? 'per kg' : 
+            criterion === 'turnaroundTime' ? 'hrs' : 
+            criterion === 'distance' ? 'km' : ''
+    };
   };
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[400] backdrop-blur-md">
-      <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[1400px] h-[95vh] md:h-auto shadow-[0_40px_100px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
-        <div className="p-6 md:p-10 border-b border-black/[0.03] flex flex-col items-start gap-6 md:gap-8 bg-gradient-to-r from-white to-[#F8F9FA]">
-          <button onClick={onClose} className="p-2 -ml-2 hover:bg-black/5 rounded-full transition-all group">
-            <ArrowLeft className="w-8 h-8 text-[#1D1D1F]" />
-          </button>
-
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="bg-[#014421] text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest">Analysis</div>
-              <p className="text-[11px] font-black text-[#1D1D1F] uppercase tracking-[0.3em]">How we calculated your match</p>
-            </div>
-            <h3 className="text-2xl md:text-4xl font-black text-[#1D1D1F] tracking-tighter">Ranking breakdown: <span className="text-[#014421]">{shop.name}</span></h3>
+    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[2000] backdrop-blur-md bg-black/60">
+      <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[850px] max-h-[90vh] shadow-[0_40px_100px_rgba(0,0,0,0.5)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
+        {/* Header */}
+        <div className="p-8 border-b border-black/[0.03] flex items-center justify-between bg-[#F8F9FA]/50">
+          <div className="space-y-1">
+            <h3 className="text-[24px] font-bold text-[#1D1D1F] tracking-tight">{shop.name}</h3>
+            <p className="text-[14px] text-gray-500 font-normal">Computation Breakdown</p>
           </div>
+          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-all">
+            <X className="w-6 h-6 text-[#1D1D1F]" />
+          </button>
         </div>
 
-        <div className="p-6 md:p-10 overflow-y-auto no-scrollbar">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12">
-            {/* Simple Explanation Side */}
-            <div className="space-y-8">
-              <div className="bg-[#014421] p-8 rounded-[40px] text-white shadow-2xl relative overflow-hidden group">
-                <div className="relative z-10 flex items-center justify-between">
-                  <div className="space-y-2">
-                    <p className="text-white/60 text-xs font-black uppercase tracking-widest">Overall Match Score</p>
-                    <h4 className="text-6xl font-normal tracking-tighter">{(shop.score * 100).toFixed(1)}%</h4>
-                  </div>
-                  <div className="w-20 h-20 bg-white/10 rounded-3xl flex items-center justify-center backdrop-blur-md">
-                    <Target className="w-10 h-10 text-green-400" />
-                  </div>
-                </div>
-                <p className="mt-6 text-white/70 text-sm font-medium leading-relaxed">
-                  This score tells you how close this shop is to your "Perfect Match" based on your priorities.
-                  100% would be a shop that has the best price, best rating, shortest wait, and is closest to you.
+        <div className="p-8 overflow-y-auto no-scrollbar space-y-10">
+          {/* 1. Final Match Score - Now Clickable for Transparency */}
+          <section 
+            onClick={() => setShowFormula(!showFormula)}
+            className="bg-[#014421] p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] active:scale-95"
+          >
+            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
+              <div className="space-y-3 text-center md:text-left">
+                <p className="text-white/60 text-xs font-bold uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
+                  Match Score <Info className="w-3 h-3" />
                 </p>
-                <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl group-hover:bg-white/10 transition-all duration-700" />
+                <h4 className="text-7xl font-normal tracking-tighter">{shop.score.toFixed(2)}</h4>
+                <p className="text-white/80 text-[14px] font-medium leading-relaxed max-w-[280px]">
+                  This shop is <span className="text-white font-bold">{Math.round(shop.score * 100)}% close</span> to the ideal laundry shop based on your preferences.
+                </p>
+                <p className="text-emerald-300 text-[11px] font-bold uppercase tracking-widest pt-2 flex items-center gap-2 justify-center md:justify-start">
+                  {showFormula ? 'Hide computation' : 'See computation'}
+                </p>
+              </div>
+              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md group-hover:rotate-12 transition-transform">
+                <Target className="w-12 h-12 text-emerald-300" />
+              </div>
+            </div>
+            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse" />
+          </section>
+
+          {/* 1.1 Hidden Computation Logic Section */}
+          {showFormula && (
+            <div className="space-y-8 animate-fadeUp bg-[#F8F9FA] p-8 md:p-10 rounded-[40px] border border-[#014421]/10">
+              <div className="flex items-center gap-4 border-b border-black/[0.05] pb-6">
+                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
+                  <ClipboardList className="w-6 h-6 text-[#014421]" />
+                </div>
+                <div>
+                  <h5 className="text-[16px] font-bold text-[#1D1D1F]">TOPSIS Methodology</h5>
+                  <p className="text-[12px] text-gray-500">Technique for Order of Preference by Similarity to Ideal Solution</p>
+                </div>
               </div>
 
-              <div className="space-y-4">
-                <h5 className="text-sm font-black text-[#1D1D1F] uppercase tracking-widest px-2">Better for You?</h5>
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-green-50 p-6 rounded-[32px] border border-green-100 space-y-2">
-                    <div className="flex items-center gap-2 text-[#014421]">
-                      <ArrowUp className="w-4 h-4" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Pros</span>
-                    </div>
-                    <p className="text-xs font-bold text-[#014421]/70">Higher scores here mean this shop excels in these areas compared to others.</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 1: Normalize</span>
+                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">We convert raw data (₱, km, hrs) into a universal 0-1 scale so factors can be compared fairly.</p>
                   </div>
-                  <div className="bg-red-50 p-6 rounded-[32px] border border-red-100 space-y-2">
-                    <div className="flex items-center gap-2 text-[#7B1113]">
-                      <ArrowDown className="w-4 h-4" />
-                      <span className="text-[10px] font-black uppercase tracking-widest">Cons</span>
-                    </div>
-                    <p className="text-xs font-bold text-[#7B1113]/70">Lower scores suggest there might be better options if this factor is vital.</p>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 2: Weighted Matrix</span>
+                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">Your priority weights are applied. Factors at the top of your list score higher points.</p>
                   </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 3: Ideal Points</span>
+                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">We identify an "Ideal Best" (cheapest, closest, fastest) and "Ideal Worst" in the group.</p>
+                  </div>
+                </div>
+
+                <div className="bg-white p-8 rounded-[32px] border border-black/5 space-y-6 shadow-inner">
+                  <h6 className="text-xs font-black text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
+                    <Droplets className="w-4 h-4 text-[#014421]" /> The Formula
+                  </h6>
+                  <div className="bg-[#F8F9FA] p-6 rounded-2xl border border-black/5 flex flex-col items-center justify-center text-center space-y-4">
+                    <div className="space-y-1">
+                      <p className="text-[11px] text-gray-400 font-bold uppercase tracking-tighter">Relative Closeness</p>
+                      <p className="text-2xl font-normal text-[#1D1D1F] tracking-tighter">C<sub>i</sub> = d<sub>i</sub><sup>-</sup> / (d<sub>i</sub><sup>+</sup> + d<sub>i</sub><sup>-</sup>)</p>
+                    </div>
+                    <p className="text-[12px] text-gray-500 leading-relaxed">
+                      Matches are calculated based on how far a shop is from the <span className="text-[#7B1113] font-bold italic">Worst Case (d-)</span> vs the <span className="text-[#014421] font-bold italic">Best Case (d+)</span>.
+                    </p>
+                  </div>
+                  <div className="text-[11px] text-gray-400 font-medium italic text-center">A score of 1.0 means the shop is mathematically perfect based on your criteria.</div>
                 </div>
               </div>
             </div>
+          )}
 
-            {/* Metrics Side */}
-            <div className="space-y-4">
-              <h5 className="text-sm font-black text-[#1D1D1F] uppercase tracking-widest px-2">Criterion Performance</h5>
-              <div className="space-y-4">
-                {shop.details?.map((detail) => {
-                  const info = getExplanation(detail);
-                  const Icon = detail.criterion === 'price' ? DollarSign :
-                    detail.criterion === 'turnaroundTime' ? Timer :
-                      detail.criterion === 'rating' ? Star : MapPin;
-
+          {/* 2. Weighted Importance */}
+          <section className="space-y-4 px-2">
+            <h5 className="text-[14px] font-bold text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" /> Weighted Importance
+            </h5>
+            <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03]">
+              <p className="text-[14px] font-medium text-gray-600 leading-relaxed italic">
+                Your ranking prioritizes:{" "}
+                {shop.details.map((d, i) => {
+                  const label = d.criterion === 'turnaroundTime' ? 'Time' : d.criterion.charAt(0).toUpperCase() + d.criterion.slice(1);
                   return (
-                    <div key={detail.criterion} className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03] hover:bg-white hover:shadow-xl transition-all group">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-md group-hover:scale-110 transition-transform">
-                            <Icon className={`w-6 h-6 ${info.percentage > 50 ? 'text-[#014421]' : 'text-[#7B1113]'}`} />
-                          </div>
-                          <div>
-                            <p className="text-sm font-black text-[#1D1D1F]">{info.label}</p>
-                            <p className="text-[10px] font-normal text-[#1D1D1F]">{detail.actualValue} {detail.criterion === 'price' ? '/kg' : detail.criterion === 'turnaroundTime' ? 'hrs' : detail.criterion === 'distance' ? 'km' : ''}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <span className={`text-lg font-normal ${info.percentage > 70 ? 'text-[#014421]' : info.percentage > 40 ? 'text-orange-500' : 'text-[#7B1113]'}`}>
-                            {info.percentage}%
-                          </span>
-                        </div>
-                      </div>
-                      <div className="space-y-3">
-                        <div className="h-2 bg-black/5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full transition-all duration-1000 ${info.percentage > 70 ? 'bg-[#014421]' : info.percentage > 40 ? 'bg-orange-500' : 'bg-[#7B1113]'}`}
-                            style={{ width: `${info.percentage}%` }}
-                          />
-                        </div>
-                        <p className="text-[10px] font-medium text-[#1D1D1F] leading-relaxed italic">
-                          {info.desc} Your priority weight: <span className="font-normal text-[#1D1D1F]">{(detail.weight * 100).toFixed(0)}%</span>
-                        </p>
-                      </div>
-                    </div>
+                    <span key={d.criterion} className="text-[#1D1D1F] font-bold">
+                      {label} ({Math.round(d.weight * 100)}%){i < shop.details.length - 1 ? " • " : ""}
+                    </span>
                   );
                 })}
-              </div>
+              </p>
+              <p className="mt-3 text-[12px] text-gray-400">This helps explain why this shop achieved its specific match ranking.</p>
             </div>
-          </div>
+          </section>
+
+          {/* 3. Criteria Performance */}
+          <section className="space-y-4 px-2">
+            <h5 className="text-[14px] font-bold text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
+              <Activity className="w-4 h-4" /> Criteria Performance
+            </h5>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {shop.details.map((detail) => {
+                const info = getExplanation(detail);
+                const Icon = info.icon;
+
+                return (
+                  <div key={detail.criterion} className="bg-white p-6 rounded-[32px] border border-black/[0.04] shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 bg-[#F8F9FA] rounded-xl flex items-center justify-center group-hover:bg-[#014421] group-hover:text-white transition-all">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <p className="text-[14px] font-bold text-[#1D1D1F]">{info.label}</p>
+                          <p className="text-[12px] font-normal text-gray-500">{info.actualValue} {info.unit}</p>
+                        </div>
+                      </div>
+                      <span className="text-[14px] font-bold text-[#1D1D1F]">{info.percentage}%</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div
+                        className="h-full bg-[#014421] transition-all duration-1000"
+                        style={{ width: `${info.percentage}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        <div className="p-8 border-t border-black/[0.03] bg-[#F8F9FA]/50 text-center">
+          <button 
+            onClick={onClose}
+            className="px-8 py-3 bg-[#1D1D1F] text-white rounded-2xl text-[14px] font-medium hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95"
+          >
+            Close
+          </button>
         </div>
       </div>
     </div>
