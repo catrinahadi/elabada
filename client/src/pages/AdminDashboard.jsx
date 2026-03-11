@@ -20,8 +20,7 @@ function PermitModal({ shop, onClose }) {
             <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-3xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col h-[95vh] md:h-auto max-h-[90vh]">
                 <div className="p-6 md:p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
                     <div>
-                        <h2 className="text-xl md:text-2xl font-black text-[#1D1D1F] tracking-tight">Verification</h2>
-                        <p className="text-[10px] font-bold text-[#1D1D1F] uppercase tracking-widest leading-none mt-1">Registry #{(shop.id || shop._id || "").toUpperCase()}</p>
+                        <h2 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">Verification</h2>
                     </div>
                     <button onClick={onClose} className="p-2 -mr-2 text-black hover:bg-black/5 rounded-full transition-colors">
                         <X className="w-6 h-6" />
@@ -35,30 +34,23 @@ function PermitModal({ shop, onClose }) {
                         <div className="space-y-4">
                             <div className="space-y-3">
                                 <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-xs text-[#1D1D1F] font-bold">Shop Name</span>
-                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.shopName || shop.name}</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Shop Name</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.shopName || shop.name}</span>
                                 </div>
                                 <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-xs text-[#1D1D1F] font-bold">Owner Name</span>
-                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.ownerName}</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Owner Name</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.ownerName}</span>
                                 </div>
                                 <div className="flex justify-between">
-                                    <span className="text-xs text-[#1D1D1F] font-bold">Date Submitted</span>
-                                    <span className="text-xs text-[#1D1D1F] font-black">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Date Submitted</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
                                 </div>
-                            </div>
-                        </div>
-                        <div className="space-y-4">
-                            <h3 className="text-[10px] font-black uppercase text-[#800000] tracking-[0.2em]">Compliance Check</h3>
-                            <div className="flex items-center gap-3 bg-[#E1FFE1] p-4 rounded-2xl border border-[#228B22]/10">
-                                <ShieldCheck className="w-5 h-5 text-[#228B22]" />
-                                <span className="text-[10px] font-black text-[#228B22] uppercase tracking-widest">Digital Signature Verified</span>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">
-                    <button onClick={onClose} className="btn-primary py-4 px-12 text-[10px] uppercase tracking-widest bg-[#003366]">Close View</button>
+                    <button onClick={onClose} className="inline-flex items-center justify-center gap-2 bg-[#003366] hover:bg-[#002244] active:scale-95 text-white text-[14px] font-normal rounded-2xl px-12 py-4 tracking-widest transition-all duration-300 select-none shadow-xl shadow-[#003366]/10">Close</button>
                 </div>
             </div>
         </div>
