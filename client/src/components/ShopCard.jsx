@@ -11,7 +11,7 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
     >
       <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-5">
         <img
-          src={shop.image}
+          src={shop.image || "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80"}
           alt={shop.name}
           className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
           loading="lazy"

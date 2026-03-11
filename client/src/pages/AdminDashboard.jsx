@@ -10,6 +10,7 @@ import {
     FileText, Eye, AlertCircle, TrendingUp,
     MapPin, Calendar, ArrowLeft, Phone, Menu, ShieldCheck, X
 } from "lucide-react";
+import { formatImageUrl } from "../utils/imageUtils";
 
 // Mock data as fallback
 const INITIAL_SHOPS = [];
@@ -28,7 +29,7 @@ function PermitModal({ shop, onClose }) {
                 </div>
                 <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
                     <div className="bg-white p-4 rounded-[24px] md:rounded-[32px] shadow-sm border border-black/[0.03]">
-                        <img src={shop.permitUrl || shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
+                        <img src={formatImageUrl(shop.permitUrl || shop.permitImage)} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div className="space-y-4">

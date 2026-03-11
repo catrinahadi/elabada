@@ -11,7 +11,7 @@ import {
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -413,7 +413,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
               <div className="w-full flex h-64 md:h-auto">
                 <div className="w-full relative rounded-[32px] overflow-hidden border border-black/5 shadow-sm">
                   <div className="absolute inset-0">
-                    <img src={shop.image} className="w-full h-full object-cover" alt="" />
+                    <img src={shop.image || "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80"} className="w-full h-full object-cover" alt="" />
                   </div>
                 </div>
               </div>
@@ -903,7 +903,7 @@ export default function ShopsPage() {
     const item = newPriorities.splice(dragIndex, 1)[0];
     newPriorities.splice(index, 0, item);
     setPriorities(newPriorities);
-    setDragIndex(null);
+    setIsApplied(false);
   };
 
   const handleTouchStart = (index) => {
@@ -1203,7 +1203,7 @@ export default function ShopsPage() {
                     className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer ${s.status === 'open' ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
                   >
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-2">
-                      <img src={s.image} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />
+                      <img src={s.image || "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80"} className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105" alt="" />
                       <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${s.status === 'open' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-black/10 text-black/40'}`}>
                         <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-black/20'}`} />
                         <span className="text-[12px] font-normal capitalize tracking-wide">{s.status}</span>
