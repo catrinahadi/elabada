@@ -171,7 +171,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         const fd = new FormData();
         fd.append("file", file);
         const { data } = await api.post("/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
-        return `${API_BASE}${data.url}`;
+        return data.url;
     };
 
     const handleSubmit = async (e) => {
