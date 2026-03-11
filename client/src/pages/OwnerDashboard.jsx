@@ -34,6 +34,7 @@ const Field = ({ label, value, onChange, type = "text", placeholder, step }) => 
             onChange={onChange}
             placeholder={placeholder}
             className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-[14px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+            required
         />
     </div>
 );
@@ -102,8 +103,8 @@ function UploadBox({ label, hint, onFileSelected, preview, small = false, extraC
                     <div className={`rounded-2xl bg-white shadow-sm flex items-center justify-center text-[#7B1113] ${small ? "w-9 h-9" : "w-10 h-10"}`}>
                         <UploadCloud className={small ? "w-4 h-4" : "w-5 h-5"} />
                     </div>
-                    <p className="text-[14px] font-normal text-[#1D1D1F] text-center">{label}</p>
-                    {hint && <p className="text-[14px] font-normal text-[#1D1D1F] text-center">{hint}</p>}
+                    <p className="text-[14px] font-normal text-[#8E8E93] text-center">{label}</p>
+                    {hint && <p className="text-[14px] font-normal text-[#8E8E93] text-center">{hint}</p>}
                 </>
             )}
             <input ref={inputRef} type="file" accept="image/*,application/pdf" className="hidden" onChange={handleChange} />
@@ -175,7 +176,18 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!form.name || !form.address) return;
+        
+        // Comprehensive validation
+        if (!form.name || !form.address || !form.price || !form.turnaroundTime) return;
+        
+        // Required files check for new registrations
+        if (!initialData) {
+            if (!shopImageFile || !permitFile) {
+                alert("Please upload both a shop photo and your business permit.");
+                return;
+            }
+        }
+
         setUploading(true);
         try {
             let finalForm = { ...form };
@@ -193,13 +205,13 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     return (
         <div className="modal-overlay fixed inset-0 flex items-center justify-center p-6 md:p-12 z-[200] backdrop-blur-xl bg-black/40">
             <div className="bg-white rounded-[48px] md:rounded-[64px] w-full max-w-5xl h-auto max-h-[92vh] shadow-[0_80px_160px_rgba(0,0,0,0.4)] animate-scaleIn overflow-hidden border border-white/20 flex flex-col">
-                <div className="px-10 pt-10 pb-6 flex items-center justify-between">
+                <div className="px-10 pt-10 pb-6 flex items-start justify-between">
                     <div className="space-y-1">
-                        <h2 className="text-3xl font-normal text-[#1D1D1F] tracking-tighter">{initialData ? "Edit Shop Details" : "Register New Shop"}</h2>
-                        <p className="text-[14px] font-medium text-[#8E8E93]">Fill in the essentials to get your establishment listed.</p>
+                        <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter">{initialData ? "Edit Shop Details" : "Register New Shop"}</h2>
+                        <p className="text-[14px] font-normal text-[#8E8E93]">Fill in the essentials to get your establishment listed.</p>
                     </div>
-                    <button onClick={onClose} className="w-12 h-12 rounded-2xl bg-[#F8F9FA] text-[#1D1D1F] flex items-center justify-center hover:bg-[#7B1113] hover:text-white transition-all active:scale-95 group">
-                        <X className="w-5 h-5 transition-transform group-hover:rotate-90" />
+                    <button onClick={onClose} className="text-[#1D1D1F] p-2 transition-all active:scale-95">
+                        <X className="w-6 h-6" />
                     </button>
                 </div>
 
@@ -208,8 +220,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         {/* Left Column: Visuals & Core Info */}
                         <div className="space-y-8">
                             <UploadBox
-                                label="Featured Establishment Image"
-                                hint="Upload a high-quality photo of your shop storefront"
+                                label="Upload a photo of your shop"
                                 onFileSelected={pickShopImage}
                                 preview={shopImagePreview}
                                 extraClass="h-72"
@@ -245,7 +256,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         {/* Right Column: Location & Documents */}
                         <div className="space-y-8">
                             <div className="space-y-2">
-                                <label className="block text-[14px] font-bold text-[#1D1D1F]">Business Address</label>
+                                <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
                                 <div className="relative">
                                     <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-30" />
                                     <input
@@ -253,7 +264,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                         value={form.address}
                                         onChange={e => set("address", e.target.value)}
                                         placeholder="Enter the complete physical address"
-                                        className="w-full h-14 bg-[#F8F9FA] rounded-[20px] pl-12 pr-5 text-[14px] font-medium border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
+                                        className="w-full h-14 bg-[#F8F9FA] rounded-[20px] pl-12 pr-5 text-[14px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
                                     />
                                 </div>
                             </div>
@@ -275,20 +286,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     />
                                 </MapContainer>
                                 <div className="absolute top-4 right-4 z-[1000] bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-black/5 shadow-sm">
-                                    <span className="text-[10px] font-black text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
+                                    <span className="text-[10px] font-normal text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
                                 </div>
                             </div>
 
                             {!initialData && (
                                 <div className="space-y-3">
-                                    <label className="block text-[14px] font-bold text-[#1D1D1F]">Operating Permit / LTO</label>
+                                    <label className="block text-[14px] font-normal text-[#1D1D1F]">Operating Permit / LTO</label>
                                     <UploadBox
                                         label={permitFile ? "Permit Uploaded Successfully" : "Upload Business Permit"}
                                         hint="Strictly JPG, PNG or PDF format only"
                                         onFileSelected={pickPermit}
                                         preview={permitPreview}
-                                        small
-                                        extraClass="h-28"
+                                        extraClass="h-36"
                                     />
                                 </div>
                             )}
@@ -299,9 +309,9 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-5 rounded-[24px] bg-[#7B1113] text-white text-[15px] font-bold hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#7B1113]/20 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
+                            className="w-full py-5 rounded-[24px] bg-[#7B1113] text-white text-[14px] font-normal hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#7B1113]/20 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
                         >
-                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : (initialData ? "Save Changes" : "Register My Establishment")}
+                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : "Confirm"}
                         </button>
                     </div>
                 </form>
