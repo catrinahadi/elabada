@@ -408,7 +408,7 @@ export default function OwnerDashboard() {
             {!isModalOpen && (
                 <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
                     <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20 transition-transform hover:scale-105 cursor-pointer" onClick={() => navigate("/")}>E</div>
+                        <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20 transition-transform">E</div>
                         <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                     </div>
                     <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] p-3 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal">

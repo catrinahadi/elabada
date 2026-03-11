@@ -50,10 +50,10 @@ export default function Signup() {
         <div className="min-h-screen bg-[#FDFDFD] flex items-center justify-center p-6 font-outfit relative">
             {/* Brand/Logo - Responsive Positioning */}
             <div className="absolute top-8 left-8 md:top-10 md:left-10 z-10">
-                <Link to="/" className="flex items-center gap-3 active:scale-95 transition-transform">
-                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
+                <div className="flex items-center gap-3 select-none">
+                    <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20 transition-transform">E</div>
                     <span className="font-normal text-[22px] tracking-tighter text-[#1D1D1F]">ELaBada</span>
-                </Link>
+                </div>
             </div>
 
             <div className="w-full max-w-[520px] mt-20 md:mt-0 bg-white rounded-[40px] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.12)] border border-black/[0.03] px-10 py-4 md:px-14 md:py-4 flex flex-col gap-6 animate-scaleIn">
