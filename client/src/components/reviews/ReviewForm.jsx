@@ -5,13 +5,15 @@ export default function ReviewForm({ shopId, userId, onSubmit, onCancel }) {
   const [rating, setRating] = useState(0);
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState("");
+  const [isAnonymous, setIsAnonymous] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating === 0) { alert("Please select a rating."); return; }
-    onSubmit({ shopId, userId, rating, comment });
+    onSubmit({ shopId, userId, rating, comment, isAnonymous });
     setRating(0);
     setComment("");
+    setIsAnonymous(false); // Reset isAnonymous after submission
   };
 
   const active = hovered || rating;
@@ -77,6 +79,27 @@ export default function ReviewForm({ shopId, userId, onSubmit, onCancel }) {
         </div>
       </div>
 
+      {/* Anonymity Toggle */}
+      <div className="flex items-center gap-3 px-1 pb-1">
+        <button
+          type="button"
+          id="post-anonymous"
+          onClick={() => setIsAnonymous(!isAnonymous)}
+          className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+            isAnonymous ? 'bg-black' : 'bg-gray-200'
+          }`}
+        >
+          <span
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+              isAnonymous ? 'translate-x-6' : 'translate-x-1'
+            }`}
+          />
+        </button>
+        <label htmlFor="post-anonymous" className="text-sm font-medium text-gray-600 cursor-pointer select-none">
+          Post Anonymously
+        </label>
+      </div>
+
       {/* Actions */}
       <div className="flex gap-2 pt-1">
         <button type="button" onClick={onCancel} className="btn-ghost flex-1 text-sm">
@@ -87,7 +110,7 @@ export default function ReviewForm({ shopId, userId, onSubmit, onCancel }) {
           disabled={rating === 0}
           className="btn-primary flex-1 text-sm disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          Submit Review
+          Post Review
         </button>
       </div>
     </form>

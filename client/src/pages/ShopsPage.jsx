@@ -89,6 +89,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   const [images, setImages] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [isAnonymous, setIsAnonymous] = useState(false);
   const fileInputRef = useRef(null);
 
   if (!user) return (
@@ -126,7 +127,14 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
     if (rating === 0) return alert("Please select a rating.");
     setSubmitting(true);
     try {
-      await onPosted(shopId, { rating, comment, reviewerName: user?.name || "Verified Customer", images, userId: user?._id || user?.id });
+      await onPosted(shopId, { 
+        rating, 
+        comment, 
+        reviewerName: isAnonymous ? "Anonymous User" : (user?.name || "Verified Customer"), 
+        images, 
+        userId: user?._id || user?.id,
+        isAnonymous
+      });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
@@ -202,7 +210,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
           <p className="text-[14px] font-normal text-[#1D1D1F]">Add photos (max 3)</p>
           <div className="flex gap-4">
             {images.map((img, idx) => (
-              <div key={idx} className="relative w-24 h-24 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
+              <div key={idx} className="relative w-32 h-32 rounded-2xl overflow-hidden group/img shadow-md border border-black/[0.03]">
                 <img src={img} className="w-full h-full object-cover" alt="" />
                 <button
                   type="button"
@@ -217,12 +225,32 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
-                className="w-24 h-24 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-[#E67E00] hover:text-[#E67E00] hover:bg-[#E67E00]/5 transition-all group"
+                className="w-32 h-32 rounded-2xl border-2 border-dashed border-gray-200 flex flex-col items-center justify-center text-gray-400 hover:border-[#E67E00] hover:text-[#E67E00] hover:bg-[#E67E00]/5 transition-all group"
               >
                 <Plus className="w-8 h-8 group-hover:scale-110 transition-transform" />
               </button>
             )}
           </div>
+        </div>
+
+        <div className="flex items-center gap-3 px-2 pb-2">
+          <button
+            type="button"
+            id="anonymous"
+            onClick={() => setIsAnonymous(!isAnonymous)}
+            className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 focus:outline-none ${
+              isAnonymous ? 'bg-black' : 'bg-gray-200'
+            }`}
+          >
+            <span
+              className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200 ${
+                isAnonymous ? 'translate-x-6' : 'translate-x-1'
+              }`}
+            />
+          </button>
+          <label htmlFor="anonymous" className="text-[14px] font-normal text-gray-600 cursor-pointer select-none">
+            Post Anonymously
+          </label>
         </div>
 
         <div className="flex gap-4">
@@ -238,7 +266,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
             disabled={submitting || rating === 0}
             className="flex-1 py-4 bg-[#014421] text-white rounded-xl text-[14px] font-normal tracking-wide hover:opacity-90 transition-all shadow-xl shadow-[#014421]/20 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {submitting ? "Submitting..." : "Submit"}
+            {submitting ? "Posting..." : "Post"}
           </button>
         </div>
       </div>

@@ -14,7 +14,7 @@ exports.getReviews = async (req, res) => {
 // POST a review and update shop's average rating
 exports.postReview = async (req, res) => {
     try {
-        const { shopId, rating, comment, reviewerName, userId, images } = req.body;
+    const { shopId, rating, comment, reviewerName, userId, images, isAnonymous } = req.body;
 
         if (!shopId || !rating) {
             return res.status(400).json({ message: "shopId and rating are required." });
@@ -25,7 +25,8 @@ exports.postReview = async (req, res) => {
             userId: userId || "anonymous",
             rating,
             comment: comment || "",
-            reviewerName: reviewerName || "Anonymous",
+            reviewerName: isAnonymous ? "Anonymous" : (reviewerName || "Anonymous"),
+            isAnonymous: !!isAnonymous,
             images: images || [],
         });
 
