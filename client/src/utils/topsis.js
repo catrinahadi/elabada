@@ -14,12 +14,16 @@ export function calculateTopsis(shops, weights, priorities = ['price', 'time', '
     if (!shops || shops.length === 0) return [];
 
     // Step 1: Identify the Criteria (Key mapping and benefit/cost type)
-    const criteria = [
+    const allCriteria = [
         { key: 'price', weightKey: 'price', isBenefit: false },
         { key: 'turnaroundTime', weightKey: 'time', isBenefit: false },
         { key: 'rating', weightKey: 'rating', isBenefit: true },
         { key: 'distance', weightKey: 'distance', isBenefit: false }
     ];
+
+    // Integrate priorities: Order criteria based on the priorities parameter
+    // This dynamically adjusts the order of evaluation and result details
+    const criteria = priorities.map(pKey => allCriteria.find(c => c.weightKey === pKey)).filter(Boolean);
 
     // Map weights (priorities) to the criteria
     const totalWeight = criteria.reduce((sum, c) => sum + (weights[c.weightKey] || 0), 0) || 1;
@@ -67,7 +71,8 @@ export function calculateTopsis(shops, weights, priorities = ['price', 'time', '
             row.reduce((sum, v_ij, j) => sum + Math.pow(v_ij - idealWorst[j], 2), 0)
         );
 
-        const closenessCoefficient = distToWorst / (distToBest + distToWorst || 0.0001);
+        const totalSeparation = distToBest + distToWorst;
+        const closenessCoefficient = totalSeparation === 0 ? 0 : distToWorst / (totalSeparation || 0.0001);
 
         return {
             id: shops[i].id || shops[i]._id,
