@@ -15,6 +15,10 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
           alt={shop.name}
           className="w-full h-full object-cover transition-transform duration-[1.5s] group-hover:scale-105"
           loading="lazy"
+          onError={(e) => {
+            e.target.onerror = null;
+            e.target.src = "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80";
+          }}
         />
         <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm">
           <div className={`w-1.5 h-1.5 rounded-full ${shop.status === "open" ? "bg-[#228B22]" : "bg-[#8E8E93]"}`} />
