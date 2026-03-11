@@ -580,20 +580,26 @@ export default function OwnerDashboard() {
                                                     {statusLabel(shop.permitStatus)}
                                                 </div>
                                                 <div className="flex items-center gap-2">
-                                                    <button
-                                                        onClick={() => setEditingShop(shop)}
-                                                        className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#1D1D1F] hover:bg-black/[0.03] hover:shadow-md transition-all active:scale-95"
-                                                        title="Edit Establishment"
-                                                    >
-                                                        <Edit3 className="w-4 h-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => setDeletingId(shop._id)}
-                                                        className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#7B1113] hover:bg-[#7B1113]/5 hover:shadow-md transition-all active:scale-95"
-                                                        title="Delete Establishment"
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                    </button>
+                                                    {shop.permitStatus !== 'rejected' ? (
+                                                        <>
+                                                            <button
+                                                                onClick={() => setEditingShop(shop)}
+                                                                className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#1D1D1F] hover:bg-black/[0.03] hover:shadow-md transition-all active:scale-95"
+                                                                title="Edit Establishment"
+                                                            >
+                                                                <Edit3 className="w-4 h-4" />
+                                                            </button>
+                                                            <button
+                                                                onClick={() => setDeletingId(shop._id)}
+                                                                className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#7B1113] hover:bg-[#7B1113]/5 hover:shadow-md transition-all active:scale-95"
+                                                                title="Delete Establishment"
+                                                            >
+                                                                <Trash2 className="w-4 h-4" />
+                                                            </button>
+                                                        </>
+                                                    ) : (
+                                                        <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest px-2">Locked</span>
+                                                    )}
                                                 </div>
                                             </div>
                                         </td>
