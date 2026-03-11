@@ -22,7 +22,8 @@ import {
     Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera, LocateFixed, Info, Search, ShieldCheck, Bell, Menu
 } from "lucide-react";
 
-const API_BASE = "http://localhost:5000";
+// Using baseURL from services/api.js instead of hardcoded strings
+
 
 const Field = ({ label, value, onChange, type = "text", placeholder, step }) => (
     <div className="space-y-1.5">
