@@ -1271,7 +1271,7 @@ export default function ShopsPage() {
                     <div className="bg-white p-8 md:p-14 rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
+                          <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
                           <button
                             onClick={() => setShowWeightManual(!showWeightManual)}
                             className={`p-3 rounded-2xl transition-all ${showWeightManual ? 'bg-[#014421] text-white shadow-lg shadow-[#014421]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
@@ -1316,7 +1316,7 @@ export default function ShopsPage() {
                     <div className="bg-white rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl p-8 md:p-14 flex flex-col space-y-12">
                       <div className="space-y-6">
                         <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
+                          <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
                           <button
                             onClick={() => setShowPriorityManual(!showPriorityManual)}
                             className={`p-3 rounded-2xl transition-all ${showPriorityManual ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
@@ -1450,7 +1450,7 @@ export default function ShopsPage() {
                   ) : (
                     <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">
                       <Target className="w-10 h-10 text-[#1D1D1F]/40 mb-4" />
-                      <p className="text-[11px] font-bold text-[#1D1D1F] max-w-[220px] leading-relaxed">Adjust your rankings and click Apply to see top shops recommendations</p>
+                      <p className="text-[14px] font-normal text-[#1D1D1F] max-w-[220px] leading-relaxed">Adjust your rankings and click Apply to see top shops recommendations</p>
                     </div>
                   )}
                 </div>
