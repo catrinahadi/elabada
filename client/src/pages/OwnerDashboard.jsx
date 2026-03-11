@@ -215,10 +215,10 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-10 pb-10 space-y-10 flex-1 overflow-y-auto no-scrollbar pt-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+                <form onSubmit={handleSubmit} className="px-10 pb-10 space-y-5 flex-1 overflow-y-auto no-scrollbar pt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
                         {/* Left Column: Visuals & Core Info */}
-                        <div className="space-y-8">
+                        <div className="space-y-5">
                             <UploadBox
                                 label="Upload a photo of your shop"
                                 onFileSelected={pickShopImage}
@@ -226,7 +226,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 extraClass="h-72"
                             />
 
-                            <div className="space-y-6">
+                            <div className="space-y-5">
                                 <Field
                                     label="Establishment Name"
                                     value={form.name}
@@ -234,7 +234,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     placeholder="e.g. Master Cleaners"
                                 />
 
-                                <div className="grid grid-cols-2 gap-6">
+                                <div className="grid grid-cols-2 gap-5">
                                     <Field
                                         label="Price per Kilo (₱)"
                                         value={form.price}
@@ -254,7 +254,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
 
                         {/* Right Column: Location & Documents */}
-                        <div className="space-y-8">
+                        <div className="space-y-5">
                             <div className="space-y-2">
                                 <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
                                 <div className="relative">
@@ -305,7 +305,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                         </div>
                     </div>
 
-                    <div className="pt-4">
+                    <div className="pt-5">
                         <button
                             type="submit"
                             disabled={isLoading}
