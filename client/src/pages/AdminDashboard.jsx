@@ -8,51 +8,49 @@ import {
     CheckCircle, XCircle, Clock, MoreVertical,
     Trash2, Edit3, ChevronRight, ArrowUpRight,
     FileText, Eye, AlertCircle, TrendingUp,
-    MapPin, Calendar, ArrowLeft, Phone, Menu, ShieldCheck, X
+    MapPin, Calendar, ArrowLeft, Phone, Menu, ShieldCheck, X, Banknote
 } from "lucide-react";
 
 
 // Mock data as fallback
 const INITIAL_SHOPS = [];
 
-function PermitModal({ shop, onClose }) {
+function ConfirmationModal({ isOpen, title, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel", type = "danger" }) {
+    if (!isOpen) return null;
     return (
-        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[100]">
-            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-3xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col h-[95vh] md:h-auto max-h-[90vh]">
-                <div className="p-6 md:p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
-                    <div>
-                        <h2 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">Verification</h2>
-                    </div>
-                    <button onClick={onClose} className="p-2 -mr-2 text-black hover:bg-black/5 rounded-full transition-colors">
-                        <X className="w-6 h-6" />
-                    </button>
+        <div className="fixed inset-0 z-[150] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fadeIn" onClick={onCancel}>
+            <div className="bg-white rounded-[32px] w-full max-w-md overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn p-8 space-y-6" onClick={e => e.stopPropagation()}>
+                <div className="space-y-2 text-center">
+                    <h3 className="text-xl font-bold tracking-tight text-[#1D1D1F]">{title}</h3>
+                    <p className="text-[14px] text-gray-500 leading-relaxed">{message}</p>
                 </div>
-                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
-                    <div className="bg-white p-4 rounded-[24px] md:rounded-[32px] shadow-sm border border-black/[0.03]">
-                        <img src={shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <div className="space-y-3">
-                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Shop Name</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.shopName || shop.name}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Owner Name</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.ownerName}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Date Submitted</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div className="flex gap-3">
+                    <button onClick={onCancel} className="flex-1 px-6 py-3.5 rounded-2xl border border-black/5 text-[14px] font-medium text-gray-600 hover:bg-gray-50 transition-all">{cancelText}</button>
+                    <button onClick={onConfirm} className={`flex-1 px-6 py-3.5 rounded-2xl text-[14px] font-medium text-white transition-all shadow-lg ${type === 'danger' ? 'bg-[#800000] hover:bg-[#600000] shadow-[#800000]/20' : 'bg-[#003366] hover:bg-[#002244] shadow-[#003366]/20'}`}>{confirmText}</button>
                 </div>
-                <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">
-                    <button onClick={onClose} className="inline-flex items-center justify-center gap-2 bg-[#003366] hover:bg-[#002244] active:scale-95 text-white text-[14px] font-normal rounded-2xl px-12 py-4 tracking-widest transition-all duration-300 select-none shadow-xl shadow-[#003366]/10">Close</button>
+            </div>
+        </div>
+    );
+}
+
+function Toast({ message, onClose }) {
+    useEffect(() => {
+        const timer = setTimeout(onClose, 3000);
+        return () => clearTimeout(timer);
+    }, [onClose]);
+
+    return (
+        <div className="fixed top-6 right-6 lg:top-auto lg:bottom-12 lg:right-12 z-[500] animate-fadeDown lg:animate-fadeUp">
+            <div className="bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.03] p-5 pr-8 flex items-center gap-4 min-w-[320px]">
+                <div className="w-10 h-10 rounded-2xl bg-[#228B2210] flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-5 h-5 text-[#228B22]" />
                 </div>
+                <div>
+                    <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight">{message}</p>
+                </div>
+                <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1D1D1F]/20 hover:text-[#1D1D1F]">
+                    <X className="w-4 h-4" />
+                </button>
             </div>
         </div>
     );
@@ -64,6 +62,8 @@ export default function AdminDashboard() {
     const [shops, setShops] = useState([]);
     const [stats, setStats] = useState({ shops: {}, users: { total: 0 } });
     const [viewingPermit, setViewingPermit] = useState(null);
+    const [confirmingApproval, setConfirmingApproval] = useState(null);
+    const [successMsg, setSuccessMsg] = useState(null);
     const [expandedShops, setExpandedShops] = useState(new Set());
     const [filterStatus, setFilterStatus] = useState("pending");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -90,7 +90,10 @@ export default function AdminDashboard() {
     const approvedShops = useMemo(() => shops.filter(s => s.permitStatus === "approved"), [shops]);
     const pendingShops = useMemo(() => shops.filter(s => s.permitStatus === "pending"), [shops]);
     const rejectedShops = useMemo(() => shops.filter(s => s.permitStatus === "rejected"), [shops]);
-    const filteredList = useMemo(() => shops.filter(s => s.permitStatus === filterStatus), [shops, filterStatus]);
+    const filteredList = useMemo(() => {
+        if (filterStatus === "all") return shops;
+        return shops.filter(s => s.permitStatus === filterStatus);
+    }, [shops, filterStatus]);
 
     const handleLogout = () => { logout(); navigate("/login"); };
 
@@ -98,6 +101,8 @@ export default function AdminDashboard() {
         try {
             await api.put(`/admin/shops/${id}/approve`);
             setShops(prev => prev.map(s => s._id === id ? { ...s, permitStatus: 'approved', rejectionReason: "" } : s));
+            setConfirmingApproval(null);
+            setSuccessMsg("Establishment approved successfully.");
         } catch (err) {
             console.error("Failed to approve shop:", err.message);
         }
@@ -211,7 +216,7 @@ export default function AdminDashboard() {
 
 
 
-                            <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-12">
+                            <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-72">
                                 {/* Table Header */}
                                 <div className="hidden lg:grid grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
                                     <span>Ref #</span>
@@ -227,7 +232,7 @@ export default function AdminDashboard() {
                                 {filteredList.map((shop, idx) => (
                                     <div
                                         key={shop._id}
-                                        className="bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300"
+                                        className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
                                     >
                                         <span className="text-[14px] font-normal text-[#1D1D1F]/20 lg:block hidden tracking-tight tabular-nums truncate">
                                             {(idx + 1).toString().padStart(2, '0')}
@@ -253,7 +258,10 @@ export default function AdminDashboard() {
 
                                         {/* Price */}
                                         <div className="flex flex-col">
-                                            <span className="text-[14px] font-normal text-[#1D1D1F]">₱{shop.price || 0}<span className="text-[#8E8E93] text-xs"> /kg</span></span>
+                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
+                                                <Banknote className="w-4 h-4 text-[#8E8E93]" />
+                                                <span>₱{shop.price || 0}<span className="text-[#8E8E93] text-xs"> /kg</span></span>
+                                            </div>
                                         </div>
 
                                         {/* Lead Time */}
@@ -272,7 +280,7 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="flex items-center gap-4 lg:justify-end w-full lg:w-auto mt-4 lg:mt-0">
+                                        <div className="flex items-center justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">
                                             <button
                                                 onClick={() => setViewingPermit(shop)}
                                                 className="h-11 px-6 rounded-[20px] border-2 border-[#003366] text-[#003366] bg-transparent hover:bg-[#003366] hover:text-white transition-all text-[14px] font-normal flex items-center gap-2.5"
@@ -280,20 +288,23 @@ export default function AdminDashboard() {
                                                 <FileText className="w-4 h-4" /> Review Permit
                                             </button>
 
-                                            <div className="relative" onClick={e => e.stopPropagation()}>
+                                            <div className="relative">
                                                 <button
-                                                    onClick={() => setOpenDropdownId(openDropdownId === shop._id ? null : shop._id)}
+                                                    onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === shop._id ? null : shop._id); }}
                                                     className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-[#F8F9FA] border border-black/[0.05] hover:bg-black hover:text-white ${openDropdownId === shop._id ? 'bg-black text-white' : 'text-[#8E8E93]'}`}
                                                 >
                                                     <MoreVertical className="w-5 h-5" />
                                                 </button>
 
                                                 {openDropdownId === shop._id && (
-                                                    <div className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.05] py-3 z-[100] overflow-hidden animate-scaleIn">
+                                                    <div 
+                                                        onClick={e => e.stopPropagation()}
+                                                        className="absolute right-0 top-full mt-3 w-64 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.05] py-3 z-[100] overflow-hidden animate-scaleIn"
+                                                    >
                                                         {(shop.permitStatus === 'pending' || filterStatus === 'all') && (
                                                             <>
                                                                 <button
-                                                                    onClick={() => { handleApprove(shop._id); setOpenDropdownId(null); }}
+                                                                    onClick={(e) => { e.stopPropagation(); setConfirmingApproval(shop); setOpenDropdownId(null); }}
                                                                     className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#228B22] hover:bg-[#228B22]/5 flex items-center gap-3 transition-colors whitespace-nowrap"
                                                                 >
                                                                     <CheckCircle className="w-4 h-4" /> Approve Listing
@@ -327,6 +338,65 @@ export default function AdminDashboard() {
 
             {/* MODALS */}
             {viewingPermit && <PermitModal shop={viewingPermit} onClose={() => setViewingPermit(null)} />}
+            
+            {successMsg && (
+                <Toast message={successMsg} onClose={() => setSuccessMsg(null)} />
+            )}
+            
+            <ConfirmationModal 
+                isOpen={!!confirmingApproval}
+                title="Confirm Approval"
+                message={`Are you sure you want to approve "${confirmingApproval?.name}"? Once approved, the shop will be visible to all users.`}
+                confirmText="Approve"
+                cancelText="Cancel"
+                type="primary"
+                onConfirm={() => handleApprove(confirmingApproval?._id)}
+                onCancel={() => setConfirmingApproval(null)}
+            />
+        </div>
+    );
+}
+
+// Separate PermitModal since it was moved out from initial position but still used
+function PermitModal({ shop, onClose }) {
+    return (
+        <div className="modal-overlay flex items-center justify-center p-4 md:p-6 z-[100]">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-3xl overflow-hidden shadow-[0_32px_80px_rgba(0,0,0,0.3)] animate-scaleIn flex flex-col h-[95vh] md:h-auto max-h-[90vh]">
+                <div className="p-6 md:p-8 border-b border-black/[0.05] flex items-center justify-between bg-[#F8F9FA]">
+                    <div>
+                        <h2 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">Verification</h2>
+                    </div>
+                    <button onClick={onClose} className="p-2 -mr-2 text-black hover:bg-black/5 rounded-full transition-colors">
+                        <X className="w-6 h-6" />
+                    </button>
+                </div>
+                <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
+                    <div className="bg-white p-4 rounded-[24px] md:rounded-[32px] shadow-sm border border-black/[0.03]">
+                        <img src={shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-4">
+                            <div className="space-y-3">
+                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Shop Name</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.shopName || shop.name}</span>
+                                </div>
+                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Owner Name</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.ownerName}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Date Submitted</span>
+                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">
+                    <button onClick={onClose} className="inline-flex items-center justify-center gap-2 bg-[#003366] hover:bg-[#002244] active:scale-95 text-white text-[14px] font-normal rounded-2xl px-12 py-4 tracking-widest transition-all duration-300 select-none shadow-xl shadow-[#003366]/10">Close</button>
+                </div>
+            </div>
         </div>
     );
 }

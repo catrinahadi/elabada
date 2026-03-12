@@ -597,9 +597,7 @@ export default function OwnerDashboard() {
                                                                 <Trash2 className="w-4 h-4" />
                                                             </button>
                                                         </>
-                                                    ) : (
-                                                        <span className="text-[10px] font-bold text-[#8E8E93] uppercase tracking-widest px-2">Locked</span>
-                                                    )}
+                                                    ) : null}
                                                 </div>
                                             </div>
                                         </td>
