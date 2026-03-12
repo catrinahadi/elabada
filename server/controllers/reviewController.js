@@ -2,21 +2,58 @@ const Review = require("../models/Review");
 const Shop = require("../models/Shop");
 
 const updateShopMetrics = async (shopId) => {
+    const shop = await Shop.findById(shopId);
+    if (!shop) return;
+
     const allReviews = await Review.find({ shopId });
-    const avg = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+    const reviewCount = allReviews.length;
+
+    if (reviewCount === 0) {
+        return await Shop.findByIdAndUpdate(shopId, {
+            rating: 0,
+            reviewCount: 0,
+            actualTurnaroundTime: null,
+            reliabilityScore: 1
+        });
+    }
+
+    const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount;
     
-    const reviewsWithTime = allReviews.filter(r => r.actualTimeTaken != null);
-    const avgActualTime = reviewsWithTime.length > 0 
-        ? reviewsWithTime.reduce((sum, r) => sum + r.actualTimeTaken, 0) / reviewsWithTime.length
-        : null;
+    // Formula Requirements:
+    // 1. Min Threshold: 5 reviews
+    // 2. Weighted Average: ((PromisedTime * 10) + Sum(ActualTimes)) / (10 + ReviewCount)
+    // 3. Cap Outliers: max 2x PromisedTime
+    
+    let avgActualTime;
+    if (reviewCount < 5) {
+        // Fallback to promised time if below threshold
+        avgActualTime = shop.turnaroundTime;
+    } else {
+        const BASE_WEIGHT = 10;
+        const CAP_MULTIPLIER = 2;
+        const maxAllowedTime = shop.turnaroundTime * CAP_MULTIPLIER;
+
+        const totalActualTimeSum = allReviews.reduce((sum, r) => {
+            let reviewTime;
+            if (r.wasOnTime !== false) {
+                reviewTime = shop.turnaroundTime;
+            } else {
+                // Cap extreme outliers
+                reviewTime = Math.min(r.actualTimeTaken || shop.turnaroundTime, maxAllowedTime);
+            }
+            return sum + reviewTime;
+        }, 0);
+
+        avgActualTime = ((shop.turnaroundTime * BASE_WEIGHT) + totalActualTimeSum) / (BASE_WEIGHT + reviewCount);
+    }
 
     const onTimeCount = allReviews.filter(r => r.wasOnTime !== false).length;
-    const reliability = onTimeCount / allReviews.length;
+    const reliability = onTimeCount / reviewCount;
 
     return await Shop.findByIdAndUpdate(shopId, {
-        rating: Math.round(avg * 10) / 10,
-        reviewCount: allReviews.length,
-        actualTurnaroundTime: avgActualTime ? Math.round(avgActualTime * 10) / 10 : null,
+        rating: Math.round(avgRating * 10) / 10,
+        reviewCount: reviewCount,
+        actualTurnaroundTime: Math.round(avgActualTime * 10) / 10,
         reliabilityScore: Math.round(reliability * 100) / 100
     });
 };

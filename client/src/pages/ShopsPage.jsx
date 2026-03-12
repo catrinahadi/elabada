@@ -1430,7 +1430,7 @@ export default function ShopsPage() {
                             )}
                           </span>
                         </div>
-                        {s.actualTurnaroundTime > s.turnaroundTime && (
+                        {s.actualTurnaroundTime >= s.turnaroundTime + 0.5 && (
                           <div className="flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-lg border border-red-100 w-fit">
                             <AlertCircle className="w-3 h-3 text-red-500" />
                             <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Delays Reported</span>
