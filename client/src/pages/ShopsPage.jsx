@@ -554,14 +554,20 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     {/* Time Card */}
                     <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300 relative group/time">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight">Turnaround</span>
-                      <p className="text-[14px] font-normal text-[#014421]">
-                        {shop.turnaroundTime} hrs
-                      </p>
-                      {shop.actualTurnaroundTime > shop.turnaroundTime && (
-                        <div className="absolute -top-2 px-3 py-1 bg-[#7B1113] text-white text-[10px] font-bold rounded-full shadow-lg shadow-[#7B1113]/20 animate-bounce">
-                          ~{shop.actualTurnaroundTime} hrs actual
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1.5">
+                        <p className={`text-[14px] font-normal ${shop.actualTurnaroundTime > shop.turnaroundTime ? 'text-[#7B1113]' : 'text-[#014421]'}`}>
+                          {shop.turnaroundTime} hrs
+                        </p>
+                        {shop.actualTurnaroundTime > shop.turnaroundTime && (
+                          <div className="relative group/tooltip ml-1">
+                            <AlertCircle className="w-6 h-6 text-[#7B1113] cursor-help transition-all hover:scale-110 active:scale-90" />
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-[#1D1D1F] text-white text-[13px] font-normal rounded-2xl opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[100] border border-white/10 backdrop-blur-xl translate-y-2 group-hover/tooltip:translate-y-0">
+                              Actual: {shop.actualTurnaroundTime} hrs
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-[#1D1D1F]" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
 
                     {/* Distance Card */}
@@ -711,6 +717,8 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
       distance: 'Distance'
     };
 
+    const isDelay = criterion === 'turnaroundTime' && shop.actualTurnaroundTime > shop.turnaroundTime;
+
     const percentage = Math.round(rating * 100);
     const weightPercent = Math.round(weight * 100);
     
@@ -718,12 +726,17 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
     let formattedValue = actualValue;
     if (criterion === 'price') formattedValue = `₱${actualValue}`;
     else if (criterion === 'rating') formattedValue = `${actualValue} / 5`;
+    else if (criterion === 'turnaroundTime') {
+      formattedValue = isDelay ? `~${shop.actualTurnaroundTime}` : `${shop.turnaroundTime}`;
+    }
 
     return { 
       label: labels[criterion], 
       percentage, 
       weightPercent,
       actualValue: formattedValue,
+      promisedValue: criterion === 'turnaroundTime' ? shop.turnaroundTime : null,
+      isDelay,
       icon: criterion === 'price' ? DollarSign :
             criterion === 'turnaroundTime' ? Timer :
             criterion === 'rating' ? Star : MapPin,
@@ -861,10 +874,29 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                         </div>
                         <div>
                           <p className="text-[14px] font-bold text-[#1D1D1F]">{info.label}</p>
-                          <p className="text-[12px] font-normal text-gray-500">{info.actualValue} {info.unit}</p>
+                          {info.isDelay ? (
+                            <div className="flex items-center gap-4 mt-1 bg-[#7B1113]/[0.02] border border-[#7B1113]/10 p-2 rounded-xl">
+                              <div className="flex flex-col px-1">
+                                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none mb-1">Stated</span>
+                                <span className="text-[13px] font-medium text-gray-400 leading-none">{info.promisedValue} {info.unit}</span>
+                              </div>
+                              <div className="h-6 w-[1px] bg-[#7B1113]/20" />
+                              <div className="flex flex-col px-1">
+                                <span className="text-[9px] text-[#7B1113] font-black uppercase tracking-widest leading-none mb-1">Reality</span>
+                                <span className="text-[13px] font-black text-[#7B1113] leading-none">{info.actualValue} {info.unit}</span>
+                              </div>
+                            </div>
+                          ) : (
+                            <p className="text-[12px] font-normal text-gray-500">
+                              {info.actualValue} {info.unit}
+                            </p>
+                          )}
                         </div>
                       </div>
-                      <span className="text-[14px] font-bold text-[#1D1D1F]">{info.percentage}%</span>
+                      <div className="text-right">
+                        <span className="text-[14px] font-bold text-[#1D1D1F] block">{info.percentage}%</span>
+                        {info.isDelay && <span className="text-[9px] text-[#7B1113] font-bold uppercase block opacity-60">Truth-Adjusted</span>}
+                      </div>
                     </div>
                     <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
                       <div
@@ -1420,20 +1452,16 @@ export default function ShopsPage() {
                           <p className="text-[12px] font-medium truncate">{s.address}</p>
                         </div>
                       </div>
-                      <div className="flex flex-col gap-1">
-                        <div className="flex items-center gap-1.5">
-                          <Clock className={`w-3.5 h-3.5 ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-red-500' : 'text-[#1D1D1F]'}`} />
-                          <span className={`text-[12px] font-medium lowercase ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-red-500' : 'text-[#1D1D1F]'}`}>
+                      <div className="flex items-center gap-3">
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <Clock className={`w-3.5 h-3.5 ${s.actualTurnaroundTime >= s.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`} />
+                          <span className={`text-[12px] font-medium lowercase ${s.actualTurnaroundTime >= s.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`}>
                             {s.turnaroundTime} hrs
-                            {s.actualTurnaroundTime > s.turnaroundTime && (
-                              <span className="font-bold ml-1"> (Usually {s.actualTurnaroundTime})</span>
-                            )}
                           </span>
                         </div>
                         {s.actualTurnaroundTime >= s.turnaroundTime + 0.5 && (
-                          <div className="flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-lg border border-red-100 w-fit">
-                            <AlertCircle className="w-3 h-3 text-red-500" />
-                            <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Delays Reported</span>
+                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#7B1113]/[0.03] border border-[#7B1113]/10">
+                            <span className="text-[12px] font-bold text-[#7B1113] uppercase tracking-[0.05em] leading-none whitespace-nowrap">Delays Reported</span>
                           </div>
                         )}
                       </div>
