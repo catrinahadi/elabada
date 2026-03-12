@@ -21,6 +21,8 @@ const shopSchema = new mongoose.Schema({
   image: { type: String, default: "" },
   latitude: { type: Number, default: 14.167 },
   longitude: { type: Number, default: 121.241 },
+  actualTurnaroundTime: { type: Number }, // Average reported by users
+  reliabilityScore: { type: Number, default: 1 }, // 1 = 100% reliable
 }, { timestamps: true });
 
 module.exports = mongoose.model("Shop", shopSchema);

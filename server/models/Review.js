@@ -8,6 +8,8 @@ const reviewSchema = new mongoose.Schema({
     reviewerName: { type: String },
     isAnonymous: { type: Boolean, default: false },
     images: { type: [String], default: [] },
+    wasOnTime: { type: Boolean, default: true },
+    actualTimeTaken: { type: Number }, // in hours
 }, { timestamps: true });
 
 module.exports = mongoose.model("Review", reviewSchema);

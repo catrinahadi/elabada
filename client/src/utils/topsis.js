@@ -40,7 +40,13 @@ export function calculateTopsis(shops, weights, priorities = ['price', 'time', '
 
     const normalizedMatrix = shops.map(shop => {
         return criteria.map((c, j) => {
-            const val = typeof shop[c.key] === "number" ? shop[c.key] : 0;
+            let val = typeof shop[c.key] === "number" ? shop[c.key] : 0;
+            
+            // Truth-Adjustment: If turnaroundTime, use actual if it's worse
+            if (c.key === 'turnaroundTime' && shop.actualTurnaroundTime > shop.turnaroundTime) {
+                val = shop.actualTurnaroundTime;
+            }
+
             return val / columnNorms[j];
         });
     });
@@ -93,10 +99,15 @@ export function calculateTopsis(shops, weights, priorities = ['price', 'time', '
                         : (worst - val) / (worst - best);
                 }
 
+                let displayValue = shops[i][c.key];
+                if (c.key === 'turnaroundTime' && shops[i].actualTurnaroundTime > shops[i].turnaroundTime) {
+                    displayValue = shops[i].actualTurnaroundTime;
+                }
+
                 return {
                     criterion: c.key,
                     weight: criterionWeights[j],
-                    actualValue: shops[i][c.key],
+                    actualValue: displayValue,
                     normalizedValue: val,
                     idealBest: best,
                     idealWorst: worst,

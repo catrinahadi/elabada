@@ -11,7 +11,7 @@ import {
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle
 } from "lucide-react";
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
@@ -82,7 +82,7 @@ const reviewCategories = [
   "Overall Service", "Cleanliness", "Folding Quality", "Fabric Care", "Smell/Fragrance"
 ];
 
-function ReviewForm({ shopId, onPosted, onCancel }) {
+function ReviewForm({ shopId, promisedTime, onPosted, onCancel }) {
   const { user } = useAuth();
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -90,6 +90,9 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   const [submitting, setSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [wasOnTime, setWasOnTime] = useState(null);
+  const [actualTimeTaken, setActualTimeTaken] = useState("");
+  const [errors, setErrors] = useState({});
   const fileInputRef = useRef(null);
 
   if (!user) return (
@@ -123,8 +126,19 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   };
 
   const handleSubmit = async (e) => {
-    if (e) e.preventDefault();
-    if (rating === 0) return alert("Please select a rating.");
+    const newErrors = {};
+    if (rating === 0) newErrors.rating = "Please select a rating.";
+    if (wasOnTime === null) newErrors.wasOnTime = "Please verify the turnaround time.";
+    if (wasOnTime === false && (!actualTimeTaken || isNaN(actualTimeTaken))) {
+      newErrors.actualTimeTaken = "Required";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setErrors({});
     setSubmitting(true);
     try {
       await onPosted(shopId, { 
@@ -133,13 +147,15 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
         reviewerName: isAnonymous ? "Anonymous User" : (user?.name || "Verified Customer"), 
         images, 
         userId: user?._id || user?.id,
-        isAnonymous
+        isAnonymous,
+        wasOnTime,
+        actualTimeTaken: !wasOnTime ? Number(actualTimeTaken) : null
       });
       setSuccess(true);
       setTimeout(() => {
         setSuccess(false);
         onCancel?.();
-      }, 2000);
+      }, 3000);
     } catch (err) {
       console.error("Submission error:", err);
       alert("Failed to post review. Please try again.");
@@ -162,16 +178,18 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
   return (
     <div className="space-y-6 animate-fadeUp">
       <div className="bg-white p-8 rounded-[40px] border border-black/[0.05] shadow-xl space-y-6">
-        <div className="space-y-4 text-center">
-          <h3 className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">Rate your experience</h3>
+        <div className={`space-y-4 text-center p-6 rounded-[32px] transition-all ${errors.rating ? 'bg-red-50 border border-red-200' : ''}`}>
+          <h3 className={`text-[14px] font-normal tracking-tight ${errors.rating ? 'text-red-500 font-bold' : 'text-[#1D1D1F]'}`}>Rate your experience</h3>
           <div className="flex justify-center gap-2">
             {[1, 2, 3, 4, 5].map((s) => (
-              <button key={s} type="button" onClick={() => setRating(s)} className="p-1 transition-transform active:scale-95">
-                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#E67E00] text-[#E67E00]' : 'text-gray-200'}`} />
+              <button key={s} type="button" onClick={() => { setRating(s); setErrors(prev => ({ ...prev, rating: null })); }} className="p-1 transition-transform active:scale-95">
+                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#E67E00] text-[#E67E00]' : errors.rating ? 'text-red-200' : 'text-gray-200'}`} />
               </button>
             ))}
           </div>
+          {errors.rating && <p className="text-[12px] text-red-500 font-medium animate-fadeUp">{errors.rating}</p>}
         </div>
+
 
         <div className="space-y-3">
           <p className="text-[14px] font-normal text-[#1D1D1F] px-2">What did you like?</p>
@@ -204,6 +222,71 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
             accept="image/*"
             className="hidden"
           />
+        </div>
+
+        {/* Turnaround Verification - Matched to "What did you like?" style */}
+        <div className={`space-y-3 px-2 p-4 rounded-[24px] transition-all ${errors.wasOnTime ? 'bg-red-50 border border-red-100' : ''}`}>
+          <p className={`text-[14px] font-normal ${errors.wasOnTime ? 'text-red-500 font-bold' : 'text-[#1D1D1F]'}`}>
+            Turnaround Verification (Promised: {promisedTime || 24}hrs)
+            {errors.wasOnTime && <span className="ml-2 text-[12px] font-medium text-red-500 italic">* required</span>}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={() => { setWasOnTime(true); setErrors(prev => ({ ...prev, wasOnTime: null })); }}
+              className={`px-4 py-2 rounded-full text-[14px] font-normal border transition-all cursor-pointer ${
+                wasOnTime === true 
+                  ? "bg-[#014421] text-white border-[#014421]" 
+                  : "bg-gray-50 text-gray-500 border-black/[0.02] hover:bg-gray-100"
+              }`}
+            >
+              Yes, On Time
+            </button>
+            <button
+              type="button"
+              onClick={() => { setWasOnTime(false); setErrors(prev => ({ ...prev, wasOnTime: null })); }}
+              className={`px-4 py-2 rounded-full text-[14px] font-normal border transition-all cursor-pointer ${
+                wasOnTime === false 
+                  ? "bg-[#7B1113] text-white border-[#7B1113]" 
+                  : "bg-gray-50 text-gray-500 border-black/[0.02] hover:bg-gray-100"
+              }`}
+            >
+              No, It Was Late
+            </button>
+          </div>
+          
+          {wasOnTime === false && (
+            <div className="mt-3 space-y-2 animate-fadeUp">
+              <p className="text-[14px] font-normal text-gray-500 pl-1">How many hours did it actually take?</p>
+              <div className="relative max-w-[200px]">
+                <style>
+                  {`
+                    input::-webkit-outer-spin-button,
+                    input::-webkit-inner-spin-button {
+                      -webkit-appearance: none;
+                      margin: 0;
+                    }
+                    input[type=number] {
+                      -moz-appearance: textfield;
+                    }
+                  `}
+                </style>
+                <input
+                  type="number"
+                  value={actualTimeTaken}
+                  onChange={(e) => { 
+                    setActualTimeTaken(e.target.value);
+                    if (e.target.value) setErrors(prev => ({ ...prev, actualTimeTaken: null }));
+                  }}
+                  placeholder="e.g. 30"
+                  className={`w-full bg-gray-50 border rounded-xl px-4 py-2 text-[14px] font-normal outline-none focus:bg-white transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none ${
+                    errors.actualTimeTaken ? 'border-red-500 ring-2 ring-red-500/10' : 'border-black/[0.05] focus:border-[#7B1113]/20'
+                  }`}
+                />
+                {errors.actualTimeTaken && <p className="text-[11px] text-red-500 font-bold mt-1 pl-1">Required</p>}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-3 px-2">
@@ -252,6 +335,7 @@ function ReviewForm({ shopId, onPosted, onCancel }) {
             Post Anonymously
           </label>
         </div>
+
 
         <div className="flex gap-4">
           <button
@@ -468,9 +552,16 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     </div>
 
                     {/* Time Card */}
-                    <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300">
+                    <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300 relative group/time">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight">Turnaround</span>
-                      <p className="text-[14px] font-normal text-[#014421]">{shop.turnaroundTime} hrs</p>
+                      <p className="text-[14px] font-normal text-[#014421]">
+                        {shop.turnaroundTime} hrs
+                      </p>
+                      {shop.actualTurnaroundTime > shop.turnaroundTime && (
+                        <div className="absolute -top-2 px-3 py-1 bg-[#7B1113] text-white text-[10px] font-bold rounded-full shadow-lg shadow-[#7B1113]/20 animate-bounce">
+                          ~{shop.actualTurnaroundTime} hrs actual
+                        </div>
+                      )}
                     </div>
 
                     {/* Distance Card */}
@@ -593,6 +684,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
               <div ref={formRef} className="mt-8 pt-8 border-t border-black/[0.04] animate-fadeUp">
                 <ReviewForm
                   shopId={shop._id || shop.id}
+                  promisedTime={shop.turnaroundTime}
                   onPosted={(id, payload) => {
                     onPosted(id, payload);
                   }}
@@ -934,7 +1026,7 @@ export default function ShopsPage() {
   // Post a new review then refresh
   const handlePostReview = async (shopId, payload) => {
     try {
-      await api.post("/reviews", { ...payload, shopId });
+      const { data: review } = await api.post("/reviews", { ...payload, shopId });
 
       // Refresh reviews list for the modal
       const { data: updatedReviews } = await api.get(`/reviews/${shopId}`);
@@ -945,12 +1037,13 @@ export default function ShopsPage() {
       if (updatedShop) {
         setShops(prevShops =>
           prevShops.map(s => (s.id === shopId || s._id === shopId)
-            ? { ...s, rating: updatedShop.rating, reviewCount: updatedShop.reviewCount }
+            ? { ...s, rating: updatedShop.rating, reviewCount: updatedShop.reviewCount, actualTurnaroundTime: updatedShop.actualTurnaroundTime, reliabilityScore: updatedShop.reliabilityScore }
             : s)
         );
-        // If modal is open, we need to update its local copy too via setSelectedShop
-        setSelectedShop(prev => prev ? { ...prev, rating: updatedShop.rating, reviewCount: updatedShop.reviewCount } : null);
+        setSelectedShop(prev => prev ? { ...prev, rating: updatedShop.rating, reviewCount: updatedShop.reviewCount, actualTurnaroundTime: updatedShop.actualTurnaroundTime, reliabilityScore: updatedShop.reliabilityScore } : null);
       }
+
+
     } catch (err) {
       console.error("Failed to post review:", err.message);
     }
@@ -1327,11 +1420,22 @@ export default function ShopsPage() {
                           <p className="text-[12px] font-medium truncate">{s.address}</p>
                         </div>
                       </div>
-                      <div className="flex items-center gap-4">
+                      <div className="flex flex-col gap-1">
                         <div className="flex items-center gap-1.5">
-                          <Clock className="w-3.5 h-3.5 text-[#1D1D1F]" />
-                          <span className="text-[12px] font-medium text-[#1D1D1F] lowercase">{s.turnaroundTime} hrs</span>
+                          <Clock className={`w-3.5 h-3.5 ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-red-500' : 'text-[#1D1D1F]'}`} />
+                          <span className={`text-[12px] font-medium lowercase ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-red-500' : 'text-[#1D1D1F]'}`}>
+                            {s.turnaroundTime} hrs
+                            {s.actualTurnaroundTime > s.turnaroundTime && (
+                              <span className="font-bold ml-1"> (Usually {s.actualTurnaroundTime})</span>
+                            )}
+                          </span>
                         </div>
+                        {s.actualTurnaroundTime > s.turnaroundTime && (
+                          <div className="flex items-center gap-1 bg-red-50 px-2 py-0.5 rounded-lg border border-red-100 w-fit">
+                            <AlertCircle className="w-3 h-3 text-red-500" />
+                            <span className="text-[10px] font-bold text-red-500 uppercase tracking-tighter">Delays Reported</span>
+                          </div>
+                        )}
                       </div>
                       <div className="mt-auto pt-1 flex items-center justify-between">
                         <div className="flex flex-col">
@@ -1508,6 +1612,11 @@ export default function ShopsPage() {
                                     <div className="flex items-center gap-1.5">
                                       <Clock className="w-3.5 h-3.5 text-[#1D1D1F] shrink-0" />
                                       <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                      {s.actualTurnaroundTime > s.turnaroundTime && (
+                                        <span className="text-[10px] font-bold text-[#7B1113] bg-[#7B1113]/5 px-2 py-0.5 rounded-full border border-[#7B1113]/10">
+                                          ~{s.actualTurnaroundTime}h actual
+                                        </span>
+                                      )}
                                     </div>
                                     <div className="flex items-center gap-1.5 shrink-0">
                                       <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
@@ -1739,6 +1848,7 @@ export default function ShopsPage() {
         />
       )}
       {showComputation && <ComputationDetailsModal shop={showComputation} weights={weights} onClose={() => setShowComputation(null)} />}
+
 
       {activeImageGallery && (
         <div className="fixed inset-0 bg-black/95 z-[2000] flex flex-col items-center justify-center p-6 animate-fadeIn">

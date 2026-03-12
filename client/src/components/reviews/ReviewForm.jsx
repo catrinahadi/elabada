@@ -6,14 +6,26 @@ export default function ReviewForm({ shopId, userId, onSubmit, onCancel }) {
   const [hovered, setHovered] = useState(0);
   const [comment, setComment] = useState("");
   const [isAnonymous, setIsAnonymous] = useState(false);
+  const [wasOnTime, setWasOnTime] = useState(true);
+  const [actualTimeTaken, setActualTimeTaken] = useState("");
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (rating === 0) { alert("Please select a rating."); return; }
-    onSubmit({ shopId, userId, rating, comment, isAnonymous });
+    onSubmit({ 
+      shopId, 
+      userId, 
+      rating, 
+      comment, 
+      isAnonymous, 
+      wasOnTime, 
+      actualTimeTaken: !wasOnTime ? Number(actualTimeTaken) : null 
+    });
     setRating(0);
     setComment("");
     setIsAnonymous(false); // Reset isAnonymous after submission
+    setWasOnTime(true);
+    setActualTimeTaken("");
   };
 
   const active = hovered || rating;
@@ -76,6 +88,58 @@ export default function ReviewForm({ shopId, userId, onSubmit, onCancel }) {
         />
         <div className="flex justify-end mt-1">
           <span className="text-xs text-gray-400">{comment.length}/1000</span>
+        </div>
+      </div>
+
+      {/* Turnaround Time Verification */}
+      <div className="p-4 bg-gray-50 rounded-xl space-y-3">
+        <label className="block text-xs font-bold text-gray-600 uppercase tracking-wide">
+          Turnaround Verification
+        </label>
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-gray-700">Did the shop follow their promised turnaround time?</p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={() => setWasOnTime(true)}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                wasOnTime 
+                  ? "bg-black text-white border-black" 
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              Yes, On Time
+            </button>
+            <button
+              type="button"
+              onClick={() => setWasOnTime(false)}
+              className={`flex-1 py-2 px-3 rounded-lg text-xs font-bold transition-all border ${
+                !wasOnTime 
+                  ? "bg-red-600 text-white border-red-600" 
+                  : "bg-white text-gray-600 border-gray-200 hover:border-gray-300"
+              }`}
+            >
+              No, It Was Late
+            </button>
+          </div>
+          
+          {!wasOnTime && (
+            <div className="animate-in fade-in slide-in-from-top-1 duration-200">
+              <label className="block text-[10px] font-bold text-gray-500 mb-1 uppercase">
+                How many hours did it actually take?
+              </label>
+              <div className="relative">
+                <input
+                  type="number"
+                  value={actualTimeTaken}
+                  onChange={e => setActualTimeTaken(e.target.value)}
+                  placeholder="e.g. 30"
+                  className="w-full bg-white border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-black/5"
+                />
+                <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 font-bold">hrs</span>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

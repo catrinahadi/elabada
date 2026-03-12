@@ -1,4 +1,4 @@
-import { Star, MapPin, Clock, ChevronRight, ClipboardList, Tag } from "lucide-react";
+import { Star, MapPin, Clock, ChevronRight, ClipboardList, Tag, AlertTriangle } from "lucide-react";
 
 export default function ShopCard({ shop, onViewDetails, topsisScore }) {
   const scoreInt = topsisScore !== undefined && !isNaN(topsisScore)
@@ -54,6 +54,15 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
             <Clock className="w-3.5 h-3.5 text-[#014421] opacity-60" />
             <span className="text-[10px] font-black text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
           </div>
+          
+          {shop.actualTurnaroundTime > shop.turnaroundTime && (
+            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
+              <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
+              <span className="text-[9px] font-bold text-amber-700 whitespace-nowrap">
+                ~{shop.actualTurnaroundTime} hr actual
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
