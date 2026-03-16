@@ -585,6 +585,18 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     <span>Get directions</span>
                     <Navigation2 className="w-5 h-5" />
                   </button>
+
+                  {/* Amenities Tags in Modal */}
+                  {shop.amenities && shop.amenities.length > 0 && (
+                    <div className="flex flex-wrap gap-2 pt-2 px-2">
+                      {shop.amenities.map(tag => (
+                        <div key={tag} className="flex items-center gap-2 px-3 py-1.5 bg-[#F8F9FA] border border-black/[0.03] rounded-xl">
+                          <div className="w-1 h-1 rounded-full bg-[#014421]/40" />
+                          <span className="text-[12px] font-medium text-gray-500">{tag}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -1298,7 +1310,14 @@ export default function ShopsPage() {
         {sidebarTab === "overview" && (
           <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
             <div className="flex flex-row items-stretch gap-4 md:gap-8 min-h-[160px] md:min-h-[200px]">
-              <div className="flex-1 bg-[#0D3A2C] rounded-[28px] md:rounded-[56px] p-5 md:p-12 text-white shadow-2xl relative flex flex-col justify-center min-h-[180px] md:min-h-[320px]">
+              <div 
+                className="flex-1 rounded-[28px] md:rounded-[56px] p-5 md:p-12 text-white shadow-2xl relative flex flex-col justify-center min-h-[180px] md:min-h-[320px] bg-no-repeat overflow-hidden"
+                style={{
+                  backgroundSize: 'cover',
+                  backgroundPosition: 'center 55%',
+                  backgroundImage: `linear-gradient(to bottom, rgba(13, 58, 44, 0.4), rgba(13, 58, 44, 0.85)), url('/welcome-bg.png')`
+                }}
+              >
                 <div className="relative z-10 md:pb-14">
                   <h2 className="text-[35px] md:text-[60px] font-normal tracking-tighter leading-tight md:leading-none font-outfit mt-1 ml-1">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
@@ -1446,6 +1465,17 @@ export default function ShopsPage() {
                           <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} <span className="opacity-40">({s.reviewCount || 0})</span></span>
                         </div>
                       </div>
+
+                      {/* Amenities (Tags) */}
+                      {s.amenities && s.amenities.length > 0 && (
+                        <div className="flex flex-wrap gap-1 mb-1">
+                          {s.amenities.map(tag => (
+                            <span key={tag} className="px-2 py-0.5 bg-gray-50 border border-black/[0.03] rounded-md text-[9px] font-bold text-gray-400 uppercase tracking-wider">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                       <div className="flex items-center gap-1.5 text-[#1D1D1F]">
                         <div className="flex items-center gap-1.5 truncate">
                           <MapPin className="w-3.5 h-3.5 shrink-0" />

@@ -23,6 +23,7 @@ const shopSchema = new mongoose.Schema({
   longitude: { type: Number, default: 121.241 },
   actualTurnaroundTime: { type: Number }, // Average reported by users
   reliabilityScore: { type: Number, default: 1 }, // 1 = 100% reliable
+  amenities: { type: [String], default: [] }, // e.g., ["Pickup", "Delivery", "Folding", "Ironing"]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Shop", shopSchema);

@@ -374,23 +374,35 @@ function PermitModal({ shop, onClose }) {
                     <div className="bg-white p-4 rounded-[24px] md:rounded-[32px] shadow-sm border border-black/[0.03]">
                         <img src={shop.permitImage || "https://images.unsplash.com/photo-1589330694653-96b6fca67612?w=800&q=80"} className="w-full rounded-2xl grayscale hover:grayscale-0 transition-all duration-700 cursor-zoom-in" alt="Business Permit" />
                     </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div className="space-y-4">
-                            <div className="space-y-3">
-                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Shop Name</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.shopName || shop.name}</span>
-                                </div>
-                                <div className="flex justify-between border-b border-black/[0.05] pb-2">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Owner Name</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.ownerName}</span>
-                                </div>
-                                <div className="flex justify-between">
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">Date Submitted</span>
-                                    <span className="text-[14px] text-[#1D1D1F] font-normal">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
-                                </div>
+                    <div className="space-y-6">
+                        <div className="bg-white p-8 rounded-[32px] shadow-sm border border-black/[0.03] space-y-4">
+                            <div className="flex justify-between items-center border-b border-black/[0.03] pb-4">
+                                <span className="text-[13px] text-[#8E8E93] font-bold uppercase tracking-wider">Shop Name</span>
+                                <span className="text-[15px] text-[#1D1D1F] font-medium text-right">{shop.shopName || shop.name}</span>
+                            </div>
+                            <div className="flex justify-between items-center border-b border-black/[0.03] pb-4">
+                                <span className="text-[13px] text-[#8E8E93] font-bold uppercase tracking-wider">Owner Name</span>
+                                <span className="text-[15px] text-[#1D1D1F] font-medium text-right">{shop.ownerName}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-[13px] text-[#8E8E93] font-bold uppercase tracking-wider">Date Submitted</span>
+                                <span className="text-[15px] text-[#1D1D1F] font-medium text-right">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
                             </div>
                         </div>
+                        
+                        {/* Admin Amenities View */}
+                        {shop.amenities && shop.amenities.length > 0 && (
+                            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-black/[0.03] space-y-4">
+                                <h4 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Service Amenities</h4>
+                                <div className="flex flex-wrap gap-2">
+                                    {shop.amenities.map(tag => (
+                                        <span key={tag} className="px-4 py-2 bg-[#F8F9FA] border border-black/[0.03] rounded-xl text-[13px] font-medium text-gray-500">
+                                            {tag}
+                                        </span>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">
