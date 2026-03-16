@@ -389,20 +389,6 @@ function PermitModal({ shop, onClose }) {
                                 <span className="text-[15px] text-[#1D1D1F] font-medium text-right">{shop.submittedAt || (shop.createdAt ? new Date(shop.createdAt).toLocaleDateString() : "N/A")}</span>
                             </div>
                         </div>
-                        
-                        {/* Admin Amenities View */}
-                        {shop.amenities && shop.amenities.length > 0 && (
-                            <div className="bg-white p-8 rounded-[32px] shadow-sm border border-black/[0.03] space-y-4">
-                                <h4 className="text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Service Amenities</h4>
-                                <div className="flex flex-wrap gap-2">
-                                    {shop.amenities.map(tag => (
-                                        <span key={tag} className="px-4 py-2 bg-[#F8F9FA] border border-black/[0.03] rounded-xl text-[13px] font-medium text-gray-500">
-                                            {tag}
-                                        </span>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
                 <div className="p-8 bg-white border-t border-black/[0.05] flex justify-end">

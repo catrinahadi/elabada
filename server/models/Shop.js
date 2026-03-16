@@ -7,6 +7,7 @@ const shopSchema = new mongoose.Schema({
   phone: { type: String, default: "" },
   address: { type: String, required: true },
   price: { type: Number, default: 0 },
+  operatingHours: { type: String, default: "8:00 AM - 8:00 PM" },
   turnaroundTime: { type: Number, default: 24 },
   permitStatus: {
     type: String,

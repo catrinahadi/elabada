@@ -141,10 +141,9 @@ function MapPicker({ position, onPositionChange }) {
 
 function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const [form, setForm] = useState(initialData || {
-        name: "", address: "", price: "", turnaroundTime: "",
+        name: "", address: "", price: "", turnaroundTime: "", operatingHours: "8:00 AM - 8:00 PM",
         latitude: "14.1675", longitude: "121.2433",
-        permitImage: "", image: "",
-        amenities: initialData?.amenities || []
+        permitImage: "", image: ""
     });
 
     const [shopImageFile, setShopImageFile] = useState(null);
@@ -180,7 +179,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         e.preventDefault();
         
         // Comprehensive validation
-        if (!form.name || !form.address || !form.price || !form.turnaroundTime) return;
+        if (!form.name || !form.address || !form.price || !form.turnaroundTime || !form.operatingHours) return;
         
         // Required files check for new registrations
         if (!initialData) {
@@ -253,6 +252,12 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                         placeholder="24"
                                     />
                                 </div>
+                                <Field
+                                    label="Operating Hours"
+                                    value={form.operatingHours}
+                                    onChange={e => set("operatingHours", e.target.value)}
+                                    placeholder="e.g. 8:00 AM - 8:00 PM"
+                                />
                             </div>
                         </div>
 
@@ -306,40 +311,6 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 </div>
                             )}
 
-                            {/* Amenities Selection */}
-                            <div className="space-y-3">
-                                <label className="block text-[14px] font-normal text-[#1D1D1F]">Service Amenities (Optional)</label>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {['Pickup', 'Delivery', 'Folding', 'Ironing'].map(amenity => (
-                                        <button
-                                            key={amenity}
-                                            type="button"
-                                            onClick={() => {
-                                                const current = form.amenities || [];
-                                                if (current.includes(amenity)) {
-                                                    set("amenities", current.filter(a => a !== amenity));
-                                                } else {
-                                                    set("amenities", [...current, amenity]);
-                                                }
-                                            }}
-                                            className={`px-4 py-3 rounded-2xl text-[14px] font-normal border transition-all flex items-center justify-between group ${
-                                                (form.amenities || []).includes(amenity)
-                                                    ? 'bg-[#7B1113]/[0.05] border-[#7B1113] text-[#7B1113]'
-                                                    : 'bg-[#F8F9FA] border-black/[0.05] text-gray-500 hover:border-black/20'
-                                            }`}
-                                        >
-                                            {amenity}
-                                            {(form.amenities || []).includes(amenity) ? (
-                                                <div className="w-5 h-5 rounded-full bg-[#7B1113] flex items-center justify-center">
-                                                    <Check className="w-3 h-3 text-white" />
-                                                </div>
-                                            ) : (
-                                                <div className="w-5 h-5 rounded-full border border-black/10 group-hover:border-black/30" />
-                                            )}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
                         </div>
                     </div>
 

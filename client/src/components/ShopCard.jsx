@@ -32,6 +32,7 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
             {scoreInt}% Match
           </div>
         )}
+
       </div>
 
       <div className="px-1 space-y-4 flex-1 flex flex-col">
@@ -49,23 +50,26 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
           <p className="text-[11px] font-bold truncate">{shop.address}</p>
         </div>
 
-        <div className="flex items-center gap-4 py-1">
-          <div className="flex items-center gap-1.5">
-            <Clock className="w-3.5 h-3.5 text-[#014421] opacity-60" />
-            <span className="text-[10px] font-black text-[#1D1D1F]">{shop.turnaroundTime} hr</span>
+        <div className="flex items-center gap-2 py-1 flex-wrap">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <Clock className={`w-3.5 h-3.5 ${shop.actualTurnaroundTime >= shop.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#014421] opacity-60'}`} />
+            <span className={`text-[10px] font-black ${shop.actualTurnaroundTime >= shop.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`}>{shop.turnaroundTime} hr</span>
           </div>
-          
-          {shop.actualTurnaroundTime > shop.turnaroundTime && (
-            <div className="flex items-center gap-1 px-2 py-0.5 bg-amber-50 rounded-full border border-amber-100">
-              <AlertTriangle className="w-2.5 h-2.5 text-amber-600" />
-              <span className="text-[9px] font-bold text-amber-700 whitespace-nowrap">
-                ~{shop.actualTurnaroundTime} hr actual
-              </span>
+          {shop.actualTurnaroundTime >= shop.turnaroundTime + 0.5 && (
+            <div className="relative group/badge">
+              <div className="flex items-center px-2 py-[3px] rounded bg-[#FFF5F5] border border-[#7B1113]/20 shadow-sm cursor-help transition-all">
+                <span className="text-[9px] font-bold text-[#7B1113] uppercase tracking-wide leading-none pt-[1px]">Delays Reported</span>
+              </div>
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#1D1D1F] text-white text-[11px] font-normal rounded-xl opacity-0 invisible group-hover/badge:opacity-100 group-hover/badge:visible transition-all duration-300 pointer-events-none whitespace-nowrap shadow-xl z-50 text-center">
+                Actual time: <span className="font-bold text-[#E53935]">{shop.actualTurnaroundTime} hrs</span>
+                <span className="block opacity-60 text-[9px] mt-0.5">computed from recent reviews</span>
+                <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#1D1D1F]" />
+              </div>
             </div>
           )}
         </div>
 
-        <div className="mt-auto pt-4 flex items-center justify-between border-t border-black/[0.03]">
+        <div className="flex items-center justify-between pt-1">
           <div className="flex flex-col">
             <span className="text-[10px] font-bold text-[#8E8E93] capitalize tracking-wider">Price</span>
             <span className="text-lg font-[900] text-[#7B1113] tracking-tighter font-outfit leading-none">₱{shop.price}<span className="text-xs font-bold text-[#8E8E93]/60 lowercase ml-0.5">/kg</span></span>

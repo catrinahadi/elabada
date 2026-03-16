@@ -78,6 +78,37 @@ function MapController({ routePath, userLocation }) {
 
 
 
+const isShopOpen = (operatingHours) => {
+  if (!operatingHours || operatingHours.toLowerCase().includes('24')) return true;
+  try {
+    const hoursPart = operatingHours.split(/[,-]/)[0] + (operatingHours.includes('-') ? '-' + operatingHours.split('-')[1] : '');
+    const segments = hoursPart.split('-');
+    if (segments.length !== 2) return true;
+    
+    const parseMins = (str) => {
+      const match = str.trim().match(/(\d+):?(\d*)\s*(AM|PM)/i);
+      if (!match) return null;
+      let [_, h, m, mdn] = match;
+      h = parseInt(h); m = parseInt(m) || 0;
+      if (h === 12) h = 0;
+      if (mdn.toUpperCase() === 'PM') h += 12;
+      return h * 60 + m;
+    };
+    
+    const startMins = parseMins(segments[0]);
+    const endMins = parseMins(segments[1]);
+    
+    if (startMins === null || endMins === null) return true;
+    const now = new Date();
+    const currMins = now.getHours() * 60 + now.getMinutes();
+    
+    if (startMins > endMins) return currMins >= startMins || currMins <= endMins;
+    return currMins >= startMins && currMins <= endMins;
+  } catch (e) {
+    return true;
+  }
+};
+
 const reviewCategories = [
   "Overall Service", "Cleanliness", "Folding Quality", "Fabric Care", "Smell/Fragrance"
 ];
@@ -533,7 +564,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Operating hours</span>
-                      <p className="text-[14px] font-normal text-[#1D1D1F]">8:00 AM - 8:00 PM</p>
+                      <p className="text-[14px] font-normal text-[#1D1D1F]">{shop.operatingHours || '8:00 AM - 8:00 PM'}</p>
                     </div>
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Shop status</span>
@@ -558,15 +589,6 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                         <p className={`text-[14px] font-normal ${shop.actualTurnaroundTime > shop.turnaroundTime ? 'text-[#7B1113]' : 'text-[#014421]'}`}>
                           {shop.turnaroundTime} hrs
                         </p>
-                        {shop.actualTurnaroundTime > shop.turnaroundTime && (
-                          <div className="relative group/tooltip ml-1">
-                            <AlertCircle className="w-6 h-6 text-[#7B1113] cursor-help transition-all hover:scale-110 active:scale-90" />
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-3 px-4 py-2 bg-[#1D1D1F] text-white text-[13px] font-normal rounded-2xl opacity-0 group-hover/tooltip:opacity-100 transition-all duration-300 pointer-events-none whitespace-nowrap shadow-[0_20px_50px_rgba(0,0,0,0.3)] z-[100] border border-white/10 backdrop-blur-xl translate-y-2 group-hover/tooltip:translate-y-0">
-                              Actual: {shop.actualTurnaroundTime} hrs
-                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[8px] border-transparent border-t-[#1D1D1F]" />
-                            </div>
-                          </div>
-                        )}
                       </div>
                     </div>
 
@@ -577,6 +599,15 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     </div>
                   </div>
 
+                  {/* Warning Banner (Delayed Turnaround) */}
+                  {shop.actualTurnaroundTime > shop.turnaroundTime && (
+                    <div className="mt-2 bg-[#FFF5F4] border border-[#f5e3e2] border-l-4 border-l-[#E53935] rounded-xl p-4 shadow-sm">
+                      <p className="text-[14px] text-[#4F4F4F] leading-relaxed">
+                        <strong className="text-[#333333] font-semibold">Warning:</strong> The stated turnaround time is frequently exceeded by this shop. Based on recent customer reviews and tracking, the computed actual return time is <strong className="text-[#1D1D1F] font-semibold">{shop.actualTurnaroundTime} hours</strong>.
+                      </p>
+                    </div>
+                  )}
+
                   {/* Directions Button */}
                   <button
                     onClick={() => onNavigate(shop)}
@@ -585,18 +616,6 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     <span>Get directions</span>
                     <Navigation2 className="w-5 h-5" />
                   </button>
-
-                  {/* Amenities Tags in Modal */}
-                  {shop.amenities && shop.amenities.length > 0 && (
-                    <div className="flex flex-wrap gap-2 pt-2 px-2">
-                      {shop.amenities.map(tag => (
-                        <div key={tag} className="flex items-center gap-2 px-3 py-1.5 bg-[#F8F9FA] border border-black/[0.03] rounded-xl">
-                          <div className="w-1 h-1 rounded-full bg-[#014421]/40" />
-                          <span className="text-[12px] font-medium text-gray-500">{tag}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
@@ -1309,19 +1328,19 @@ export default function ShopsPage() {
         {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
           <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
-            <div className="flex flex-row items-stretch gap-4 md:gap-8 min-h-[160px] md:min-h-[200px]">
+            <div className="flex flex-row items-stretch gap-3 md:gap-6 h-[160px]">
               <div 
-                className="flex-1 rounded-[28px] md:rounded-[56px] p-5 md:p-12 text-white shadow-2xl relative flex flex-col justify-center min-h-[180px] md:min-h-[320px] bg-no-repeat overflow-hidden"
+                className="flex-1 rounded-[24px] md:rounded-[40px] px-5 py-6 md:px-10 md:py-8 text-white shadow-2xl relative flex flex-col justify-center gap-4 h-full bg-no-repeat overflow-hidden"
                 style={{
                   backgroundSize: 'cover',
                   backgroundPosition: 'center 55%',
                   backgroundImage: `linear-gradient(to bottom, rgba(13, 58, 44, 0.4), rgba(13, 58, 44, 0.85)), url('/welcome-bg.png')`
                 }}
               >
-                <div className="relative z-10 md:pb-14">
-                  <h2 className="text-[35px] md:text-[60px] font-normal tracking-tighter leading-tight md:leading-none font-outfit mt-1 ml-1">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
+                <div className="relative z-10 w-full flex items-center">
+                  <h2 className="text-[28px] md:text-[38px] font-normal tracking-tighter leading-none font-outfit truncate pr-4 mt-2">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
-                <div className="mt-auto relative z-30 self-end w-full max-w-xl flex-shrink-0 pointer-events-auto">
+                <div className="relative z-30 self-end w-full md:max-w-[70%] lg:max-w-xl flex-shrink-0 pointer-events-auto">
                   <input
                     type="text"
                     placeholder="Search Shops"
@@ -1329,9 +1348,9 @@ export default function ShopsPage() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="w-full h-11 md:h-16 bg-white rounded-xl md:rounded-[24px] border border-black/[0.05] pl-10 md:pl-16 pr-4 text-[10px] md:text-[12px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
+                    className="w-full h-10 md:h-12 bg-white rounded-xl md:rounded-[20px] border border-black/[0.05] pl-10 md:pl-14 pr-4 text-[12px] md:text-[14px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
                   />
-                  <div className="absolute left-4 md:left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 pointer-events-none"><Search className="w-4 h-4 md:w-6 md:h-6" /></div>
+                  <div className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 pointer-events-none"><Search className="w-4 h-4 md:w-5 md:h-5" /></div>
                   {searchQuery && suggestions.length > 0 && showSuggestions && (
                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
                       {suggestions.map(s => (
@@ -1357,12 +1376,12 @@ export default function ShopsPage() {
                 </div>
                 <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none z-0" />
               </div>
-              <div className="flex flex-col justify-center gap-3 md:gap-6 py-2">
-                <button onClick={() => setSidebarTab("computation")} className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[32px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
-                  <Sliders className="w-5 h-5 md:w-8 md:h-8 text-white transition-all" />
+              <div className="flex flex-col justify-between gap-2 h-[160px]">
+                <button onClick={() => setSidebarTab("computation")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                  <Sliders className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-12 h-12 md:w-20 md:h-20 rounded-xl md:rounded-[32px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
-                  <LocateFixed className="w-5 h-5 md:w-8 md:h-8 text-white transition-all" />
+                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                  <LocateFixed className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
               </div>
             </div>
@@ -1417,8 +1436,8 @@ export default function ShopsPage() {
                 {filteredShops.map(s => (
                   <div
                     key={s.id || s._id}
-                    onClick={() => s.status === 'open' && handleSelectShop(s)}
-                    className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer ${s.status === 'open' ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
+                    onClick={() => (isShopOpen(s.operatingHours) && s.status !== 'closed') && handleSelectShop(s)}
+                    className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer ${(isShopOpen(s.operatingHours) && s.status !== 'closed') ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
                   >
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-2">
                       <img
@@ -1431,24 +1450,26 @@ export default function ShopsPage() {
                           e.target.src = "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80";
                         }}
                       />
-                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${s.status === 'open' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-black/10 text-black/40'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${s.status === 'open' ? 'bg-[#228B22]' : 'bg-black/20'}`} />
-                        <span className="text-[12px] font-normal capitalize tracking-wide">{s.status}</span>
+                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-black/10 text-black/40'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-[#228B22]' : 'bg-black/20'}`} />
+                        <span className="text-[12px] font-normal capitalize tracking-wide">{isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'open' : 'closed'}</span>
                       </div>
-                      {isApplied && s.score > 0 && (
-                        <div
-                          onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
-                          className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl flex items-center gap-2.5 border border-white/20 shadow-xl cursor-help transition-all hover:scale-105 active:scale-95 group/match"
-                        >
-                          <div className="w-7 h-7 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0">
-                            <TrendingUp className="w-4 h-4 text-[#014421]" />
+                      <div className="absolute bottom-3 right-3 flex flex-col items-end gap-2 pointer-events-none">
+                        {isApplied && s.score > 0 && (
+                          <div
+                            onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
+                            className="bg-white/90 backdrop-blur-md px-3 py-2 rounded-2xl flex items-center gap-2.5 border border-white/20 shadow-xl cursor-help transition-all hover:scale-105 active:scale-95 group/match pointer-events-auto"
+                          >
+                            <div className="w-7 h-7 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0">
+                              <TrendingUp className="w-4 h-4 text-[#014421]" />
+                            </div>
+                            <div className="flex flex-col -space-y-0.5">
+                              <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
+                              <span className="text-[15px] font-normal text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
+                            </div>
                           </div>
-                          <div className="flex flex-col -space-y-0.5">
-                            <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
-                            <span className="text-[15px] font-normal text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
-                          </div>
-                        </div>
-                      )}
+                        )}
+                      </div>
                     </div>
                     <div className="px-2 py-3 space-y-3 flex-1 flex flex-col">
                       <div className="flex justify-between items-center gap-2">
@@ -1466,16 +1487,7 @@ export default function ShopsPage() {
                         </div>
                       </div>
 
-                      {/* Amenities (Tags) */}
-                      {s.amenities && s.amenities.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mb-1">
-                          {s.amenities.map(tag => (
-                            <span key={tag} className="px-2 py-0.5 bg-gray-50 border border-black/[0.03] rounded-md text-[9px] font-bold text-gray-400 uppercase tracking-wider">
-                              {tag}
-                            </span>
-                          ))}
-                        </div>
-                      )}
+
                       <div className="flex items-center gap-1.5 text-[#1D1D1F]">
                         <div className="flex items-center gap-1.5 truncate">
                           <MapPin className="w-3.5 h-3.5 shrink-0" />
@@ -1490,13 +1502,20 @@ export default function ShopsPage() {
                           </span>
                         </div>
                         {s.actualTurnaroundTime >= s.turnaroundTime + 0.5 && (
-                          <div className="flex items-center gap-1 px-2 py-0.5 rounded-md bg-[#7B1113]/[0.03] border border-[#7B1113]/10">
-                            <span className="text-[12px] font-bold text-[#7B1113] uppercase tracking-[0.05em] leading-none whitespace-nowrap">Delays Reported</span>
+                          <div className="relative group/badge">
+                            <div className="flex items-center px-1.5 py-[2px] rounded bg-[#FFF5F5] border border-[#7B1113]/25 shadow-sm cursor-help transition-all">
+                              <span className="text-[10px] font-bold text-[#7B1113] uppercase tracking-wide leading-[1] whitespace-nowrap pt-[0.5px]">Delays Reported</span>
+                            </div>
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-3 py-2 bg-[#1D1D1F] text-white text-[11px] font-normal rounded-xl opacity-0 invisible group-hover/badge:opacity-100 group-hover/badge:visible transition-all duration-300 pointer-events-none whitespace-nowrap shadow-xl z-50 text-center">
+                              Actual time: <span className="font-bold text-[#E53935]">{s.actualTurnaroundTime} hrs</span>
+                              <span className="block opacity-60 text-[9px] mt-0.5">computed from recent reviews</span>
+                              <div className="absolute top-full left-1/2 -translate-x-1/2 border-[5px] border-transparent border-t-[#1D1D1F]" />
+                            </div>
                           </div>
                         )}
                       </div>
-                      <div className="mt-auto pt-1 flex items-center justify-between">
-                        <div className="flex flex-col">
+                      <div className="flex flex-col gap-2.5">
+                        <div className="flex items-center justify-between">
                           <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-none">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
                         </div>
                       </div>
@@ -1949,7 +1968,6 @@ export default function ShopsPage() {
           </div>
         </div>
       )}
-    </div >
-
+    </div>
   );
 }
