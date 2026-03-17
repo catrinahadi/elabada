@@ -6,8 +6,8 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
 
   return (
     <div
-      onClick={() => shop.status === 'open' && onViewDetails()}
-      className={`bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-4 h-full ${shop.status === 'open' ? 'hover:shadow-xl cursor-pointer group' : 'opacity-60 cursor-not-allowed grayscale-[0.3]'}`}
+      onClick={() => onViewDetails()}
+      className={`bg-white rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-4 h-full hover:shadow-xl cursor-pointer group`}
     >
       <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-5">
         <img
@@ -20,9 +20,9 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
             e.target.src = "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80";
           }}
         />
-        <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/20 shadow-sm">
-          <div className={`w-1.5 h-1.5 rounded-full ${shop.status === "open" ? "bg-[#228B22]" : "bg-[#8E8E93]"}`} />
-          <span className={`text-[9px] font-black capitalize tracking-widest ${shop.status === 'open' ? 'text-[#228B22]' : 'text-[#8E8E93]'}`}>
+        <div className={`absolute top-3 left-3 flex items-center gap-1.5 bg-white/90 backdrop-blur-md px-3 py-1.5 rounded-xl border transition-all shadow-sm ${shop.status === 'open' ? 'border-[#228B22]/20' : 'border-[#7B1113]/20'}`}>
+          <div className={`w-1.5 h-1.5 rounded-full ${shop.status === "open" ? "bg-[#228B22]" : "bg-[#7B1113]"}`} />
+          <span className={`text-[9px] font-black capitalize tracking-widest ${shop.status === 'open' ? 'text-[#228B22]' : 'text-[#7B1113]'}`}>
             {shop.status || 'open'}
           </span>
         </div>
@@ -35,9 +35,9 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
 
       </div>
 
-      <div className="px-1 space-y-4 flex-1 flex flex-col">
+      <div className="px-1 space-y-2 flex-1 flex flex-col">
         <div className="flex justify-between items-start gap-2">
-          <h4 className="text-sm font-[900] text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{shop.name}</h4>
+          <h4 className="text-sm font-[900] text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate py-0.5">{shop.name}</h4>
           <div className="flex items-center gap-1 shrink-0">
             <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
             <span className="text-xs font-black text-[#1D1D1F]">{shop.rating}</span>
@@ -75,9 +75,8 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
             <span className="text-lg font-[900] text-[#7B1113] tracking-tighter font-outfit leading-none">₱{shop.price}<span className="text-xs font-bold text-[#8E8E93]/60 lowercase ml-0.5">/kg</span></span>
           </div>
           <button
-            disabled={shop.status !== 'open'}
-            onClick={(e) => { e.stopPropagation(); shop.status === 'open' && onViewDetails(); }}
-            className={`px-5 py-3 rounded-full text-[10px] font-bold capitalize tracking-wider transition-all shadow-lg shadow-black/10 flex items-center justify-center ${shop.status === 'open' ? 'bg-[#1D1D1F] text-white' : 'bg-[#8E8E93]/20 text-[#8E8E93] cursor-not-allowed'}`}
+            onClick={(e) => { e.stopPropagation(); onViewDetails(); }}
+            className={`px-5 py-3 rounded-full text-[10px] font-bold capitalize tracking-wider transition-all shadow-lg shadow-black/10 flex items-center justify-center ${shop.status === 'open' ? 'bg-[#1D1D1F] text-white' : 'bg-[#1D1D1F]/80 text-white opacity-90'}`}
           >
             See details
           </button>

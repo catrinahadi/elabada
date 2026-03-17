@@ -46,20 +46,23 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (rank) => {
-  const mainColor = "#FF8C00"; // Always orange
+  const mainColor = "#FF8C00"; 
+  const maroonColor = "#7B1113";
 
   return L.divIcon({
     className: 'custom-shop-marker',
-    html: `<div class="flex flex-col items-center">
-      <div class="relative transition-transform">
-        <svg width="36" height="48" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+    html: `<div class="flex flex-col items-center group cursor-pointer">
+      <div class="relative transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110">
+        <svg width="42" height="54" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-2xl">
           <path d="M14 0C6.26801 0 0 6.26801 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.26801 21.732 0 14 0Z" fill="${mainColor}"/>
-          <circle cx="14" cy="14" r="5" fill="#FFFFFF"/>
+          <path d="M14 2C7.37258 2 2 7.37258 2 14C2 22.5 14 32.5 14 32.5C14 32.5 26 22.5 26 14C26 7.37258 20.6274 2 14 2Z" fill="${maroonColor}" opacity="0.1"/>
+          <circle cx="14" cy="14" r="6" fill="#FFFFFF" class="shadow-sm"/>
         </svg>
+        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
     </div>`,
-    iconSize: [36, 48],
-    iconAnchor: [18, 48]
+    iconSize: [42, 54],
+    iconAnchor: [21, 54]
   });
 };
 
@@ -550,7 +553,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
               {/* Right Column: Details */}
               <div className="flex flex-col justify-start w-full">
-                <h1 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight leading-none mb-4 mt-2 pl-2">{shop.name}</h1>
+                <h1 className="text-[20px] font-bold text-[#1D1D1F] tracking-tight leading-none mb-2 mt-2 pl-2">{shop.name}</h1>
                 <div className="space-y-2">
                   {/* Address Card & Navigation */}
                   <div className="bg-[#F8F9FA] p-4 rounded-[32px] border border-black/[0.03] flex items-center justify-between gap-4 group hover:bg-white hover:shadow-xl transition-all duration-300">
@@ -1340,17 +1343,19 @@ export default function ShopsPage() {
                 <div className="relative z-10 w-full flex items-center">
                   <h2 className="text-[28px] md:text-[38px] font-normal tracking-tighter leading-none font-outfit truncate pr-4 mt-2">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
-                <div className="relative z-30 self-end w-full md:max-w-[70%] lg:max-w-xl flex-shrink-0 pointer-events-auto">
+                <div className="relative z-30 self-end w-full md:max-w-[70%] lg:max-w-xl flex-shrink-0 pointer-events-auto group">
                   <input
                     type="text"
-                    placeholder="Search Shops"
+                    placeholder="Search laundry shops..."
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-                    className="w-full h-10 md:h-12 bg-white rounded-xl md:rounded-[20px] border border-black/[0.05] pl-10 md:pl-14 pr-4 text-[12px] md:text-[14px] font-light shadow-xl focus:ring-4 focus:ring-[#014421]/10 transition-all outline-none placeholder:font-light placeholder:text-gray-500 text-[#1D1D1F]"
+                    className="w-full h-12 md:h-16 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[24px] md:rounded-[32px] pl-14 md:pl-16 pr-6 text-white text-[14px] md:text-[15px] font-medium shadow-2xl focus:bg-white focus:text-[#1D1D1F] focus:ring-8 focus:ring-black/10 transition-all duration-500 outline-none placeholder:text-white/60 placeholder:font-normal"
                   />
-                  <div className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 pointer-events-none"><Search className="w-4 h-4 md:w-5 md:h-5" /></div>
+                  <div className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 text-white group-focus-within:text-[#014421] transition-colors pointer-events-none">
+                    <Search className="w-4 h-4 md:w-6 md:h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
+                  </div>
                   {searchQuery && suggestions.length > 0 && showSuggestions && (
                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
                       {suggestions.map(s => (
@@ -1436,8 +1441,8 @@ export default function ShopsPage() {
                 {filteredShops.map(s => (
                   <div
                     key={s.id || s._id}
-                    onClick={() => (isShopOpen(s.operatingHours) && s.status !== 'closed') && handleSelectShop(s)}
-                    className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer ${(isShopOpen(s.operatingHours) && s.status !== 'closed') ? 'hover:shadow-xl group' : 'opacity-60 cursor-not-allowed grayscale-[0.5]'}`}
+                    onClick={() => handleSelectShop(s)}
+                    className={`bg-white rounded-[24px] md:rounded-[32px] flex flex-col border border-black/[0.05] shadow-sm transition-all overflow-hidden p-3 md:p-4 cursor-pointer hover:shadow-xl group`}
                   >
                     <div className="aspect-[4/3] w-full relative overflow-hidden rounded-[24px] mb-2">
                       <img
@@ -1450,8 +1455,8 @@ export default function ShopsPage() {
                           e.target.src = "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80";
                         }}
                       />
-                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-black/10 text-black/40'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-[#228B22]' : 'bg-black/20'}`} />
+                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-[#7B1113]/20 text-[#7B1113]'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-[#228B22]' : 'bg-[#7B1113]'}`} />
                         <span className="text-[12px] font-normal capitalize tracking-wide">{isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'open' : 'closed'}</span>
                       </div>
                       <div className="absolute bottom-3 right-3 flex flex-col items-end gap-2 pointer-events-none">
@@ -1471,10 +1476,10 @@ export default function ShopsPage() {
                         )}
                       </div>
                     </div>
-                    <div className="px-2 py-3 space-y-3 flex-1 flex flex-col">
+                    <div className="px-2 py-3 space-y-2 flex-1 flex flex-col">
                       <div className="flex justify-between items-center gap-2">
                         <div className="flex items-center gap-1.5 min-w-0">
-                          <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate">{s.name}</h4>
+                          <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate py-0.5">{s.name}</h4>
                           {s.permitStatus === 'approved' && (
                             <div className="w-4 h-4 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm">
                               <Check className="w-2.5 h-2.5 text-white stroke-[4]" />
@@ -1657,7 +1662,7 @@ export default function ShopsPage() {
                       <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight">Based on your priorities</p>
                       <div className="flex flex-col gap-5 pt-6">
                         {top3.map((s, i) => (
-                          <div key={s.id || s._id || i} onClick={() => { if (s.status === 'open') handleSelectShop(s); }} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-4 ${s.status === 'open' ? 'hover:shadow-2xl cursor-pointer group' : 'opacity-40 cursor-not-allowed grayscale'}`}>
+                          <div key={s.id || s._id || i} onClick={() => handleSelectShop(s)} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-4 hover:shadow-2xl cursor-pointer group`}>
                             <div className="flex justify-between items-start gap-3">
                               <div className="relative shrink-0 flex justify-center w-12 pt-0.5">
                                 <span className="text-5xl font-black text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
@@ -1665,7 +1670,7 @@ export default function ShopsPage() {
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center justify-between gap-2 overflow-hidden">
                                   <div className="flex items-center gap-2 min-w-0">
-                                    <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal">{s.name}</h4>
+                                    <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal py-0.5">{s.name}</h4>
                                     {s.permitStatus === 'approved' && (
                                       <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
                                         <Check className="w-3 h-3 text-white stroke-[4]" />
@@ -1680,7 +1685,7 @@ export default function ShopsPage() {
                                     {(s.score * 100).toFixed(0)}%
                                   </span>
                                 </div>
-                                <div className="flex flex-col gap-1 mt-1">
+                                <div className="flex flex-col gap-2 mt-2">
                                   <div className="flex items-center gap-1.5 text-[#1D1D1F]">
                                     <MapPin className="w-3.5 h-3.5 shrink-0" />
                                     <p className="text-[12px] font-medium capitalize truncate">{s.address}</p>
@@ -1729,173 +1734,231 @@ export default function ShopsPage() {
         </div>
 
         {/* ── REDESIGNED MAP INTERFACE ── */}
-        {sidebarTab === "map" && (
-          <div className="absolute inset-0 z-30 flex flex-col bg-slate-50 animate-fadeUp overflow-hidden">
-            {/* Map Background */}
-            <div className="absolute inset-0 z-0">
-              <MapContainer center={userLocation} zoom={15} className="w-full h-full z-0 overflow-hidden" zoomControl={false}>
-                <TileLayer
-                  url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                  attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
-                />
-
-                <MapController routePath={routePath} userLocation={userLocation} />
-
-                {/* User Location Marker */}
-                <Marker position={userLocation} icon={createUserLocationIcon()} />
-
-                {/* Shop Marker for Selected Shop Only */}
-                {(() => {
-                  if (!activeRouteShopId) return null;
-                  const selectedShopIndex = rankedShops.findIndex(s => s.id === activeRouteShopId || s._id === activeRouteShopId);
-                  const s = rankedShops[selectedShopIndex];
-                  if (!s) return null;
-                  return (
-                    <Marker
-                      key={s.id}
-                      position={[s.latitude, s.longitude]}
-                      icon={createShopMarkerIcon(selectedShopIndex + 1)}
-                    />
-                  );
-                })()}
-
-                {/* Routing Line - Road Following */}
-                {routePath.length > 0 && (
-                  <Polyline
-                    positions={routePath}
-                    color="#014421"
-                    weight={6}
-                    opacity={0.8}
-                    lineCap="round"
-                    lineJoin="round"
+          {sidebarTab === "map" && (
+            <div className="absolute inset-0 z-30 flex flex-col bg-slate-50 animate-fadeUp overflow-hidden">
+              {/* Map Background */}
+              <div className="absolute inset-0 z-0">
+                <MapContainer center={userLocation} zoom={15} className="w-full h-full z-0 overflow-hidden" zoomControl={false}>
+                  <TileLayer
+                    url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'
                   />
-                )}
-              </MapContainer>
-            </div>
 
-            <div className="absolute inset-0 z-10 pointer-events-none p-4 pt-6 md:p-10 flex flex-col">
-              <div className="flex flex-col md:flex-row items-stretch md:items-start justify-between pointer-events-auto gap-4">
-                <div className="flex items-center gap-4 md:gap-6">
-                  <button
-                    onClick={() => { setSidebarTab("overview"); setActiveRouteShopId(null); }}
-                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/90 backdrop-blur-xl text-[#1D1D1F] shadow-2xl hover:bg-[#1D1D1F] hover:text-white transition-all"
-                  >
-                    <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" />
-                  </button>
-                  <button
-                    onClick={refreshLocation}
-                    className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-2xl bg-white/90 backdrop-blur-xl text-[#014421] shadow-2xl hover:bg-[#014421] hover:text-white transition-all shadow-md"
-                    title="Detect my current location"
-                  >
-                    <LocateFixed className="w-5 h-5 md:w-6 md:h-6" />
-                  </button>
-                  <div className="relative flex-1 md:w-[450px]">
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#1D1D1F] opacity-40 md:opacity-40"><Search className="w-5 h-5" /></div>
-                    <input
-                      type="text"
-                      placeholder="Search laundry..."
-                      value={mapSearchQuery}
-                      onChange={(e) => setMapSearchQuery(e.target.value)}
-                      onFocus={() => setShowMapSuggestions(true)}
-                      onBlur={() => setTimeout(() => setShowMapSuggestions(false), 200)}
-                      className="w-full h-12 md:h-16 bg-white/90 backdrop-blur-xl rounded-[24px] md:rounded-[32px] pl-16 pr-6 text-[12px] font-normal shadow-2xl outline-none transition-all placeholder:text-gray-500 text-gray-500"
+                  <MapController routePath={routePath} userLocation={userLocation} />
+
+                  {/* User Location Marker */}
+                  <Marker position={userLocation} icon={createUserLocationIcon()} />
+
+                  {/* Shop Marker for Selected Shop Only */}
+                  {(() => {
+                    if (!activeRouteShopId) return null;
+                    const selectedShopIndex = rankedShops.findIndex(s => s.id === activeRouteShopId || s._id === activeRouteShopId);
+                    const s = rankedShops[selectedShopIndex];
+                    if (!s) return null;
+                    return (
+                      <Marker
+                        key={s.id}
+                        position={[s.latitude, s.longitude]}
+                        icon={createShopMarkerIcon(selectedShopIndex + 1)}
+                      />
+                    );
+                  })()}
+
+                  {/* Routing Line - Road Following */}
+                  {routePath.length > 0 && (
+                    <Polyline
+                      positions={routePath}
+                      color="#014421"
+                      weight={6}
+                      opacity={0.8}
+                      lineCap="round"
+                      lineJoin="round"
                     />
-                  </div>
-                </div>
+                  )}
+                </MapContainer>
               </div>
 
-              <div className={`mt-auto md:mt-6 self-center md:self-end pointer-events-none w-full md:w-[420px] max-h-[85vh] md:max-h-[85%] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] z-[40]
-                ${activeRouteShopId ? 'translate-y-[calc(100%-120px)] md:translate-y-0' : (isMapSheetExpanded ? 'translate-y-0' : 'translate-y-[calc(100%-80px)] md:translate-y-0')}
-              `}>
-                {(() => {
-                  const query = mapSearchQuery.toLowerCase().trim();
-                  const filtered = (query
-                    ? shopsWithDistance.filter(s => s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query))
-                    : [...shopsWithDistance]
-                  ).sort((a, b) => a.distance - b.distance);
-                  return (
-                    <>
-                      <div className="px-6 pb-6 pointer-events-auto relative bg-white/95 backdrop-blur-xl rounded-t-[40px] md:rounded-t-none md:bg-transparent md:backdrop-filter-none border-t border-black/[0.05] md:border-t-0 shadow-[0_-8px_30px_rgba(0,0,0,0.05)] md:shadow-none">
-                        <div className="md:hidden flex flex-col items-center py-3 mb-2" onClick={() => setIsMapSheetExpanded(!isMapSheetExpanded)}>
-                          <div className="w-12 h-1.5 bg-black/10 rounded-full mb-3" />
+              <div className="absolute inset-0 z-10 pointer-events-none p-4 pt-6 md:p-10 flex flex-col">
+                <div className="flex flex-col md:flex-row items-stretch md:items-start justify-between pointer-events-auto gap-4">
+                  <div className="flex items-center gap-3 p-2.5 bg-white/60 backdrop-blur-3xl rounded-[32px] md:rounded-[44px] border border-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] group/search-container">
+                    <button
+                      onClick={() => { setSidebarTab("overview"); setActiveRouteShopId(null); }}
+                      className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[24px] md:rounded-[36px] bg-white text-[#1D1D1F] shadow-lg hover:bg-[#1D1D1F] hover:text-white transition-all transform active:scale-95 group-hover/search-container:scale-[1.02]"
+                    >
+                      <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
+                    </button>
+                    <button
+                      onClick={refreshLocation}
+                      className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[24px] md:rounded-[36px] bg-white text-[#014421] shadow-lg hover:bg-[#014421] hover:text-white transition-all transform active:scale-95 group-hover/search-container:scale-[1.02]"
+                      title="Detect my current location"
+                    >
+                      <LocateFixed className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
+                    </button>
+                    <div className="relative flex-1 md:w-[480px] group/input">
+                      <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#014421] opacity-60 z-10 group-focus-within/input:opacity-100 transition-opacity"><Search className="w-5 h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]" /></div>
+                      <input
+                        type="text"
+                        placeholder="Search laundry near you..."
+                        value={mapSearchQuery}
+                        onChange={(e) => setMapSearchQuery(e.target.value)}
+                        onFocus={() => setShowMapSuggestions(true)}
+                        onBlur={() => setTimeout(() => setShowMapSuggestions(false), 200)}
+                        className="w-full h-12 md:h-16 bg-white/80 rounded-[24px] md:rounded-[36px] pl-16 pr-6 text-[14px] md:text-[16px] font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-white/50 outline-none transition-all placeholder:text-gray-400 text-[#1D1D1F] focus:bg-white focus:ring-8 focus:ring-[#014421]/5"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {activeRouteShopId && (
+                  <div className="mt-6 self-start pointer-events-auto animate-fadeDown">
+                    <div className="bg-[#014421] text-white px-6 py-4 rounded-[28px] shadow-2xl flex items-center gap-5 border border-white/20 backdrop-blur-xl">
+                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
+                        <Navigation className="w-5 h-5 fill-white" />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="text-[14px] font-bold tracking-tight">Navigating to {shops.find(s => s.id === activeRouteShopId || s._id === activeRouteShopId)?.name}</span>
+                        <span className="text-[11px] font-medium opacity-70">Estimated travel dist: {shopsWithDistance.find(s => s.id === activeRouteShopId || s._id === activeRouteShopId)?.distance?.toFixed(1)} km</span>
+                      </div>
+                      <button onClick={() => setActiveRouteShopId(null)} className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors">
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="mt-auto self-start pointer-events-auto flex flex-col gap-4 animate-fadeUp delay-300">
+                  <div className="bg-white/90 backdrop-blur-2xl p-5 rounded-[40px] border border-white shadow-2xl flex items-center gap-6 min-w-[280px]">
+                    <div className="w-12 h-12 rounded-3xl bg-[#014421]/10 flex items-center justify-center text-[#014421]">
+                      <MapIcon className="w-6 h-6" />
+                    </div>
+                    <div className="flex flex-col">
+                      <p className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em] leading-none mb-2">Live Status</p>
+                      <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-2 text-[14px] font-bold text-[#014421]">
+                          <div className="w-2.5 h-2.5 rounded-full bg-[#014421] animate-pulse" />
+                          {shops.filter(s => isShopOpen(s.operatingHours)).length} Open
                         </div>
-                        <div className="flex items-center justify-between">
-                          <h3 className="text-[18px] font-bold text-[#1D1D1F] tracking-tight leading-none mt-2 md:mt-0">{filtered.length} Shops Around You</h3>
+                        <div className="w-[1px] h-3 bg-black/10" />
+                        <div className="text-[13px] font-semibold text-black/60 truncate max-w-[150px]">
+                          Los Baños, Laguna
                         </div>
                       </div>
-                      <div className="flex-1 overflow-y-auto px-4 pb-8 space-y-4 no-scrollbar pointer-events-auto bg-white/95 backdrop-blur-xl md:bg-transparent md:backdrop-filter-none transition-all duration-500">
-                        <div className="px-4 pb-8 space-y-5">
-                          {filtered
-                            .map((s, i) => {
-                              const isActive = activeRouteShopId === s.id;
+                    </div>
+                  </div>
+                </div>
 
-                              return (
-                                <div
-                                  key={s.id}
-                                  onClick={() => {
-                                    if (isActive && !isMapSheetExpanded) {
-                                      setIsMapSheetExpanded(true);
-                                      return;
-                                    }
-                                    setActiveRouteShopId(isActive ? null : s.id);
-                                    if (!isActive) setIsMapSheetExpanded(false);
-                                  }}
-                                  className={`relative p-5 md:p-7 rounded-[32px] md:rounded-[40px] bg-white border transition-all duration-300 cursor-pointer ${isActive ? 'border-[#014421] ring-2 ring-[#014421]/20 shadow-2xl z-10' : 'border-black/[0.1] hover:border-black/20'}`}
-                                >
-                                  <div className="flex items-start gap-6">
-                                    {/* Left Side: Info */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="flex items-start gap-4">
-                                        <span className="text-[14px] font-normal text-[#7B1113] leading-none shrink-0">{i + 1}.</span>
-                                        <div className="flex-1 min-w-0">
+                <div className={`absolute top-0 right-0 h-full pointer-events-none w-full md:w-[460px] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] z-[40] p-4 md:p-10
+                  ${activeRouteShopId ? 'translate-x-[calc(100%+40px)] md:translate-x-0' : (isMapSheetExpanded ? 'translate-x-0' : 'translate-y-[calc(100%-100px)] md:translate-y-0')}
+                `}>
+                  <div className="w-full h-full pointer-events-auto bg-white/80 backdrop-blur-3xl rounded-[48px] border border-white shadow-[0_32px_80px_-16px_rgba(0,0,0,0.2)] md:ring-1 md:ring-black/5 flex flex-col overflow-hidden">
+
+                  {(() => {
+                    const query = mapSearchQuery.toLowerCase().trim();
+                    const filtered = (query
+                      ? shopsWithDistance.filter(s => s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query))
+                      : [...shopsWithDistance]
+                    ).sort((a, b) => a.distance - b.distance);
+
+                    const avgPrice = Math.round(filtered.reduce((acc, s) => acc + (s.price || 0), 0) / (filtered.length || 1));
+
+                    return (
+                      <>
+                        <div className="px-8 pt-10 pb-6 pointer-events-auto relative border-b border-black/[0.03]">
+                          <div className="md:hidden flex flex-col items-center py-2 mb-4" onClick={() => setIsMapSheetExpanded(!isMapSheetExpanded)}>
+                            <div className="w-16 h-1.5 bg-black/10 rounded-full" />
+                          </div>
+                          <div className="space-y-4">
+                            <div className="flex items-center justify-between">
+                              <h3 className="text-[22px] font-black text-[#1D1D1F] tracking-tighter leading-none">{filtered.length} Shops Around You</h3>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex-1 overflow-y-auto no-scrollbar pointer-events-auto transition-all duration-500">
+                          <div className="px-6 py-6 space-y-4">
+                            {filtered
+                              .map((s, i) => {
+                                const isActive = activeRouteShopId === s.id;
+
+                                return (
+                                  <div
+                                    key={s.id}
+                                    onClick={() => {
+                                      if (isActive && !isMapSheetExpanded) {
+                                        setIsMapSheetExpanded(true);
+                                        return;
+                                      }
+                                      setActiveRouteShopId(isActive ? null : s.id);
+                                      if (!isActive) setIsMapSheetExpanded(false);
+                                    }}
+                                    className={`relative p-5 rounded-[36px] bg-white border transition-all duration-300 cursor-pointer overflow-hidden group ${isActive ? 'border-[#014421] ring-4 ring-[#014421]/10 shadow-2xl z-10 scale-[1.02]' : 'border-black/[0.05] hover:border-[#014421]/30 hover:shadow-xl hover:-translate-y-1'}`}
+                                  >
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#014421]/5 to-transparent rounded-bl-[100px] -mr-8 -mt-8 transition-transform group-hover:scale-150" />
+                                    <div className="flex items-start gap-6">
+                                      {/* Left Side: Info */}
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex flex-col gap-1">
+                                          {i === 0 && (
+                                            <div className="flex items-center gap-1.5 mb-1 animate-pulse">
+                                              <MapPin className="w-3 h-3 text-[#014421] fill-[#014421]/10" />
+                                              <span className="text-[10px] font-black text-[#014421] uppercase tracking-[0.2em]">Nearest to you</span>
+                                            </div>
+                                          )}
                                           <div className="flex items-center gap-2">
-                                            <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-none font-outfit truncate">{s.name}</h4>
+                                            <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate py-0.5">{s.name}</h4>
                                             {s.permitStatus === 'approved' && (
                                               <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
                                                 <Check className="w-3 h-3 text-white stroke-[4]" />
                                               </div>
                                             )}
                                           </div>
+                                        </div>
 
+                                        <div className="mt-2 space-y-2">
+                                          <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-0.5">
+                                              {[...Array(5)].map((_, idx) => (
+                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                              ))}
+                                            </div>
+                                            <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
+                                          </div>
+
+                                          <div className="flex flex-col gap-2">
+                                            <div className="flex items-center gap-6">
+                                              <div className="flex items-center gap-2">
+                                                <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
+                                              </div>
+                                              <div className="flex items-center gap-2">
+                                                <Clock className="w-4 h-4 text-[#1D1D1F]" />
+                                                <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                              </div>
+                                            </div>
+                                            <div className="flex items-center gap-3 mt-0.5">
+                                              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#014421] bg-[#014421]/5 px-2.5 py-1 rounded-full border border-[#014421]/10">
+                                                <Navigation2 className="w-3 h-3 fill-[#014421]" />
+                                                {(s.distance || 0).toFixed(1)} km away
+                                              </div>
+                                              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#1D1D1F]/60">
+                                                <Timer className="w-3 h-3" />
+                                                <span>~{Math.round((s.distance || 0) * 12)} min walk</span>
+                                              </div>
+                                            </div>
+                                          </div>
                                         </div>
                                       </div>
 
-                                      <div className="mt-3 space-y-2">
-                                        <div className="flex items-center gap-1.5">
-                                          <div className="flex items-center gap-0.5">
-                                            {[...Array(5)].map((_, idx) => (
-                                              <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
-                                            ))}
+                                      <div className="w-24 h-24 md:w-28 md:h-28 rounded-[28px] md:rounded-[32px] overflow-hidden shrink-0 shadow-lg border-2 border-white relative">
+                                        <img src={s.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.name} />
+                                        {isActive && (
+                                          <div className="absolute inset-0 bg-[#014421]/20 backdrop-blur-[2px] flex items-center justify-center">
+                                            <Navigation className="w-6 h-6 text-white" />
                                           </div>
-                                          <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
-                                        </div>
-
-                                        <div className="flex flex-wrap items-center justify-between gap-4 mt-2">
-                                          <div className="flex items-center gap-6">
-                                            <div className="flex items-center gap-2">
-                                              <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
-                                            </div>
-                                            <div className="flex items-center gap-2">
-                                              <Clock className="w-4 h-4 text-[#1D1D1F]" />
-                                              <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
-                                            </div>
-                                          </div>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                          <div className="flex items-center gap-1.5 text-[12px] font-normal text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full">
-                                            {(s.distance || 0).toFixed(1)} km
-                                          </div>
-                                        </div>
+                                        )}
                                       </div>
-                                    </div>
-
-                                    <div className="w-32 h-32 rounded-[32px] overflow-hidden shrink-0 shadow-inner">
-                                      <img src={s.image} className="w-full h-full object-cover" alt={s.name} />
                                     </div>
                                   </div>
-                                </div>
-                              );
-                            })}
+                                );
+                              })}
                         </div>
                       </div>
                     </>
@@ -1904,9 +1967,9 @@ export default function ShopsPage() {
               </div>
             </div>
           </div>
-        )
-        }
-      </main >
+        </div>
+      )}
+    </main>
 
       {selectedShop && (
         <ShopDetailModal
