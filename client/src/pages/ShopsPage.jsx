@@ -1532,124 +1532,100 @@ export default function ShopsPage() {
           )}
 
           {sidebarTab === "computation" && (
-            <div className="max-w-[1700px] mx-auto animate-fadeUp py-4 md:py-8 px-2 md:px-6">
-              <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 md:gap-12 items-start">
-                <div className="xl:col-span-8 space-y-10">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-stretch">
-                    {/* Weight ranges — first */}
-                    <div className="bg-white p-8 md:p-14 rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl relative overflow-hidden flex flex-col space-y-12">
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Weight ranges</h3>
-                          <button
-                            onClick={() => setShowWeightManual(!showWeightManual)}
-                            className={`p-3 rounded-2xl transition-all ${showWeightManual ? 'bg-[#014421] text-white shadow-lg shadow-[#014421]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
-                          >
-                            <Info className="w-6 h-6" />
-                          </button>
-                        </div>
-                        {showWeightManual && (
-                          <div className="bg-[#014421]/5 p-6 rounded-[32px] flex items-start gap-4 border border-[#014421]/10 animate-fadeUp">
-                            <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#014421]/20">
-                              <Sliders className="w-5 h-5 text-white" />
-                            </div>
-                            <div>
-                              <p className="text-sm font-bold text-[#1D1D1F] font-outfit">Set your preferences</p>
-                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Adjust these sliders to set your ideal budget, distance, and time. We'll use these to find shops that fit your needs.</p>
-                            </div>
-                          </div>
-                        )}
+          {sidebarTab === "computation" && (() => {
+            const surveyQuestions = [
+              { id: "price", icon: "P", label: "What is your ideal budget per kilogram?", subtitle: "We will prioritize shops within your range",
+                options: [{ label: "Budget", sub: "P1-P25/kg", value: 20 },{ label: "Moderate", sub: "P26-P50/kg", value: 45 },{ label: "Premium", sub: "P51+/kg", value: 80 }], stateKey: "price" },
+              { id: "distance", icon: "D", label: "How far are you willing to travel?", subtitle: "We will highlight shops within your preferred range",
+                options: [{ label: "Very Near", sub: "Under 1 km", value: 1 },{ label: "Walking", sub: "1-3 km", value: 3 },{ label: "Anywhere", sub: "3 km+", value: 10 }], stateKey: "distance" },
+              { id: "time", icon: "T", label: "How fast do you need your laundry done?", subtitle: "Turnaround time preference",
+                options: [{ label: "Same Day", sub: "1-6 hrs", value: 5 },{ label: "Next Day", sub: "7-18 hrs", value: 14 },{ label: "Flexible", sub: "18-48 hrs", value: 30 }], stateKey: "time" },
+              { id: "rating", icon: "R", label: "How important are shop ratings to you?", subtitle: "Minimum acceptable rating from customers",
+                options: [{ label: "Any Shop", sub: "1.0+ stars", value: 1 },{ label: "Good", sub: "3.0+ stars", value: 3 },{ label: "Excellent", sub: "4.5+ stars", value: 4.5 }], stateKey: "rating" },
+              { id: "priority", icon: "G", label: "What matters most to you overall?", subtitle: "Your top priority gets the highest weight (40%)",
+                options: [
+                  { label: "Price", sub: "Lowest price per kg", order: ["price","distance","time","rating"] },
+                  { label: "Distance", sub: "Closest to me first", order: ["distance","price","rating","time"] },
+                  { label: "Speed", sub: "Fastest turnaround", order: ["time","rating","distance","price"] },
+                  { label: "Rating", sub: "Highest rated shops", order: ["rating","price","time","distance"] },
+                ], stateKey: "priority" },
+            ];
+            const answeredCount = surveyQuestions.filter(q => {
+              if (q.id === "priority") return q.options.some(o => JSON.stringify(o.order) === JSON.stringify(priorities));
+              return q.options.some(o => o.value === weights[q.stateKey]);
+            }).length;
+            return (
+              <div className="max-w-[1400px] mx-auto animate-fadeUp py-4 md:py-6 px-2 md:px-4">
+                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
+                  <div className="xl:col-span-8">
+                    <div className="mb-5 flex items-center justify-between gap-4">
+                      <div>
+                        <h2 className="text-[18px] font-semibold text-[#1D1D1F] font-outfit tracking-tight">Find your perfect shop</h2>
+                        <p className="text-[12px] text-[#1D1D1F]/40 mt-0.5">Answer {surveyQuestions.length} quick questions to get personalized results</p>
                       </div>
-                      <div className="space-y-10 relative z-10">
-                        {Object.entries(weights).map(([key, val]) => (
-                          <div key={key} className="space-y-5">
-                            <div className="flex justify-between items-end gap-3">
-                              <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight font-outfit whitespace-nowrap">
-                                {key === 'price' ? (<>Price <span className="font-medium normal-case text-xs text-[#1D1D1F]">(kg)</span></>) :
-                                  key === 'time' ? 'Turnaround Time' :
-                                    key === 'rating' ? 'Rating' :
-                                      key === 'distance' ? (<>Distance <span className="font-medium normal-case text-xs text-[#1D1D1F]">(km)</span></>) : key}
-                              </p>
-                              <span className="text-[14px] font-normal text-[#014421] leading-none">{val}</span>
-                            </div>
-                            <div className="relative h-2.5 flex items-center group">
-                              <div className="absolute inset-x-0 h-full bg-[#1D1D1F]/5 rounded-full overflow-hidden"><div className="h-full bg-[#014421] transition-all" style={{ width: `${(val / CRITERIA_LIMITS[key]) * 100}%` }} /></div>
-                              <input type="range" min="1" max={CRITERIA_LIMITS[key]} step={key === 'rating' ? 0.1 : 1} value={val} onChange={(e) => { setWeights({ ...weights, [key]: parseFloat(e.target.value) }); setIsApplied(false); }} className="relative w-full h-full bg-transparent appearance-none cursor-pointer z-10 opacity-0 group-hover:opacity-10" />
-                              <div className="absolute w-6 h-6 bg-white rounded-full shadow-xl border-[3px] border-[#014421] pointer-events-none transition-all" style={{ left: `calc(${(val / CRITERIA_LIMITS[key]) * 100}% - 12px)` }} />
-                            </div>
-                          </div>
-                        ))}
+                      <div className="flex items-center gap-2 shrink-0">
+                        <div className="flex gap-1">
+                          {surveyQuestions.map((_, i) => (
+                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i < answeredCount ? "w-5 bg-[#014421]" : "w-2.5 bg-black/10"}`} />
+                          ))}
+                        </div>
+                        <span className="text-[11px] font-bold text-[#014421]">{answeredCount}/{surveyQuestions.length}</span>
                       </div>
                     </div>
-                    {/* Rank your priorities — second */}
-                    <div className="bg-white rounded-[32px] md:rounded-[64px] border border-black/[0.03] shadow-2xl p-8 md:p-14 flex flex-col space-y-12">
-                      <div className="space-y-6">
-                        <div className="flex items-center justify-between gap-4">
-                          <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter capitalize font-outfit leading-none">Rank your priorities</h3>
-                          <button
-                            onClick={() => setShowPriorityManual(!showPriorityManual)}
-                            className={`p-3 rounded-2xl transition-all ${showPriorityManual ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20' : 'bg-[#1D1D1F]/5 text-[#1D1D1F] hover:bg-[#1D1D1F]/10'}`}
-                          >
-                            <Info className="w-6 h-6" />
-                          </button>
-                        </div>
-                        {showPriorityManual && (
-                          <div className="bg-[#7B1113]/5 p-6 rounded-[32px] flex items-start gap-4 border border-[#7B1113]/10 animate-fadeUp">
-                            <div className="w-10 h-10 bg-[#7B1113] rounded-2xl flex items-center justify-center shrink-0 shadow-lg shadow-[#7B1113]/20">
-                              <Activity className="w-5 h-5 text-white" />
+                    <div className="space-y-3">
+                      {surveyQuestions.map((q) => {
+                        const isAnswered = q.id === "priority"
+                          ? q.options.some(o => JSON.stringify(o.order) === JSON.stringify(priorities))
+                          : q.options.some(o => o.value === weights[q.stateKey]);
+                        return (
+                          <div key={q.id} className={`bg-white rounded-[20px] border-2 transition-all duration-200 overflow-hidden ${isAnswered ? "border-[#014421]/20 shadow-green-sm" : "border-black/[0.04] shadow-sm"}`}>
+                            <div className="px-5 pt-4 pb-3 flex items-start gap-3">
+                              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isAnswered ? "bg-[#014421]" : "bg-[#F9FAF8]"}`}>
+                                {isAnswered ? <Check className="w-3.5 h-3.5 text-white" /> : <span className="text-[12px]">{q.icon}</span>}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <p className="text-[13px] font-semibold text-[#1D1D1F] font-outfit leading-snug">{q.label}</p>
+                                <p className="text-[11px] text-[#1D1D1F]/40 mt-0.5">{q.subtitle}</p>
+                              </div>
+                              {isAnswered && <span className="text-[10px] font-bold text-[#014421] bg-[#E8F5EE] px-2 py-1 rounded-full shrink-0 self-start mt-0.5">Set</span>}
                             </div>
-                            <div>
-                              <p className="text-sm font-bold text-[#1D1D1F] font-outfit">What matters most?</p>
-                              <p className="text-xs text-[#1D1D1F]/60 mt-1 leading-relaxed">Drag items to reorder them on desktop, or long-press and drag on mobile. The item at the top is given the most importance (40%) when calculating your shop recommendations.</p>
+                            <div className="px-5 pb-4 grid grid-cols-2 md:grid-cols-4 gap-2">
+                              {q.options.map((opt) => {
+                                const isSelected = q.id === "priority"
+                                  ? JSON.stringify(opt.order) === JSON.stringify(priorities)
+                                  : opt.value === weights[q.stateKey];
+                                return (
+                                  <button
+                                    key={opt.label}
+                                    onClick={() => {
+                                      if (q.id === "priority") { setPriorities(opt.order); }
+                                      else { setWeights(prev => ({ ...prev, [q.stateKey]: opt.value })); }
+                                      setIsApplied(false);
+                                    }}
+                                    className={`relative flex flex-col items-start px-3.5 py-3 rounded-xl border-2 text-left transition-all duration-200 active:scale-95 ${isSelected ? "border-[#014421] bg-[#E8F5EE]" : "border-transparent bg-[#F9FAF8] hover:border-[#014421]/20 hover:bg-[#F0FAF5]"}`}
+                                  >
+                                    {isSelected && <div className="absolute top-2 right-2 w-3.5 h-3.5 rounded-full bg-[#014421] flex items-center justify-center"><Check className="w-2 h-2 text-white" /></div>}
+                                    <span className={`text-[12px] font-semibold font-outfit ${isSelected ? "text-[#014421]" : "text-[#1D1D1F]"}`}>{opt.label}</span>
+                                    <span className={`text-[11px] mt-0.5 ${isSelected ? "text-[#014421]/60" : "text-[#1D1D1F]/40"}`}>{opt.sub}</span>
+                                  </button>
+                                );
+                              })}
                             </div>
                           </div>
-                        )}
-                      </div>
-                      <div className="space-y-4">
-                        {priorities.map((key, index) => (
-                          <div
-                            key={key}
-                            data-priority-index={index}
-                            draggable
-                            onDragStart={() => onDragStart(index)}
-                            onDragOver={onDragOver}
-                            onDrop={() => { onDrop(index); setIsApplied(false); }}
-                            onTouchStart={() => handleTouchStart(index)}
-                            onTouchMove={(e) => handleTouchMove(e, index)}
-                            onTouchEnd={(e) => handleTouchEnd(e, index)}
-                            onTouchCancel={handleTouchCancel}
-                            className={`flex items-center justify-between gap-6 p-5 rounded-[36px] border border-black/[0.01] group transition-all select-none
-                              ${touchDragIndex === index ? 'bg-white shadow-2xl scale-105 opacity-90 z-50 relative' : 'bg-[#F8F9FA] hover:bg-white hover:shadow-2xl cursor-grab active:cursor-grabbing'}
-                            `}
-                            style={{
-                              touchAction: touchDragIndex !== null ? 'none' : 'auto' // Prevent scrolling only while actively dragging
-                            }}
-                          >
-                            <div className="flex-1 min-w-0 pointer-events-none">
-                              <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight font-outfit leading-none whitespace-normal">
-                                {key === 'price' ? (<>Price <span className="text-xs text-[#1D1D1F]">(per kg)</span></>) :
-                                  key === 'time' ? 'Turnaround Time' :
-                                    key === 'rating' ? 'Rating' :
-                                      key === 'distance' ? (<>Distance <span className="text-xs text-[#1D1D1F]">(km)</span></>) : key}
-                              </p>
-                            </div>
-                            <span className="text-[14px] font-normal text-[#014421] font-outfit leading-none pointer-events-none">{Math.round(POSITION_WEIGHTS[index] * 100)}%</span>
-                          </div>
-                        ))}
-                        {/* Total row */}
-                        <div className="flex items-center justify-between gap-6 px-5 pt-6 border-t border-black/[0.06]">
-                          <div className="flex-1 min-w-0">
-                            <p className="text-[14px] font-medium text-[#1D1D1F] font-outfit">Total</p>
-                          </div>
-                          <span className="text-[14px] font-normal text-[#1D1D1F] font-outfit">100%</span>
-                        </div>
-                      </div>
-                      <div className="pt-8 border-t border-black/[0.03]">
-                        <button onClick={() => { setIsApplied(true); setActiveSort('topsis'); }} className="w-full py-6 bg-[#014421] text-white rounded-[36px] font-normal text-[12px] capitalize tracking-[0.2em] flex items-center justify-center gap-4 hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#014421]/30 group active:scale-[0.98]">Apply</button>
-                      </div>
+                        );
+                      })}
+                    </div>
+                    <div className="mt-4">
+                      <button
+                        onClick={() => { setIsApplied(true); setActiveSort("topsis"); }}
+                        disabled={answeredCount < surveyQuestions.length}
+                        className={`w-full py-4 rounded-2xl font-semibold text-[13px] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] ${answeredCount >= surveyQuestions.length ? "bg-[#014421] text-white shadow-green hover:bg-[#0F5C35] cursor-pointer" : "bg-black/[0.05] text-[#1D1D1F]/30 cursor-not-allowed"}`}
+                      >
+                        <Check className="w-4 h-4" />
+                        {answeredCount >= surveyQuestions.length ? "Find My Best Shops" : `${surveyQuestions.length - answeredCount} question${surveyQuestions.length - answeredCount !== 1 ? "s" : ""} remaining`}
+                      </button>
                     </div>
                   </div>
-                </div>
                 <div className="xl:col-span-4 min-h-[500px]">
                   {shops.length === 0 ? (
                     <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">

@@ -15,7 +15,7 @@ body,
   height: 100%;
   margin: 0;
   padding: 0;
-  background-color: #F8F9FA;
+  background-color: var(--up-cream);
   font-family: "Inter", -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text",
     "Helvetica Neue", Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -25,14 +25,15 @@ body,
 
 /* ─── Color System ─────────────────────────────────────── */
 :root {
-  --primary-blue: #003366;
-  /* Royal Blue */
-  --accent-maroon: #800000;
-  --status-green: #228B22;
-  /* Forest Green */
-  --status-red: #FF3B30;
-  --text-dark: #1D1D1F;
-  --text-grey: #8E8E93;
+  --up-green:       #014421;
+  --up-green-mid:   #0F5C35;
+  --up-green-light: #E8F5EE;
+  --up-maroon:      #7B1113;
+  --up-maroon-light:#FBF0F0;
+  --up-cream:       #F9FAF8;
+  --up-gold:        #FF8C00;
+  --text-dark:      #1D1D1F;
+  --text-grey:      #8E8E93;
 }
 
 .status-open {
@@ -61,12 +62,12 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #D1D1D6;
+  background: rgba(1, 68, 33, 0.2);
   border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--primary-blue);
+  background: var(--up-green);
 }
 
 /* ─── Animations ────────────────────────────────────────── */
@@ -105,21 +106,23 @@ body {
 /* ─── Premium Components ─────────────────────────────────── */
 .card {
   @apply bg-white rounded-[32px] border border-black/[0.05] transition-all duration-500;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 4px 24px rgba(1, 68, 33, 0.04);
 }
 
 .card:hover {
   @apply -translate-y-1;
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.08);
-  border-color: rgba(0, 51, 102, 0.1);
+  box-shadow: 0 20px 48px rgba(1, 68, 33, 0.08);
+  border-color: rgba(1, 68, 33, 0.1);
 }
 
 .btn-primary {
-  @apply inline-flex items-center justify-center gap-2 bg-[#003366] hover:bg-[#002244] active:scale-95 text-white text-sm font-black rounded-2xl px-6 py-3.5 transition-all duration-300 select-none shadow-xl shadow-[#003366]/10;
+  @apply inline-flex items-center justify-center gap-2 bg-[#014421] hover:bg-[#0F5C35] active:scale-95 text-white text-sm font-black rounded-2xl px-6 py-3.5 transition-all duration-300 select-none;
+  box-shadow: 0 8px 24px rgba(1, 68, 33, 0.25);
 }
 
 .btn-maroon {
-  @apply inline-flex items-center justify-center gap-2 bg-[#800000] hover:bg-[#600000] active:scale-95 text-white text-sm font-black rounded-2xl px-6 py-3.5 transition-all duration-300 select-none shadow-xl shadow-[#800000]/10;
+  @apply inline-flex items-center justify-center gap-2 bg-[#7B1113] hover:bg-[#5C0D0F] active:scale-95 text-white text-sm font-black rounded-2xl px-6 py-3.5 transition-all duration-300 select-none;
+  box-shadow: 0 8px 24px rgba(123, 17, 19, 0.2);
 }
 
 .btn-icon {
@@ -139,11 +142,12 @@ body {
 }
 
 .sidebar-link:hover {
-  @apply bg-[#F0F4F8] text-[#003366];
+  @apply bg-[#E8F5EE] text-[#014421];
 }
 
 .sidebar-link.active {
-  @apply bg-[#003366] text-white shadow-2xl shadow-[#003366]/20;
+  @apply bg-[#014421] text-white;
+  box-shadow: 0 8px 24px rgba(1, 68, 33, 0.25);
 }
 
 .divider {
@@ -151,7 +155,25 @@ body {
 }
 
 .brand-logo {
-  @apply w-12 h-12 bg-[#003366] rounded-2xl flex items-center justify-center text-white font-normal text-2xl shadow-xl shadow-[#003366]/20;
+  @apply w-12 h-12 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-2xl;
+  box-shadow: 0 8px 24px rgba(1, 68, 33, 0.3);
+}
+
+/* ─── Green Glow Utilities ───────────────────────────── */
+.shadow-green {
+  box-shadow: 0 8px 32px rgba(1, 68, 33, 0.18), 0 2px 8px rgba(1, 68, 33, 0.1);
+}
+
+.shadow-green-sm {
+  box-shadow: 0 4px 16px rgba(1, 68, 33, 0.12);
+}
+
+.shadow-maroon {
+  box-shadow: 0 8px 32px rgba(123, 17, 19, 0.15), 0 2px 8px rgba(123, 17, 19, 0.08);
+}
+
+.glow-green {
+  box-shadow: 0 0 0 3px rgba(1, 68, 33, 0.12), 0 8px 32px rgba(1, 68, 33, 0.15);
 }
 
 .modal-overlay {
