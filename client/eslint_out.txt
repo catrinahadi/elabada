@@ -1,6 +1,74 @@
 
-C:\Users\mcatr\Downloads\elabada\client\src\pages\ShopsPage.jsx
-  1699:17  error  Parsing error: Adjacent JSX elements must be wrapped in an enclosing tag
+> client@0.0.0 lint
+> eslint .
 
-✖ 1 problem (1 error, 0 warnings)
+
+C:\Users\mcatr\Downloads\elabada\client\src\context\AuthContext.jsx
+  15:13  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  13 |         const token = localStorage.getItem("elabada_token");
+  14 |         if (stored && token) {
+> 15 |             setUser(JSON.parse(stored));
+     |             ^^^^^^^ Avoid calling setState() directly within an effect
+  16 |         }
+  17 |         setLoading(false);
+  18 |     }, []);  react-hooks/set-state-in-effect
+  59:17  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    react-refresh/only-export-components
+
+C:\Users\mcatr\Downloads\elabada\client\src\pages\AdminDashboard.jsx
+  60:13  error  'user' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u              no-unused-vars
+  63:12  error  'stats' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u             no-unused-vars
+  67:12  error  'expandedShops' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  67:27  error  'setExpandedShops' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+  69:12  error  'isSidebarOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u     no-unused-vars
+  69:27  error  'setIsSidebarOpen' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\mcatr\Downloads\elabada\client\src\pages\Login.jsx
+  19:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  17 |     // Clear fields when role changes
+  18 |     useEffect(() => {
+> 19 |         setUsername("");
+     |         ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  20 |         setPassword("");
+  21 |         setError("");
+  22 |     }, [selectedRole]);  react-hooks/set-state-in-effect
+
+C:\Users\mcatr\Downloads\elabada\client\src\pages\OwnerDashboard.jsx
+  120:8   warning  React Hook useEffect has a missing dependency: 'map'. Either include it or remove the dependency array         react-hooks/exhaustive-deps
+  361:40  warning  React Hook useEffect has a missing dependency: 'fetchShops'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\mcatr\Downloads\elabada\client\src\pages\ShopsPage.jsx
+  1993:12  error  Parsing error: Unexpected token `}`. Did you mean `&rbrace;` or `{"}"}`?
+
+C:\Users\mcatr\Downloads\elabada\client\src\pages\Signup.jsx
+  20:9  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  18 |     // Clear fields when role changes
+  19 |     useEffect(() => {
+> 20 |         setName("");
+     |         ^^^^^^^ Avoid calling setState() directly within an effect
+  21 |         setUsername("");
+  22 |         setPassword("");
+  23 |         setError("");  react-hooks/set-state-in-effect
+
+Γ£û 13 problems (11 errors, 2 warnings)
 

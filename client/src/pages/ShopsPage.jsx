@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from "react";
+import React, { useState, useMemo, useEffect, useRef, Fragment, cloneElement } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -8,7 +8,7 @@ import {
   Clock, Package, Check, ChevronRight,
   X, Info, MessageSquare, ArrowUpRight, Award,
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
-  ArrowUp, ArrowDown, Map as GoogleMap,
+  ArrowUp, ArrowDown, Map as GoogleMap, ArrowRight,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
   Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle
@@ -46,7 +46,7 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (rank) => {
-  const mainColor = "#FF8C00"; 
+  const mainColor = "#014421"; 
   const maroonColor = "#7B1113";
 
   return L.divIcon({
@@ -217,7 +217,7 @@ function ReviewForm({ shopId, promisedTime, onPosted, onCancel }) {
           <div className="flex justify-center gap-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <button key={s} type="button" onClick={() => { setRating(s); setErrors(prev => ({ ...prev, rating: null })); }} className="p-1 transition-transform active:scale-95">
-                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#E67E00] text-[#E67E00]' : errors.rating ? 'text-red-200' : 'text-gray-200'}`} />
+                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#7B1113] text-[#7B1113]' : errors.rating ? 'text-red-200' : 'text-gray-200'}`} />
               </button>
             ))}
           </div>
@@ -449,7 +449,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   key={val}
                   onClick={() => setFilter(val)}
                   className={`px-5 py-2 rounded-full text-[14px] font-normal transition-all ${filter === val
-                    ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
+                    ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20'
                     : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                     }`}
                 >
@@ -692,7 +692,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                             </div>
                             <div className="flex items-center gap-1">
                               {[1, 2, 3, 4, 5].map((s) => (
-                                <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
+                                <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#7B1113] text-[#7B1113]" : "text-gray-200"}`} />
                               ))}
                             </div>
                           </div>
@@ -748,7 +748,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
       price: 'Price',
       turnaroundTime: 'Turnaround Time',
       rating: 'Rating',
-      distance: 'Distance'
+      distance: 'Range'
     };
 
     const isDelay = criterion === 'turnaroundTime' && shop.actualTurnaroundTime > shop.turnaroundTime;
@@ -847,6 +847,10 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                     <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 3: Ideal Points</span>
                     <p className="text-[13px] text-gray-600 leading-relaxed font-medium">We identify an "Ideal Best" (cheapest, closest, fastest) and "Ideal Worst" in the group.</p>
                   </div>
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 4: Match Ranking</span>
+                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">The results are sorted by their closeness to the ideal, giving you the best recommendations.</p>
+                  </div>
                 </div>
 
                 <div className="bg-white p-8 rounded-[32px] border border-black/5 space-y-6 shadow-inner">
@@ -876,11 +880,11 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
             <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03]">
               <p className="text-[14px] font-medium text-gray-600 leading-relaxed italic">
                 Your ranking prioritizes:{" "}
-                {shop.details.map((d, i) => {
-                  const label = d.criterion === 'turnaroundTime' ? 'Time' : d.criterion.charAt(0).toUpperCase() + d.criterion.slice(1);
+                {[...shop.details].sort((a, b) => a.criterion === 'distance' ? -1 : b.criterion === 'distance' ? 1 : 0).map((d, i) => {
+                  const label = d.criterion === 'turnaroundTime' ? 'Time' : d.criterion === 'distance' ? 'Range' : d.criterion.charAt(0).toUpperCase() + d.criterion.slice(1);
                   return (
                     <span key={d.criterion} className="text-[#1D1D1F] font-bold">
-                      {label} ({Math.round(d.weight * 100)}%){i < shop.details.length - 1 ? " • " : ""}
+                      {label} ({Math.round(d.weight * 100)}){i < shop.details.length - 1 ? " • " : ""}
                     </span>
                   );
                 })}
@@ -895,7 +899,8 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
               <Activity className="w-4 h-4" /> Criteria Performance
             </h5>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {shop.details.map((detail) => {
+              {/* Sorted so distance/range always comes first */}
+              {[...shop.details].sort((a, b) => a.criterion === 'distance' ? -1 : b.criterion === 'distance' ? 1 : 0).map((detail) => {
                 const info = getExplanation(detail);
                 const Icon = info.icon;
 
@@ -928,7 +933,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                         </div>
                       </div>
                       <div className="text-right">
-                        <span className="text-[14px] font-bold text-[#1D1D1F] block">{info.percentage}%</span>
+                        <span className="text-[14px] font-bold text-[#1D1D1F] block">{info.percentage}</span>
                         {info.isDelay && <span className="text-[9px] text-[#7B1113] font-bold uppercase block opacity-60">Truth-Adjusted</span>}
                       </div>
                     </div>
@@ -995,7 +1000,20 @@ export default function ShopsPage() {
   const [showWeightManual, setShowWeightManual] = useState(false);
   const [showPriorityManual, setShowPriorityManual] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [showMapSuggestions, setShowMapSuggestions] = useState(false);
+  const [surveyStep, setSurveyStep] = useState(1);
+  const handleMovePriority = (index, direction) => {
+    const newPriorities = [...priorities];
+    const targetIndex = index + direction;
+    if (targetIndex < 0 || targetIndex >= newPriorities.length) return;
+    
+    // Swap elements
+    const temp = newPriorities[index];
+    newPriorities[index] = newPriorities[targetIndex];
+    newPriorities[targetIndex] = temp;
+    
+    setPriorities(newPriorities);
+    setIsApplied(false);
+  }; // 1: 4 Questions, 2: Priority, 3: Results
 
   // New Filter & Sort State
   const [activeSort, setActiveSort] = useState('price');
@@ -1069,6 +1087,9 @@ export default function ShopsPage() {
           const mapped = data.map(s => ({
             ...s,
             id: s._id,
+            price: Number(s.price) || 0,
+            turnaroundTime: Number(s.turnaroundTime) || 24,
+            rating: Number(s.rating) || 0,
             image: s.image || DEFAULT_SHOP_IMAGE,
           }));
           setShops(mapped);
@@ -1202,14 +1223,16 @@ export default function ShopsPage() {
 
   // Auto-weights from priority order combined with weight ranges
   const combinedWeights = useMemo(() => {
+    // We use a base importance of 25 for all factors,
+    // then multiply by the user's priority position order (1st = 4x, 2nd = 3x, etc)
+    const baseImportance = { price: 25, time: 25, distance: 25, rating: 25 };
     const w = {};
+    const POSITION_WEIGHTS = [1.0, 0.75, 0.5, 0.25]; // Priority multipliers
     priorities.forEach((key, i) => {
-      // Multiply the slider weight by the priority-based multiplier
-      // This ensures both values influence the final decision
-      w[key] = (weights[key] || 1) * POSITION_WEIGHTS[i];
+      w[key] = baseImportance[key] * (POSITION_WEIGHTS[i] || 1);
     });
     return w;
-  }, [priorities, weights]);
+  }, [priorities]);
 
   const shopsWithDistance = useMemo(() => {
     return shops.map(s => ({
@@ -1219,16 +1242,24 @@ export default function ShopsPage() {
   }, [shops, userLocation]);
 
   const rankedShops = useMemo(() => {
+    if (!shopsWithDistance || shopsWithDistance.length === 0) return [];
+    
+    // Pass the actual weights from the state, merged with priority position multipliers
     const scores = calculateTopsis(shopsWithDistance, combinedWeights, priorities);
+    
+    // Merge scores back into shop objects by finding the match (standardizing ID check)
     return shopsWithDistance.map(shop => {
-      const scoreData = scores.find(s => s.id === shop.id);
+      const shopId = shop.id || shop._id;
+      const scoreData = scores.find(s => s.id === shopId);
+      
       return {
         ...shop,
         score: scoreData?.score ?? 0,
         details: scoreData?.details ?? []
       };
-    }).sort((a, b) => b.score - a.score);
+    }).sort((a, b) => b.score - a.score); // Absolute sorting by TOPSIS score
   }, [combinedWeights, shopsWithDistance, priorities]);
+
 
   const nearbyShops = useMemo(() => [...shopsWithDistance].sort((a, b) => a.distance - b.distance).slice(0, 3), [shopsWithDistance]);
   const top3 = useMemo(() => rankedShops.slice(0, 3), [rankedShops]);
@@ -1275,7 +1306,7 @@ export default function ShopsPage() {
 
 
   return (
-    <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden relative">
+    <div className="flex bg-[#FAFAF7] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden relative">
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
@@ -1285,7 +1316,7 @@ export default function ShopsPage() {
       )}
 
       {/* Sidebar - Conditional classes for responsiveness */}
-      <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
+      <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] flex flex-col p-8 
         ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
         <div className="flex items-center gap-4 mb-16 px-2">
           <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white text-2xl shadow-lg shadow-[#014421]/20">E</div>
@@ -1385,7 +1416,7 @@ export default function ShopsPage() {
                 <button onClick={() => setSidebarTab("computation")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <Sliders className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#014421] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <LocateFixed className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
               </div>
@@ -1418,10 +1449,10 @@ export default function ShopsPage() {
                       {showSortDropdown && (
                         <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-[24px] shadow-2xl border border-black/[0.05] py-3 z-[150] animate-fadeUp">
                           {[
-                            ...(isApplied ? [{ id: 'topsis', label: 'Best Match' }] : []),
+                            { id: 'distance', label: 'By Range' },
                             { id: 'price', label: 'Lowest Price' },
                             { id: 'rating', label: 'Highest Rating' },
-                            { id: 'distance', label: 'Nearest' }
+                            ...(isApplied ? [{ id: 'topsis', label: 'Best Match' }] : []),
                           ].map((option) => (
                             <button
                               key={option.id}
@@ -1468,7 +1499,7 @@ export default function ShopsPage() {
                             <div className="w-7 h-7 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0">
                               <TrendingUp className="w-4 h-4 text-[#014421]" />
                             </div>
-                            <div className="flex flex-col -space-y-0.5">
+                            <div className="flex flex-row items-baseline gap-2">
                               <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
                               <span className="text-[15px] font-normal text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
                             </div>
@@ -1487,7 +1518,7 @@ export default function ShopsPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
+                          <Star className="w-3.5 h-3.5 fill-[#7B1113] text-[#7B1113]" />
                           <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} <span className="opacity-40">({s.reviewCount || 0})</span></span>
                         </div>
                       </div>
@@ -1531,182 +1562,372 @@ export default function ShopsPage() {
             </div>
           )}
 
-          {sidebarTab === "computation" && (
           {sidebarTab === "computation" && (() => {
             const surveyQuestions = [
-              { id: "price", icon: "P", label: "What is your ideal budget per kilogram?", subtitle: "We will prioritize shops within your range",
-                options: [{ label: "Budget", sub: "P1-P25/kg", value: 20 },{ label: "Moderate", sub: "P26-P50/kg", value: 45 },{ label: "Premium", sub: "P51+/kg", value: 80 }], stateKey: "price" },
-              { id: "distance", icon: "D", label: "How far are you willing to travel?", subtitle: "We will highlight shops within your preferred range",
-                options: [{ label: "Very Near", sub: "Under 1 km", value: 1 },{ label: "Walking", sub: "1-3 km", value: 3 },{ label: "Anywhere", sub: "3 km+", value: 10 }], stateKey: "distance" },
-              { id: "time", icon: "T", label: "How fast do you need your laundry done?", subtitle: "Turnaround time preference",
-                options: [{ label: "Same Day", sub: "1-6 hrs", value: 5 },{ label: "Next Day", sub: "7-18 hrs", value: 14 },{ label: "Flexible", sub: "18-48 hrs", value: 30 }], stateKey: "time" },
-              { id: "rating", icon: "R", label: "How important are shop ratings to you?", subtitle: "Minimum acceptable rating from customers",
-                options: [{ label: "Any Shop", sub: "1.0+ stars", value: 1 },{ label: "Good", sub: "3.0+ stars", value: 3 },{ label: "Excellent", sub: "4.5+ stars", value: 4.5 }], stateKey: "rating" },
-              { id: "priority", icon: "G", label: "What matters most to you overall?", subtitle: "Your top priority gets the highest weight (40%)",
-                options: [
-                  { label: "Price", sub: "Lowest price per kg", order: ["price","distance","time","rating"] },
-                  { label: "Distance", sub: "Closest to me first", order: ["distance","price","rating","time"] },
-                  { label: "Speed", sub: "Fastest turnaround", order: ["time","rating","distance","price"] },
-                  { label: "Rating", sub: "Highest rated shops", order: ["rating","price","time","distance"] },
-                ], stateKey: "priority" },
+              { id: "distance", icon: <Navigation2 className="w-4 h-4" />, label: "Distance preference (km)", subtitle: "Maximum distance you'd travel",
+                options: [{ label: "Near", value: 1 },{ label: "Mid", value: 5 },{ label: "Far", value: 15 }], stateKey: "distance", min: 0.5, max: 20, step: 0.5, unit: "km" },
+              { id: "price", icon: <Banknote className="w-4 h-4" />, label: "Budget preference (₱/kg)", subtitle: "Ideal cost per kilogram",
+                options: [{ label: "Cheap", value: 25 },{ label: "Mid", value: 50 },{ label: "Premium", value: 100 }], stateKey: "price", min: 10, max: 200, step: 5, unit: "₱" },
+              { id: "time", icon: <Timer className="w-4 h-4" />, label: "Time preference (hrs)", subtitle: "Ideal turnaround time",
+                options: [{ label: "Flash", value: 6 },{ label: "Normal", value: 24 },{ label: "Flexible", value: 72 }], stateKey: "time", min: 1, max: 96, step: 1, unit: "hrs" },
+              { id: "rating", icon: <Star className="w-4 h-4" />, label: "Minimum rating (★)", subtitle: "Lowest acceptable shop rating",
+                options: [{ label: "Any", value: 1 },{ label: "Excl", value: 3 },{ label: "High", value: 4.5 }], stateKey: "rating", min: 1, max: 5, step: 0.1, unit: "stars" }
             ];
-            const answeredCount = surveyQuestions.filter(q => {
-              if (q.id === "priority") return q.options.some(o => JSON.stringify(o.order) === JSON.stringify(priorities));
-              return q.options.some(o => o.value === weights[q.stateKey]);
-            }).length;
+
+            const isFirstStepDone = true; // Sliders always have a default value
+
             return (
-              <div className="max-w-[1400px] mx-auto animate-fadeUp py-4 md:py-6 px-2 md:px-4">
-                <div className="grid grid-cols-1 xl:grid-cols-12 gap-6 items-start">
-                  <div className="xl:col-span-8">
-                    <div className="mb-5 flex items-center justify-between gap-4">
-                      <div>
-                        <h2 className="text-[18px] font-semibold text-[#1D1D1F] font-outfit tracking-tight">Find your perfect shop</h2>
-                        <p className="text-[12px] text-[#1D1D1F]/40 mt-0.5">Answer {surveyQuestions.length} quick questions to get personalized results</p>
-                      </div>
-                      <div className="flex items-center gap-2 shrink-0">
-                        <div className="flex gap-1">
-                          {surveyQuestions.map((_, i) => (
-                            <div key={i} className={`h-1.5 rounded-full transition-all duration-300 ${i < answeredCount ? "w-5 bg-[#014421]" : "w-2.5 bg-black/10"}`} />
-                          ))}
-                        </div>
-                        <span className="text-[11px] font-bold text-[#014421]">{answeredCount}/{surveyQuestions.length}</span>
-                      </div>
-                    </div>
-                    <div className="space-y-3">
-                      {surveyQuestions.map((q) => {
-                        const isAnswered = q.id === "priority"
-                          ? q.options.some(o => JSON.stringify(o.order) === JSON.stringify(priorities))
-                          : q.options.some(o => o.value === weights[q.stateKey]);
-                        return (
-                          <div key={q.id} className={`bg-white rounded-[20px] border-2 transition-all duration-200 overflow-hidden ${isAnswered ? "border-[#014421]/20 shadow-green-sm" : "border-black/[0.04] shadow-sm"}`}>
-                            <div className="px-5 pt-4 pb-3 flex items-start gap-3">
-                              <div className={`w-7 h-7 rounded-xl flex items-center justify-center shrink-0 mt-0.5 ${isAnswered ? "bg-[#014421]" : "bg-[#F9FAF8]"}`}>
-                                {isAnswered ? <Check className="w-3.5 h-3.5 text-white" /> : <span className="text-[12px]">{q.icon}</span>}
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <p className="text-[13px] font-semibold text-[#1D1D1F] font-outfit leading-snug">{q.label}</p>
-                                <p className="text-[11px] text-[#1D1D1F]/40 mt-0.5">{q.subtitle}</p>
-                              </div>
-                              {isAnswered && <span className="text-[10px] font-bold text-[#014421] bg-[#E8F5EE] px-2 py-1 rounded-full shrink-0 self-start mt-0.5">Set</span>}
-                            </div>
-                            <div className="px-5 pb-4 grid grid-cols-2 md:grid-cols-4 gap-2">
-                              {q.options.map((opt) => {
-                                const isSelected = q.id === "priority"
-                                  ? JSON.stringify(opt.order) === JSON.stringify(priorities)
-                                  : opt.value === weights[q.stateKey];
-                                return (
-                                  <button
-                                    key={opt.label}
-                                    onClick={() => {
-                                      if (q.id === "priority") { setPriorities(opt.order); }
-                                      else { setWeights(prev => ({ ...prev, [q.stateKey]: opt.value })); }
-                                      setIsApplied(false);
-                                    }}
-                                    className={`relative flex flex-col items-start px-3.5 py-3 rounded-xl border-2 text-left transition-all duration-200 active:scale-95 ${isSelected ? "border-[#014421] bg-[#E8F5EE]" : "border-transparent bg-[#F9FAF8] hover:border-[#014421]/20 hover:bg-[#F0FAF5]"}`}
-                                  >
-                                    {isSelected && <div className="absolute top-2 right-2 w-3.5 h-3.5 rounded-full bg-[#014421] flex items-center justify-center"><Check className="w-2 h-2 text-white" /></div>}
-                                    <span className={`text-[12px] font-semibold font-outfit ${isSelected ? "text-[#014421]" : "text-[#1D1D1F]"}`}>{opt.label}</span>
-                                    <span className={`text-[11px] mt-0.5 ${isSelected ? "text-[#014421]/60" : "text-[#1D1D1F]/40"}`}>{opt.sub}</span>
-                                  </button>
-                                );
-                              })}
-                            </div>
+              <div className="max-w-[1400px] mx-auto py-8 px-4 md:px-12 animate-fadeUp relative overflow-hidden bg-white shadow-[0_0_80px_rgba(0,0,0,0.02)] min-h-screen">
+
+
+
+                <div className="min-h-[500px]">
+                  {/* STEP 1: PREFERENCES */}
+                  {surveyStep === 1 && (
+                    <div className="flex flex-col gap-10 animate-fadeUp">
+                        <div className="flex flex-col gap-8 items-center text-center w-full">
+                          {/* Title Section (Centered) */}
+                          <div className="space-y-1">
+                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
+                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
                           </div>
-                        );
-                      })}
-                    </div>
-                    <div className="mt-4">
-                      <button
-                        onClick={() => { setIsApplied(true); setActiveSort("topsis"); }}
-                        disabled={answeredCount < surveyQuestions.length}
-                        className={`w-full py-4 rounded-2xl font-semibold text-[13px] flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] ${answeredCount >= surveyQuestions.length ? "bg-[#014421] text-white shadow-green hover:bg-[#0F5C35] cursor-pointer" : "bg-black/[0.05] text-[#1D1D1F]/30 cursor-not-allowed"}`}
-                      >
-                        <Check className="w-4 h-4" />
-                        {answeredCount >= surveyQuestions.length ? "Find My Best Shops" : `${surveyQuestions.length - answeredCount} question${surveyQuestions.length - answeredCount !== 1 ? "s" : ""} remaining`}
-                      </button>
-                    </div>
-                  </div>
-                <div className="xl:col-span-4 min-h-[500px]">
-                  {shops.length === 0 ? (
-                    <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">
-                      <Store className="w-10 h-10 text-[#1D1D1F]/40 mb-4" />
-                      <p className="text-[11px] font-bold text-[#1D1D1F] max-w-[220px] leading-relaxed">No shops available yet in the system.</p>
-                    </div>
-                  ) : isApplied ? (
-                    <div className="space-y-1 animate-fadeUp">
-                      <h3 className="text-[16px] font-bold text-[#1D1D1F] tracking-tighter font-outfit">Recommended shops for you</h3>
-                      <p className="text-[14px] font-medium text-[#1D1D1F] tracking-tight">Based on your priorities</p>
-                      <div className="flex flex-col gap-5 pt-6">
-                        {top3.map((s, i) => (
-                          <div key={s.id || s._id || i} onClick={() => handleSelectShop(s)} className={`bg-white p-6 rounded-[40px] border border-black/[0.04] shadow-xl transition-all relative overflow-hidden flex flex-col gap-4 hover:shadow-2xl cursor-pointer group`}>
-                            <div className="flex justify-between items-start gap-3">
-                              <div className="relative shrink-0 flex justify-center w-12 pt-0.5">
-                                <span className="text-5xl font-black text-[#7B1113] font-outfit leading-none select-none">{i + 1}</span>
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-center justify-between gap-2 overflow-hidden">
-                                  <div className="flex items-center gap-2 min-w-0">
-                                    <h4 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight capitalize font-outfit truncate group-hover:text-[#014421] transition-colors leading-normal py-0.5">{s.name}</h4>
-                                    {s.permitStatus === 'approved' && (
-                                      <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-md">
-                                        <Check className="w-3 h-3 text-white stroke-[4]" />
-                                      </div>
-                                    )}
+  
+                          {/* Step Indicator (Centered) */}
+                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
+                          {["Preferences", "Ranking", "Results"].map((label, i) => {
+                            const num = i + 1;
+                            const isActive = surveyStep === num;
+                            const isCompleted = surveyStep > num;
+                            
+                            return (
+                              <Fragment key={label}>
+                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
+                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
+                                    isActive ? "bg-white border-[#014421] border-2" : 
+                                    "bg-white border-black/10"
+                                  }`}>
+                                    {isCompleted ? (
+                                      <Check className="w-5 h-5" />
+                                    ) : isActive ? (
+                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
+                                    ) : null}
                                   </div>
-                                  <span
-                                    onClick={(e) => { e.stopPropagation(); setShowComputation(s); }}
-                                    className="text-[14px] font-normal text-[#014421] tracking-tighter font-outfit shrink-0 hover:scale-110 transition-transform cursor-help bg-[#014421]/5 px-3 py-1 rounded-full"
-                                    title="Click to view match calculation"
-                                  >
-                                    {(s.score * 100).toFixed(0)}%
+                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
+                                    {label}
                                   </span>
                                 </div>
-                                <div className="flex flex-col gap-2 mt-2">
-                                  <div className="flex items-center gap-1.5 text-[#1D1D1F]">
-                                    <MapPin className="w-3.5 h-3.5 shrink-0" />
-                                    <p className="text-[12px] font-medium capitalize truncate">{s.address}</p>
-                                  </div>
+                                {i < 2 && (
+                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="rounded-[56px] p-8 md:p-16 space-y-16 relative">
+                        <div className="space-y-0.5">
+                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Set your preferences</h3>
+                          <p className="text-[14px] text-black/40 font-normal">Adjust the sliders below</p>
+                        </div>
+                        
+                        <div className="space-y-10">
+                          {surveyQuestions.map((q, idx) => {
+                            return (
+                              <div key={q.id} className="group relative space-y-6 animate-fadeUp" style={{ animationDelay: `${idx * 150}ms` }}>
+                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                                   <div className="flex items-center gap-4">
-                                    <div className="flex items-center gap-1.5">
-                                      <Clock className="w-3.5 h-3.5 text-[#1D1D1F] shrink-0" />
-                                      <span className="text-[12px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
-                                      {s.actualTurnaroundTime > s.turnaroundTime && (
-                                        <span className="text-[10px] font-bold text-[#7B1113] bg-[#7B1113]/5 px-2 py-0.5 rounded-full border border-[#7B1113]/10">
-                                          ~{s.actualTurnaroundTime}h actual
-                                        </span>
-                                      )}
-                                    </div>
-                                    <div className="flex items-center gap-1.5 shrink-0">
-                                      <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
-                                      <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} ({s.reviewCount || 0})</span>
+                                    <div className="space-y-0.5">
+                                      <h3 className="text-[14px] font-normal text-[#1D1D1F] font-outfit tracking-normal leading-none">{q.label}</h3>
+                                      <p className="text-[12px] text-black/40 font-normal">{q.subtitle}</p>
                                     </div>
                                   </div>
-                                  <div className="mt-1 flex items-center gap-4">
-                                    <span className="text-[14px] font-normal text-[#7B1113] tracking-tight font-outfit leading-normal">₱{s.price}<span className="text-[12px] font-normal text-[#7B1113]/60 lowercase ml-1">/kg</span></span>
-                                    {s.status !== 'open' && (
-                                      <div className="flex items-center gap-2 px-3 py-1.5 bg-[#1D1D1F]/10 rounded-full">
-                                        <XCircle className="w-3 h-3 text-[#1D1D1F]" />
-                                        <span className="text-[10px] font-black text-[#1D1D1F] tracking-wider">Closed</span>
-                                      </div>
-                                    )}
+                                  <div className="flex items-center gap-6 self-end md:self-auto">
+                                    <div className="text-right">
+                                      <span className="text-[22px] font-normal text-[#1D1D1F] font-outfit tabular-nums leading-none">
+                                        {weights[q.stateKey]}
+                                      </span>
+                                      <span className="text-[12px] ml-1 font-normal text-black/30 lowercase tracking-widest">{q.unit}</span>
+                                    </div>
                                   </div>
+                                </div>
+                                
+                                <div className="relative h-2 flex items-center">
+                                  <div className="absolute inset-0 bg-black/[0.05] rounded-full overflow-hidden">
+                                    <div className={`h-full bg-[#1D1D1F] transition-all duration-1000 ease-out`} style={{ width: `${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}%` }} />
+                                  </div>
+                                  <input 
+                                    type="range"
+                                    min={q.min}
+                                    max={q.max}
+                                    step={q.step}
+                                    value={weights[q.stateKey]}
+                                    onChange={(e) => {
+                                      const val = parseFloat(e.target.value);
+                                      setWeights(prev => ({ ...prev, [q.stateKey]: val }));
+                                      setIsApplied(false);
+                                    }}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                  />
+                                  <div className="absolute h-6 w-6 bg-white border-2 border-[#1D1D1F] rounded-full shadow-lg pointer-events-none transition-all duration-200" style={{ left: `calc(${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}% - 12px)` }} />
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+
+
+                      <div className="flex justify-end pt-6">
+                        <button 
+                          onClick={() => setSurveyStep(2)}
+                          className="bg-[#014421] text-white px-10 py-5 rounded-[22px] font-normal text-[14px] shadow-2xl shadow-[#014421]/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group"
+                        >
+                          Continue to priority
+                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* STEP 2: RANKING */}
+                  {surveyStep === 2 && (
+                    <div className="flex flex-col gap-10 animate-fadeUp">
+                        <div className="flex flex-col gap-8 items-center text-center w-full">
+                          {/* Title Section (Centered) */}
+                          <div className="space-y-1">
+                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
+                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
+                          </div>
+  
+                          {/* Step Indicator (Centered) */}
+                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
+                          {["Preferences", "Ranking", "Results"].map((label, i) => {
+                            const num = i + 1;
+                            const isActive = surveyStep === num;
+                            const isCompleted = surveyStep > num;
+                            
+                            return (
+                              <Fragment key={label}>
+                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
+                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
+                                    isActive ? "bg-white border-[#014421] border-2" : 
+                                    "bg-white border-black/10"
+                                  }`}>
+                                    {isCompleted ? (
+                                      <Check className="w-5 h-5" />
+                                    ) : isActive ? (
+                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
+                                    ) : null}
+                                  </div>
+                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
+                                    {label}
+                                  </span>
+                                </div>
+                                {i < 2 && (
+                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="rounded-[40px] p-4 md:p-8 space-y-4">
+                        <div className="space-y-0.5 mb-6 px-4">
+                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Rank the factors</h3>
+                          <p className="text-[14px] text-black/40 font-normal">Drag or use arrows to set priority</p>
+                        </div>
+                        {priorities.map((key, index) => {
+                          const labelMapping = {
+                            price: { label: "Price strategy", desc: "How much you value cost savings", icon: <Banknote className="w-6 h-6" /> },
+                            distance: { label: "Proximity", desc: "How much distance matters", icon: <Navigation2 className="w-6 h-6" /> },
+                            time: { label: "Velocity", desc: "Need for rapid service turnaround", icon: <Timer className="w-6 h-6" /> },
+                            rating: { label: "Trust score", desc: "User review and quality weighting", icon: <Star className="w-6 h-6" /> }
+                          };
+                          const factor = labelMapping[key];
+                          return (
+                            <div key={key} className="p-6 md:p-8 rounded-[32px] border border-black/[0.05] hover:border-[#014421]/30 transition-all duration-300 flex items-center gap-8 group">
+                              <div className="w-16 h-16 rounded-[22px] border border-[#014421]/30 bg-[#014421]/5 text-[#014421] flex items-center justify-center font-normal text-2xl font-outfit transition-all duration-700">{index + 1}</div>
+                              <div className="flex-1 flex items-center justify-between">
+                                <div className="flex items-center gap-6">
+                                  <div>
+                                    <h4 className="text-[14px] font-normal text-[#1D1D1F] font-outfit tracking-wider">{factor.label}</h4>
+                                    <p className="text-[12px] text-black/30 font-normal">{factor.desc}</p>
+                                  </div>
+                                </div>
+                                <div className="flex gap-4">
+                                  <button onClick={() => handleMovePriority(index, -1)} disabled={index === 0} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all active:scale-90">
+                                    <ChevronUp className="w-6 h-6" />
+                                  </button>
+                                  <button onClick={() => handleMovePriority(index, 1)} disabled={index === priorities.length - 1} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all active:scale-90">
+                                    <ChevronDown className="w-6 h-6" />
+                                  </button>
                                 </div>
                               </div>
                             </div>
-                          </div>
-                        ))}
+                          );
+                        })}
+                      </div>
+
+
+                      <div className="flex items-center justify-between pt-6">
+                        <button onClick={() => setSurveyStep(1)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] hover:bg-[#014421]/5 transition-all flex items-center gap-2 group">
+                          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                          Back to preferences
+                        </button>
+                        <button 
+                          onClick={() => {
+                            setIsApplied(true);
+                            setSurveyStep(3);
+                          }} 
+                          className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-[0_24px_48px_-12px_rgba(1,68,33,0.4)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group"
+                        >
+                          Discover Best Matches
+                          <Zap className="w-5 h-5 fill-white group-hover:animate-bounce" />
+                        </button>
                       </div>
                     </div>
-                  ) : (
-                    <div className="h-64 flex flex-col items-center justify-center text-center p-10 bg-black/[0.02] rounded-[48px] border-2 border-dashed border-black/[0.08]">
-                      <Target className="w-10 h-10 text-[#1D1D1F]/40 mb-4" />
-                      <p className="text-[14px] font-normal text-[#1D1D1F] max-w-[220px] leading-relaxed">Adjust your rankings and click Apply to see top shops recommendations</p>
+                  )}
+
+
+
+                  {/* STEP 3: RESULTS */}
+                  {surveyStep === 3 && (
+                    <div className="flex flex-col gap-10 animate-fadeUp">
+                        <div className="flex flex-col gap-8 items-center text-center w-full">
+                          {/* Title Section (Centered) */}
+                          <div className="space-y-1">
+                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
+                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
+                          </div>
+  
+                          {/* Step Indicator (Centered) */}
+                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
+                          {["Preferences", "Ranking", "Results"].map((label, i) => {
+                            const num = i + 1;
+                            const isActive = surveyStep === num;
+                            const isCompleted = surveyStep > num;
+                            
+                            return (
+                              <Fragment key={label}>
+                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
+                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
+                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
+                                    isActive ? "bg-white border-[#014421] border-2" : 
+                                    "bg-white border-black/10"
+                                  }`}>
+                                    {isCompleted ? (
+                                      <Check className="w-5 h-5" />
+                                    ) : isActive ? (
+                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
+                                    ) : null}
+                                  </div>
+                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
+                                    {label}
+                                  </span>
+                                </div>
+                                {i < 2 && (
+                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      <div className="rounded-[56px] p-8 md:p-16 space-y-16 relative">
+                        <div className="space-y-0.5">
+                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Best matches</h3>
+                          <p className="text-[14px] text-black/40 font-normal">Top recommendations based on your profile.</p>
+                        </div>
+                        <div className="space-y-6">
+                          {top3.slice(0, 3).map((s, i) => {
+                            return (
+                              <div 
+                                key={s._id || s.id || i} 
+                                onClick={() => handleSelectShop(s)} 
+                                className="bg-white p-5 md:p-6 rounded-[32px] border-[1px] border-black/[0.08] hover:border-black/20 hover:bg-gray-50/50 transition-all cursor-pointer group relative flex flex-row items-center gap-6 md:gap-8 shadow-[0_8px_32px_-16px_rgba(0,0,0,0.06)] hover:shadow-lg"
+                              >
+                                {/* Left: Circular Gauge */}
+                                <div className="relative w-24 h-24 md:w-28 md:h-28 flex items-center justify-center shrink-0">
+                                  <svg className="w-full h-full transform -rotate-90">
+                                    <circle cx="50%" cy="50%" r="42%" stroke="#F0F0F0" strokeWidth="8" fill="transparent" />
+                                    <circle 
+                                      cx="50%" 
+                                      cy="50%" 
+                                      r="42%" 
+                                      stroke="#014421" 
+                                      strokeWidth="8" 
+                                      fill="transparent" 
+                                      strokeDasharray="264" 
+                                      strokeDashoffset={264 - (264 * (s.score || 0))} 
+                                      strokeLinecap="round"
+                                      className="transition-all duration-1000 ease-out"
+                                    />
+                                  </svg>
+                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span className="text-[18px] md:text-[22px] font-normal text-[#1D1D1F] font-outfit leading-none mb-1">
+                                      {((s.score || 0) * 100).toFixed(0)}%
+                                    </span>
+                                    <span className="text-[8px] md:text-[10px] font-normal text-black/30 uppercase tracking-widest leading-none">Match</span>
+                                  </div>
+                                </div>
+  
+                                {/* Right: Info */}
+                                <div className="flex-1 flex flex-col justify-center min-w-0">
+                                  <div className="space-y-2">
+                                    <div className="space-y-1">
+                                      <h4 className="text-[18px] font-normal text-[#1D1D1F] font-outfit leading-tight tracking-tight truncate">
+                                        {s.name}
+                                      </h4>
+                                      <p className="text-[16px] text-[#1D1D1F]/60 font-normal leading-relaxed max-w-xl">
+                                        Located at {s.address}. Offering quality service at ₱{s.price}/kg with a {s.turnaroundTime} hour turnaround.
+                                      </p>
+                                    </div>
+                                    
+                                    <div className="flex items-center gap-8 pt-2">
+                                      <button className="text-[16px] font-normal text-[#014421] underline underline-offset-8 decoration-2 hover:text-[#7B1113] hover:decoration-[#7B1113] transition-all">
+                                        View details
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {top3.length === 0 && (
+                        <div className="col-span-full py-40 text-center glassmorphism rounded-[60px] border-2 border-dashed border-[#014421]/10">
+                          <div className="w-24 h-24 bg-[#014421]/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse text-[#014421]">
+                            <Store className="w-10 h-10" />
+                          </div>
+                          <h3 className="text-[24px] font-normal text-[#1D1D1F] font-outfit opacity-20">Optimizing inventory...</h3>
+                          <p className="text-[14px] text-black/20 font-normal mt-2">Connecting to local providers</p>
+                        </div>
+                      )}
+
+                      <div className="flex items-center justify-between pt-6">
+                        <button onClick={() => setSurveyStep(2)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] hover:bg-[#014421]/5 transition-all flex items-center gap-2 group">
+                          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                          Back to priority
+                        </button>
+                        <button onClick={() => { setSurveyStep(1); setIsApplied(false); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-[0_24px_48px_-12px_rgba(1,68,33,0.4)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group">
+                          <LogOut className="w-5 h-5 rotate-180" />
+                          Reset survey
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
               </div>
-            </div>
-          )}
+            );
+          })()}
         </div>
 
         {/* ── REDESIGNED MAP INTERFACE ── */}
@@ -1893,7 +2114,7 @@ export default function ShopsPage() {
                                           <div className="flex items-center gap-1.5">
                                             <div className="flex items-center gap-0.5">
                                               {[...Array(5)].map((_, idx) => (
-                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#7B1113] text-[#7B1113]' : 'text-[#1D1D1F]/20'}`} />
                                               ))}
                                             </div>
                                             <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>

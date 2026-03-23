@@ -39,7 +39,7 @@ export default function ShopCard({ shop, onViewDetails, topsisScore }) {
         <div className="flex justify-between items-start gap-2">
           <h4 className="text-sm font-[900] text-[#1D1D1F] tracking-tight leading-normal font-outfit truncate py-0.5">{shop.name}</h4>
           <div className="flex items-center gap-1 shrink-0">
-            <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
+            <Star className="w-3.5 h-3.5 fill-[#7B1113] text-[#7B1113]" />
             <span className="text-xs font-black text-[#1D1D1F]">{shop.rating}</span>
             <span className="text-xs font-bold text-[#8E8E93]">({shop.reviewCount})</span>
           </div>
