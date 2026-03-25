@@ -176,8 +176,67 @@ body {
   box-shadow: 0 0 0 3px rgba(1, 68, 33, 0.12), 0 8px 32px rgba(1, 68, 33, 0.15);
 }
 
-.modal-overlay {
-  @apply fixed inset-0 z-50 flex items-center justify-center p-6 bg-black/40 backdrop-blur-xl;
+/* ─── Advanced Design System ───────────────────────── */
+.glass {
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.glass-dark {
+  background: rgba(29, 29, 31, 0.8);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.bg-premium-gradient {
+  background: linear-gradient(135deg, #014421 0%, #0F5C35 100%);
+}
+
+.bg-maroon-gradient {
+  background: linear-gradient(135deg, #7B1113 0%, #5C0D0F 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(135deg, #1D1D1F 0%, #434345 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ─── Advanced Animations ───────────────────────────── */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.animate-shimmer {
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite linear;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes slideInRight {
+  from { opacity: 0; transform: translateX(30px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.animate-slideInRight {
+  animation: slideInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.hover-glow:hover {
+  box-shadow: 0 0 30px rgba(1, 68, 33, 0.3);
 }
 
 .no-scrollbar::-webkit-scrollbar {

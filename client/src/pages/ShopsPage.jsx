@@ -1026,6 +1026,19 @@ export default function ShopsPage() {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [activeImageGallery, setActiveImageGallery] = useState(null); // { images: [], index: 0 }
+
+  const surveyQuestions = [
+    { id: "distance", icon: <Navigation2 className="w-4 h-4" />, label: "Distance preference (km)", subtitle: "Maximum distance you'd travel",
+      options: [{ label: "Near", value: 1 },{ label: "Mid", value: 5 },{ label: "Far", value: 15 }], stateKey: "distance", min: 0.5, max: 20, step: 0.5, unit: "km" },
+    { id: "price", icon: <Banknote className="w-4 h-4" />, label: "Budget preference (₱/kg)", subtitle: "Ideal cost per kilogram",
+      options: [{ label: "Cheap", value: 25 },{ label: "Mid", value: 50 },{ label: "Premium", value: 100 }], stateKey: "price", min: 10, max: 200, step: 5, unit: "₱" },
+    { id: "time", icon: <Timer className="w-4 h-4" />, label: "Time preference (hrs)", subtitle: "Ideal turnaround time",
+      options: [{ label: "Flash", value: 6 },{ label: "Normal", value: 24 },{ label: "Flexible", value: 72 }], stateKey: "time", min: 1, max: 96, step: 1, unit: "hrs" },
+    { id: "rating", icon: <Star className="w-4 h-4" />, label: "Minimum rating (★)", subtitle: "Lowest acceptable shop rating",
+      options: [{ label: "Any", value: 1 },{ label: "Excl", value: 3 },{ label: "High", value: 4.5 }], stateKey: "rating", min: 1, max: 5, step: 0.1, unit: "stars" }
+  ];
+  const isFirstStepDone = surveyStep > 1;
+
   const [isMapSheetExpanded, setIsMapSheetExpanded] = useState(false);
 
 
@@ -1315,36 +1328,62 @@ export default function ShopsPage() {
         />
       )}
 
-      {/* Sidebar - Conditional classes for responsiveness */}
-      <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] flex flex-col p-8 
-        ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
-        <div className="flex items-center gap-4 mb-16 px-2">
-          <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white text-2xl shadow-lg shadow-[#014421]/20">E</div>
-          <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter font-outfit">ELaBada</span>
-        </div>
+      {/* ── PREMIUM SIDEBAR ── */}
+      <aside className={`fixed inset-y-0 left-0 z-[100] w-72 h-screen lg:sticky lg:flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
+        <div className="h-full m-4 rounded-[40px] glass shadow-2xl shadow-green/10 flex flex-col overflow-hidden border border-white/40">
+          <div className="p-10">
+            <div className="flex items-center gap-4 group">
+              <div className="w-12 h-12 bg-premium-gradient rounded-2xl flex items-center justify-center text-white text-2xl font-normal shadow-green transform group-hover:rotate-12 transition-all duration-500">
+                E
+              </div>
+              <div>
+                <h1 className="text-2xl font-normal tracking-tighter text-gradient leading-none">ELaBada</h1>
+                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#014421] mt-1 opacity-60">Executive Platform</p>
+              </div>
+            </div>
+          </div>
 
-        <nav className="flex-1 space-y-3">
-          <button onClick={() => { setSidebarTab("overview"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
-            <LayoutDashboard className={`w-5 h-5 ${sidebarTab === "overview" ? "text-white" : "text-[#014421]"}`} />
-            Overview
-          </button>
+          <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
+            {[
+              { id: 'overview', label: 'Overview', icon: LayoutDashboard },
+              { id: 'map', label: 'Registry Map', icon: MapPin },
+              { id: 'computation', label: 'Smart Search', icon: ShieldCheck, isNew: true },
+            ].map((tab) => {
+              const Icon = tab.icon;
+              const active = sidebarTab === tab.id;
+              return (
+                <button
+                  key={tab.id}
+                  onClick={() => { setSidebarTab(tab.id); setIsSidebarOpen(false); }}
+                  className={`w-full group relative flex items-center gap-4 px-6 py-5 rounded-[24px] transition-all duration-500 overflow-hidden ${active ? 'bg-premium-gradient text-white shadow-green scale-[1.02]' : 'text-[#8E8E93] hover:bg-white hover:text-[#014421]'}`}
+                >
+                  {active && <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />}
+                  <Icon className={`w-6 h-6 transition-all duration-500 ${active ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[#014421]'}`} />
+                  <span className="text-[14px] font-bold tracking-tight">{tab.label}</span>
+                  {tab.isNew && !active && <span className="ml-auto w-2 h-2 rounded-full bg-[#7B1113] animate-pulse" />}
+                  {active && <ChevronRight className="ml-auto w-5 h-5 animate-slideInRight" />}
+                </button>
+              );
+            })}
+          </nav>
 
-          <button onClick={() => { setSidebarTab("map"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
-            <MapIcon className={`w-5 h-5 ${sidebarTab === "map" ? "text-white" : "text-[#014421]"}`} />
-            Location
-          </button>
-
-          <button onClick={() => { setSidebarTab("computation"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
-            <BarChart3 className={`w-5 h-5 ${sidebarTab === "computation" ? "text-white" : "text-[#014421]"}`} />
-            Computation
-          </button>
-        </nav>
-
-        <div className="mt-auto pt-8 border-t border-[#F3F4F6]">
-          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-[14px] font-normal">
-            <LogOut className="w-5 h-5" />
-            Log out
-          </button>
+          <div className="p-8 mt-auto">
+            <div className="p-6 rounded-[32px] bg-[#014421]/[0.03] border border-[#014421]/[0.05] space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
+                  <Star className="w-5 h-5 text-[#FF8C00] fill-[#FF8C00]" />
+                </div>
+                <p className="text-[12px] font-bold text-[#1D1D1F]">Membership Status</p>
+              </div>
+              <p className="text-[11px] text-[#8E8E93] leading-relaxed">You are currently using the UP Executive Platform.</p>
+              <button 
+                onClick={handleLogout}
+                className="w-full py-4 rounded-xl text-[12px] font-bold text-[#7B1113] hover:bg-[#7B1113]/5 transition-all flex items-center justify-center gap-2"
+              >
+                <LogOut className="w-4 h-4" /> Sign out
+              </button>
+            </div>
+          </div>
         </div>
       </aside>
 
@@ -1359,10 +1398,10 @@ export default function ShopsPage() {
           </div>
         )}
 
-        {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
+        {/* ── FIXED OVERVIEW HEADER ── */}
         {sidebarTab === "overview" && (
-          <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
-            <div className="flex flex-row items-stretch gap-3 md:gap-6 h-[160px]">
+          <div className="px-12 pt-6 pb-6 shrink-0 border-b border-black/5 bg-white z-10">
+            <div className="max-w-[1000px] mx-auto flex flex-row items-stretch gap-6 h-[160px]">
               <div 
                 className="flex-1 rounded-[24px] md:rounded-[40px] px-5 py-6 md:px-10 md:py-8 text-white shadow-2xl relative flex flex-col justify-center gap-4 h-full bg-no-repeat overflow-hidden"
                 style={{
@@ -1424,11 +1463,10 @@ export default function ShopsPage() {
           </div>
         )}
 
-        {/* ── SCROLLABLE CONTENT (shops grid / computation) ── */}
-        <div className={`flex-1 overflow-y-auto no-scrollbar animate-fadeUp ${sidebarTab === "overview" ? "px-6 md:px-10 pb-10 pt-3" : "p-6 md:p-10"}`}>
-
-          {sidebarTab === "overview" && (
-            <div className="space-y-6 lg:px-12">
+        {/* ── MAIN CONTENT AREA ── */}
+        {sidebarTab === "overview" && (
+          <div className="flex-1 overflow-y-auto no-scrollbar px-12">
+            <div className="max-w-[1000px] mx-auto py-10 space-y-6">
               <div className="flex flex-col gap-6 pt-8">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
@@ -1558,377 +1596,243 @@ export default function ShopsPage() {
                     </div>
                   </div>
                 ))}
-              </div>
             </div>
-          )}
+          </div>
+        </div>
+      )}
 
-          {sidebarTab === "computation" && (() => {
-            const surveyQuestions = [
-              { id: "distance", icon: <Navigation2 className="w-4 h-4" />, label: "Distance preference (km)", subtitle: "Maximum distance you'd travel",
-                options: [{ label: "Near", value: 1 },{ label: "Mid", value: 5 },{ label: "Far", value: 15 }], stateKey: "distance", min: 0.5, max: 20, step: 0.5, unit: "km" },
-              { id: "price", icon: <Banknote className="w-4 h-4" />, label: "Budget preference (₱/kg)", subtitle: "Ideal cost per kilogram",
-                options: [{ label: "Cheap", value: 25 },{ label: "Mid", value: 50 },{ label: "Premium", value: 100 }], stateKey: "price", min: 10, max: 200, step: 5, unit: "₱" },
-              { id: "time", icon: <Timer className="w-4 h-4" />, label: "Time preference (hrs)", subtitle: "Ideal turnaround time",
-                options: [{ label: "Flash", value: 6 },{ label: "Normal", value: 24 },{ label: "Flexible", value: 72 }], stateKey: "time", min: 1, max: 96, step: 1, unit: "hrs" },
-              { id: "rating", icon: <Star className="w-4 h-4" />, label: "Minimum rating (★)", subtitle: "Lowest acceptable shop rating",
-                options: [{ label: "Any", value: 1 },{ label: "Excl", value: 3 },{ label: "High", value: 4.5 }], stateKey: "rating", min: 1, max: 5, step: 0.1, unit: "stars" }
-            ];
+        {/* ── REDESIGNED MAP INTERFACE ── */}
+        {sidebarTab === "computation" && (
+          <div className="flex-1 animate-fadeUp relative overflow-hidden bg-white shadow-[0_0_80px_rgba(0,0,0,0.02)] h-screen flex flex-col">
+                {/* ── SHARED FIXED HEADER ── */}
+                <div className="px-12 pt-6 pb-6 shrink-0 border-b border-black/5 bg-white z-10">
+                  <div className="max-w-[1000px] mx-auto flex flex-row items-stretch gap-6 h-[160px] flex-col !items-center !text-center !justify-center">
+                    <div className="space-y-1">
+                      <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
+                      <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
+                    </div>
 
-            const isFirstStepDone = true; // Sliders always have a default value
+                    <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
+                      {["Preferences", "Ranking", "Results"].map((label, i) => {
+                        const num = i + 1;
+                        const isActive = surveyStep === num;
+                        const isCompleted = surveyStep > num;
+                        return (
+                          <Fragment key={label}>
+                            <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
+                              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
+                                isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
+                                isActive ? "bg-white border-[#014421] border-2" : 
+                                "bg-white border-black/10"
+                              }`}>
+                                {isCompleted ? <Check className="w-5 h-5" /> : isActive ? <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" /> : null}
+                              </div>
+                              <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
+                                {label}
+                              </span>
+                            </div>
+                            {i < 2 && (
+                              <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
+                            )}
+                          </Fragment>
+                        );
+                      })}
+                    </div>
+                  </div>
+                </div>
 
-            return (
-              <div className="max-w-[1400px] mx-auto py-8 px-4 md:px-12 animate-fadeUp relative overflow-hidden bg-white shadow-[0_0_80px_rgba(0,0,0,0.02)] min-h-screen">
-
-
-
-                <div className="min-h-[500px]">
-                  {/* STEP 1: PREFERENCES */}
-                  {surveyStep === 1 && (
-                    <div className="flex flex-col gap-10 animate-fadeUp">
-                        <div className="flex flex-col gap-8 items-center text-center w-full">
-                          {/* Title Section (Centered) */}
-                          <div className="space-y-1">
-                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
-                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
-                          </div>
-  
-                          {/* Step Indicator (Centered) */}
-                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
-                          {["Preferences", "Ranking", "Results"].map((label, i) => {
-                            const num = i + 1;
-                            const isActive = surveyStep === num;
-                            const isCompleted = surveyStep > num;
-                            
-                            return (
-                              <Fragment key={label}>
-                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
-                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
-                                    isActive ? "bg-white border-[#014421] border-2" : 
-                                    "bg-white border-black/10"
-                                  }`}>
-                                    {isCompleted ? (
-                                      <Check className="w-5 h-5" />
-                                    ) : isActive ? (
-                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
-                                    ) : null}
-                                  </div>
-                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
-                                    {label}
-                                  </span>
-                                </div>
-                                {i < 2 && (
-                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
-                                )}
-                              </Fragment>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-                      <div className="rounded-[56px] p-8 md:p-16 space-y-16 relative">
+                {/* ── SCROLLABLE MIDDLE CONTENT AREA ── */}
+                <div className="flex-1 overflow-y-auto no-scrollbar px-12">
+                  <div className="max-w-[1000px] mx-auto py-10">
+                    {/* STEP 1: PREFERENCES */}
+                    {surveyStep === 1 && (
+                      <div className="animate-fadeUp space-y-12">
                         <div className="space-y-0.5">
                           <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Set your preferences</h3>
                           <p className="text-[14px] text-black/40 font-normal">Adjust the sliders below</p>
                         </div>
-                        
                         <div className="space-y-10">
-                          {surveyQuestions.map((q, idx) => {
-                            return (
-                              <div key={q.id} className="group relative space-y-6 animate-fadeUp" style={{ animationDelay: `${idx * 150}ms` }}>
-                                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                  <div className="flex items-center gap-4">
-                                    <div className="space-y-0.5">
-                                      <h3 className="text-[14px] font-normal text-[#1D1D1F] font-outfit tracking-normal leading-none">{q.label}</h3>
-                                      <p className="text-[12px] text-black/40 font-normal">{q.subtitle}</p>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-6 self-end md:self-auto">
-                                    <div className="text-right">
-                                      <span className="text-[22px] font-normal text-[#1D1D1F] font-outfit tabular-nums leading-none">
-                                        {weights[q.stateKey]}
-                                      </span>
-                                      <span className="text-[12px] ml-1 font-normal text-black/30 lowercase tracking-widest">{q.unit}</span>
-                                    </div>
-                                  </div>
+                          {surveyQuestions.map((q, idx) => (
+                            <div key={q.id} className="group relative space-y-6 animate-fadeUp" style={{ animationDelay: `${idx * 150}ms` }}>
+                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                                <div className="space-y-0.5">
+                                  <h3 className="text-[14px] font-normal text-[#1D1D1F] font-outfit leading-none">{q.label}</h3>
+                                  <p className="text-[12px] text-black/40 font-normal">{q.subtitle}</p>
                                 </div>
-                                
-                                <div className="relative h-2 flex items-center">
-                                  <div className="absolute inset-0 bg-black/[0.05] rounded-full overflow-hidden">
-                                    <div className={`h-full bg-[#1D1D1F] transition-all duration-1000 ease-out`} style={{ width: `${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}%` }} />
-                                  </div>
-                                  <input 
-                                    type="range"
-                                    min={q.min}
-                                    max={q.max}
-                                    step={q.step}
-                                    value={weights[q.stateKey]}
-                                    onChange={(e) => {
-                                      const val = parseFloat(e.target.value);
-                                      setWeights(prev => ({ ...prev, [q.stateKey]: val }));
-                                      setIsApplied(false);
-                                    }}
-                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                  />
-                                  <div className="absolute h-6 w-6 bg-white border-2 border-[#1D1D1F] rounded-full shadow-lg pointer-events-none transition-all duration-200" style={{ left: `calc(${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}% - 12px)` }} />
+                                <div className="text-right">
+                                  <span className="text-[22px] font-normal text-[#1D1D1F] font-outfit tabular-nums leading-none">{weights[q.stateKey]}</span>
+                                  <span className="text-[12px] ml-1 font-normal text-black/30 lowercase">{q.unit}</span>
                                 </div>
                               </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-
-
-
-                      <div className="flex justify-end pt-6">
-                        <button 
-                          onClick={() => setSurveyStep(2)}
-                          className="bg-[#014421] text-white px-10 py-5 rounded-[22px] font-normal text-[14px] shadow-2xl shadow-[#014421]/30 hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group"
-                        >
-                          Continue to priority
-                          <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* STEP 2: RANKING */}
-                  {surveyStep === 2 && (
-                    <div className="flex flex-col gap-10 animate-fadeUp">
-                        <div className="flex flex-col gap-8 items-center text-center w-full">
-                          {/* Title Section (Centered) */}
-                          <div className="space-y-1">
-                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
-                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
-                          </div>
-  
-                          {/* Step Indicator (Centered) */}
-                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
-                          {["Preferences", "Ranking", "Results"].map((label, i) => {
-                            const num = i + 1;
-                            const isActive = surveyStep === num;
-                            const isCompleted = surveyStep > num;
-                            
-                            return (
-                              <Fragment key={label}>
-                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
-                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
-                                    isActive ? "bg-white border-[#014421] border-2" : 
-                                    "bg-white border-black/10"
-                                  }`}>
-                                    {isCompleted ? (
-                                      <Check className="w-5 h-5" />
-                                    ) : isActive ? (
-                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
-                                    ) : null}
-                                  </div>
-                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
-                                    {label}
-                                  </span>
+                              <div className="relative h-2 flex items-center">
+                                <div className="absolute inset-0 bg-black/[0.05] rounded-full overflow-hidden">
+                                  <div className="h-full bg-[#1D1D1F] transition-all duration-1000 ease-out" style={{ width: `${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}%` }} />
                                 </div>
-                                {i < 2 && (
-                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
-                                )}
-                              </Fragment>
-                            );
-                          })}
+                                <input type="range" min={q.min} max={q.max} step={q.step} value={weights[q.stateKey]} onChange={(e) => {
+                                  const val = parseFloat(e.target.value);
+                                  setWeights(prev => ({ ...prev, [q.stateKey]: val }));
+                                  setIsApplied(false);
+                                }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                                <div className="absolute h-6 w-6 bg-white border-2 border-[#1D1D1F] rounded-full shadow-lg pointer-events-none transition-all duration-200" style={{ left: `calc(${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}% - 12px)` }} />
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </div>
+                    )}
 
-                      <div className="rounded-[40px] p-4 md:p-8 space-y-4">
-                        <div className="space-y-0.5 mb-6 px-4">
+                    {/* STEP 2: RANKING */}
+                    {surveyStep === 2 && (
+                      <div className="animate-fadeUp space-y-12">
+                        <div className="space-y-0.5 mb-6">
                           <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Rank the factors</h3>
                           <p className="text-[14px] text-black/40 font-normal">Drag or use arrows to set priority</p>
                         </div>
-                        {priorities.map((key, index) => {
-                          const labelMapping = {
-                            price: { label: "Price strategy", desc: "How much you value cost savings", icon: <Banknote className="w-6 h-6" /> },
-                            distance: { label: "Proximity", desc: "How much distance matters", icon: <Navigation2 className="w-6 h-6" /> },
-                            time: { label: "Velocity", desc: "Need for rapid service turnaround", icon: <Timer className="w-6 h-6" /> },
-                            rating: { label: "Trust score", desc: "User review and quality weighting", icon: <Star className="w-6 h-6" /> }
-                          };
-                          const factor = labelMapping[key];
-                          return (
-                            <div key={key} className="p-6 md:p-8 rounded-[32px] border border-black/[0.05] hover:border-[#014421]/30 transition-all duration-300 flex items-center gap-8 group">
-                              <div className="w-16 h-16 rounded-[22px] border border-[#014421]/30 bg-[#014421]/5 text-[#014421] flex items-center justify-center font-normal text-2xl font-outfit transition-all duration-700">{index + 1}</div>
-                              <div className="flex-1 flex items-center justify-between">
-                                <div className="flex items-center gap-6">
+                        <div className="space-y-4">
+                          {priorities.map((key, index) => {
+                            const labelMapping = {
+                              price: { label: "Price strategy", desc: "How much you value cost savings" },
+                              distance: { label: "Proximity", desc: "How much distance matters" },
+                              time: { label: "Velocity", desc: "Need for rapid service turnaround" },
+                              rating: { label: "Trust score", desc: "User review and quality weighting" }
+                            };
+                            const factor = labelMapping[key];
+                            return (
+                              <div key={key} className="p-6 rounded-[32px] border border-black/[0.05] hover:border-[#014421]/30 transition-all duration-300 flex items-center gap-8 group">
+                                <div className="w-16 h-16 rounded-[22px] border border-[#014421]/30 bg-[#014421]/5 text-[#014421] flex items-center justify-center font-normal text-2xl font-outfit">{index + 1}</div>
+                                <div className="flex-1 flex items-center justify-between">
                                   <div>
                                     <h4 className="text-[14px] font-normal text-[#1D1D1F] font-outfit tracking-wider">{factor.label}</h4>
                                     <p className="text-[12px] text-black/30 font-normal">{factor.desc}</p>
                                   </div>
-                                </div>
-                                <div className="flex gap-4">
-                                  <button onClick={() => handleMovePriority(index, -1)} disabled={index === 0} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all active:scale-90">
-                                    <ChevronUp className="w-6 h-6" />
-                                  </button>
-                                  <button onClick={() => handleMovePriority(index, 1)} disabled={index === priorities.length - 1} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all active:scale-90">
-                                    <ChevronDown className="w-6 h-6" />
-                                  </button>
+                                  <div className="flex gap-4">
+                                    <button onClick={() => handleMovePriority(index, -1)} disabled={index === 0} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all">
+                                      <ChevronUp className="w-6 h-6" />
+                                    </button>
+                                    <button onClick={() => handleMovePriority(index, 1)} disabled={index === priorities.length - 1} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all">
+                                      <ChevronDown className="w-6 h-6" />
+                                    </button>
+                                  </div>
                                 </div>
                               </div>
-                            </div>
-                          );
-                        })}
-                      </div>
-
-
-                      <div className="flex items-center justify-between pt-6">
-                        <button onClick={() => setSurveyStep(1)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] hover:bg-[#014421]/5 transition-all flex items-center gap-2 group">
-                          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                          Back to preferences
-                        </button>
-                        <button 
-                          onClick={() => {
-                            setIsApplied(true);
-                            setSurveyStep(3);
-                          }} 
-                          className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-[0_24px_48px_-12px_rgba(1,68,33,0.4)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group"
-                        >
-                          Discover Best Matches
-                          <Zap className="w-5 h-5 fill-white group-hover:animate-bounce" />
-                        </button>
-                      </div>
-                    </div>
-                  )}
-
-
-
-                  {/* STEP 3: RESULTS */}
-                  {surveyStep === 3 && (
-                    <div className="flex flex-col gap-10 animate-fadeUp">
-                        <div className="flex flex-col gap-8 items-center text-center w-full">
-                          {/* Title Section (Centered) */}
-                          <div className="space-y-1">
-                            <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
-                            <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
-                          </div>
-  
-                          {/* Step Indicator (Centered) */}
-                          <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
-                          {["Preferences", "Ranking", "Results"].map((label, i) => {
-                            const num = i + 1;
-                            const isActive = surveyStep === num;
-                            const isCompleted = surveyStep > num;
-                            
-                            return (
-                              <Fragment key={label}>
-                                <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
-                                  <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
-                                    isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
-                                    isActive ? "bg-white border-[#014421] border-2" : 
-                                    "bg-white border-black/10"
-                                  }`}>
-                                    {isCompleted ? (
-                                      <Check className="w-5 h-5" />
-                                    ) : isActive ? (
-                                      <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" />
-                                    ) : null}
-                                  </div>
-                                  <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
-                                    {label}
-                                  </span>
-                                </div>
-                                {i < 2 && (
-                                  <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
-                                )}
-                              </Fragment>
                             );
                           })}
                         </div>
                       </div>
+                    )}
 
-                      <div className="rounded-[56px] p-8 md:p-16 space-y-16 relative">
+                    {/* STEP 3: RESULTS */}
+                    {surveyStep === 3 && (
+                      <div className="animate-fadeUp space-y-12">
                         <div className="space-y-0.5">
                           <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Best matches</h3>
                           <p className="text-[14px] text-black/40 font-normal">Top recommendations based on your profile.</p>
                         </div>
                         <div className="space-y-6">
-                          {top3.slice(0, 3).map((s, i) => {
-                            return (
-                              <div 
-                                key={s._id || s.id || i} 
-                                onClick={() => handleSelectShop(s)} 
-                                className="bg-white p-5 md:p-6 rounded-[32px] border-[1px] border-black/[0.08] hover:border-black/20 hover:bg-gray-50/50 transition-all cursor-pointer group relative flex flex-row items-center gap-6 md:gap-8 shadow-[0_8px_32px_-16px_rgba(0,0,0,0.06)] hover:shadow-lg"
-                              >
-                                {/* Left: Circular Gauge */}
-                                <div className="relative w-24 h-24 md:w-28 md:h-28 flex items-center justify-center shrink-0">
-                                  <svg className="w-full h-full transform -rotate-90">
-                                    <circle cx="50%" cy="50%" r="42%" stroke="#F0F0F0" strokeWidth="8" fill="transparent" />
-                                    <circle 
-                                      cx="50%" 
-                                      cy="50%" 
-                                      r="42%" 
-                                      stroke="#014421" 
-                                      strokeWidth="8" 
-                                      fill="transparent" 
-                                      strokeDasharray="264" 
-                                      strokeDashoffset={264 - (264 * (s.score || 0))} 
-                                      strokeLinecap="round"
-                                      className="transition-all duration-1000 ease-out"
-                                    />
-                                  </svg>
-                                  <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                    <span className="text-[18px] md:text-[22px] font-normal text-[#1D1D1F] font-outfit leading-none mb-1">
-                                      {((s.score || 0) * 100).toFixed(0)}%
-                                    </span>
-                                    <span className="text-[8px] md:text-[10px] font-normal text-black/30 uppercase tracking-widest leading-none">Match</span>
-                                  </div>
+                          {top3.slice(0, 3).map((s, i) => (
+                            <div 
+                              key={s._id || i} 
+                              onClick={() => handleSelectShop(s)} 
+                              className="group relative bg-white p-8 rounded-[40px] border border-black/[0.05] hover:border-[#014421]/20 hover:shadow-2xl hover:shadow-green/10 transition-all duration-500 cursor-pointer flex items-center gap-8 animate-slideInRight"
+                              style={{ animationDelay: `${i * 100}ms` }}
+                            >
+                              <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
+                                <ArrowUpRight className="w-5 h-5 text-[#014421]" />
+                              </div>
+
+                              <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
+                                <div className="absolute inset-0 rounded-full bg-[#014421]/5 animate-pulse" />
+                                <svg className="w-full h-full transform -rotate-90 z-10">
+                                  <circle cx="50%" cy="50%" r="44%" stroke="#F0F0F0" strokeWidth="10" fill="transparent" />
+                                  <circle 
+                                    cx="50%" 
+                                    cy="50%" 
+                                    r="44%" 
+                                    stroke="#014421" 
+                                    strokeWidth="10" 
+                                    fill="transparent" 
+                                    strokeDasharray="276" 
+                                    strokeDashoffset={276 - (276 * (s.score || 0))} 
+                                    strokeLinecap="round" 
+                                    className="transition-all duration-1000" 
+                                  />
+                                </svg>
+                                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+                                  <span className="text-[24px] font-normal text-gradient leading-none mb-1">{((s.score || 0) * 100).toFixed(0)}%</span>
+                                  <span className="text-[9px] text-[#014421] font-black uppercase tracking-[0.2em]">Match</span>
                                 </div>
-  
-                                {/* Right: Info */}
-                                <div className="flex-1 flex flex-col justify-center min-w-0">
-                                  <div className="space-y-2">
-                                    <div className="space-y-1">
-                                      <h4 className="text-[18px] font-normal text-[#1D1D1F] font-outfit leading-tight tracking-tight truncate">
-                                        {s.name}
-                                      </h4>
-                                      <p className="text-[16px] text-[#1D1D1F]/60 font-normal leading-relaxed max-w-xl">
-                                        Located at {s.address}. Offering quality service at ₱{s.price}/kg with a {s.turnaroundTime} hour turnaround.
-                                      </p>
-                                    </div>
-                                    
-                                    <div className="flex items-center gap-8 pt-2">
-                                      <button className="text-[16px] font-normal text-[#014421] underline underline-offset-8 decoration-2 hover:text-[#7B1113] hover:decoration-[#7B1113] transition-all">
-                                        View details
-                                      </button>
-                                    </div>
+                              </div>
+
+                              <div className="flex-1 space-y-4">
+                                <h4 className="text-2xl font-normal text-[#1D1D1F] font-outfit tracking-tighter truncate">{s.name}</h4>
+                                <div className="flex flex-wrap items-center gap-3">
+                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
+                                    <MapPin className="w-3.5 h-3.5 text-[#7B1113] opacity-60" />
+                                    <span className="text-[13px] font-medium text-[#1D1D1F]/60">{s.address}</span>
+                                  </div>
+                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
+                                    <Banknote className="w-3.5 h-3.5 text-[#014421] opacity-60" />
+                                    <span className="text-[13px] font-medium text-[#1D1D1F]/60">₱{s.price}<span className="text-[10px] opacity-40">/kg</span></span>
+                                  </div>
+                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
+                                    <Timer className="w-3.5 h-3.5 text-black/40" />
+                                    <span className="text-[13px] font-medium text-[#1D1D1F]/40">{s.turnaroundTime} hrs</span>
                                   </div>
                                 </div>
                               </div>
-                            );
-                          })}
+                              
+                              <div className="shrink-0 w-14 h-14 rounded-full glass border border-black/[0.05] flex items-center justify-center text-black/20 group-hover:bg-[#014421] group-hover:text-white group-hover:shadow-green group-hover:scale-110 transition-all duration-500 transform group-hover:-translate-x-2">
+                                <ChevronRight className="w-6 h-6" />
+                              </div>
+                            </div>
+                          ))}
                         </div>
+                        {top3.length === 0 && (
+                          <div className="py-20 text-center opacity-20">Optimizing inventory...</div>
+                        )}
                       </div>
+                    )}
+                  </div>
+                </div>
 
-                      {top3.length === 0 && (
-                        <div className="col-span-full py-40 text-center glassmorphism rounded-[60px] border-2 border-dashed border-[#014421]/10">
-                          <div className="w-24 h-24 bg-[#014421]/10 rounded-full flex items-center justify-center mx-auto mb-8 animate-pulse text-[#014421]">
-                            <Store className="w-10 h-10" />
-                          </div>
-                          <h3 className="text-[24px] font-normal text-[#1D1D1F] font-outfit opacity-20">Optimizing inventory...</h3>
-                          <p className="text-[14px] text-black/20 font-normal mt-2">Connecting to local providers</p>
-                        </div>
-                      )}
-
-                      <div className="flex items-center justify-between pt-6">
-                        <button onClick={() => setSurveyStep(2)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] hover:bg-[#014421]/5 transition-all flex items-center gap-2 group">
-                          <ChevronLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
+                {/* ── SHARED FIXED FOOTER ── */}
+                <div className="p-10 px-12 shrink-0 border-t border-black/5 bg-white z-10">
+                  <div className="max-w-[1000px] mx-auto flex items-center justify-between">
+                    {surveyStep === 1 ? (
+                      <>
+                        <div />
+                        <button onClick={() => setSurveyStep(2)} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
+                          Continue to priority
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </>
+                    ) : surveyStep === 2 ? (
+                      <>
+                        <button onClick={() => setSurveyStep(1)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] transition-all flex items-center gap-2">
+                          <ChevronLeft className="w-5 h-5" />
+                          Back to preferences
+                        </button>
+                        <button onClick={() => { setIsApplied(true); setSurveyStep(3); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
+                          Discover Best Matches
+                          <Zap className="w-5 h-5 fill-white" />
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button onClick={() => setSurveyStep(2)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] transition-all flex items-center gap-2">
+                          <ChevronLeft className="w-5 h-5" />
                           Back to priority
                         </button>
-                        <button onClick={() => { setSurveyStep(1); setIsApplied(false); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-[0_24px_48px_-12px_rgba(1,68,33,0.4)] hover:scale-[1.02] active:scale-95 transition-all flex items-center gap-3 group">
+                        <button onClick={() => { setSurveyStep(1); setIsApplied(false); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
                           <LogOut className="w-5 h-5 rotate-180" />
                           Reset survey
                         </button>
-                      </div>
-                    </div>
-                  )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            );
-          })()}
-        </div>
+          )}
 
         {/* ── REDESIGNED MAP INTERFACE ── */}
           {sidebarTab === "map" && (
@@ -2161,12 +2065,12 @@ export default function ShopsPage() {
                     </>
                   );
                 })()}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </main>
+        )}
+      </main>
 
       {selectedShop && (
         <ShopDetailModal
