@@ -1,18 +1,19 @@
-import React, { useState, useMemo, useEffect, useRef, Fragment, cloneElement } from "react";
+import { useState, useMemo, useEffect, useRef, Fragment } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { calculateTopsis } from "../utils/topsis";
 import {
   Star, MapPin, Search, Filter, Map as MapIcon,
-  Clock, Package, Check, ChevronRight,
+  Clock, Package, Check, ChevronRight, ArrowRight,
   X, Info, MessageSquare, ArrowUpRight, Award,
   Droplets, Zap, ThumbsUp, DollarSign, LayoutGrid, List,
-  ArrowUp, ArrowDown, Map as GoogleMap, ArrowRight,
+  ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle, MousePointer2
 } from "lucide-react";
+
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -46,7 +47,7 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (rank) => {
-  const mainColor = "#014421"; 
+  const mainColor = "#FF8C00"; 
   const maroonColor = "#7B1113";
 
   return L.divIcon({
@@ -217,7 +218,7 @@ function ReviewForm({ shopId, promisedTime, onPosted, onCancel }) {
           <div className="flex justify-center gap-2">
             {[1, 2, 3, 4, 5].map((s) => (
               <button key={s} type="button" onClick={() => { setRating(s); setErrors(prev => ({ ...prev, rating: null })); }} className="p-1 transition-transform active:scale-95">
-                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#7B1113] text-[#7B1113]' : errors.rating ? 'text-red-200' : 'text-gray-200'}`} />
+                <Star className={`w-10 h-10 ${s <= rating ? 'fill-[#E67E00] text-[#E67E00]' : errors.rating ? 'text-red-200' : 'text-gray-200'}`} />
               </button>
             ))}
           </div>
@@ -449,7 +450,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   key={val}
                   onClick={() => setFilter(val)}
                   className={`px-5 py-2 rounded-full text-[14px] font-normal transition-all ${filter === val
-                    ? 'bg-[#7B1113] text-white shadow-lg shadow-[#7B1113]/20'
+                    ? 'bg-[#E67E00] text-white shadow-lg shadow-[#E67E00]/20'
                     : 'bg-gray-50 text-gray-400 hover:bg-gray-100'
                     }`}
                 >
@@ -692,7 +693,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                             </div>
                             <div className="flex items-center gap-1">
                               {[1, 2, 3, 4, 5].map((s) => (
-                                <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#7B1113] text-[#7B1113]" : "text-gray-200"}`} />
+                                <Star key={s} className={`w-4 h-4 ${s <= r.rating ? "fill-[#E67E00] text-[#E67E00]" : "text-gray-200"}`} />
                               ))}
                             </div>
                           </div>
@@ -740,8 +741,6 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 }
 
 function ComputationDetailsModal({ shop, weights, onClose }) {
-  const [showFormula, setShowFormula] = useState(false);
-
   const getExplanation = (detail) => {
     const { criterion, rating, actualValue, isBenefit, weight } = detail;
     const labels = {
@@ -781,179 +780,196 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
   };
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[2000] backdrop-blur-md bg-black/60">
-      <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[850px] max-h-[90vh] shadow-[0_40px_100px_rgba(0,0,0,0.5)] animate-scaleIn flex flex-col overflow-hidden border border-black/5 font-outfit">
-        {/* Header */}
-        <div className="p-8 border-b border-black/[0.03] flex items-center justify-between bg-[#F8F9FA]/50">
-          <div className="space-y-1">
-            <h3 className="text-[24px] font-bold text-[#1D1D1F] tracking-tight">{shop.name}</h3>
-            <p className="text-[14px] text-gray-500 font-normal">Computation Breakdown</p>
-          </div>
-          <button onClick={onClose} className="p-2 hover:bg-black/5 rounded-full transition-all">
-            <X className="w-6 h-6 text-[#1D1D1F]" />
+    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[2000] backdrop-blur-md bg-[#014421]/30">
+      <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[850px] max-h-[90vh] mt-2 md:mt-4 shadow-[0_40px_100px_rgba(1,68,33,0.15)] animate-scaleIn flex flex-col overflow-hidden border border-[#014421]/10 font-outfit">
+        {/* Header (Minimalist Close Button Only) */}
+        <div className="pt-6 pr-6 md:pt-8 md:pr-8 flex justify-end">
+          <button onClick={onClose} className="p-2 hover:bg-[#014421]/10 rounded-full transition-all text-[#1D1D1F] hover:text-[#014421]">
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         <div className="p-8 overflow-y-auto no-scrollbar space-y-10">
-          {/* 1. Final Match Score - Now Clickable for Transparency */}
-          <section 
-            onClick={() => setShowFormula(!showFormula)}
-            className="bg-[#014421] p-10 rounded-[40px] text-white shadow-2xl relative overflow-hidden group cursor-pointer transition-all hover:scale-[1.01] active:scale-95"
-          >
-            <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8">
-              <div className="space-y-3 text-center md:text-left">
-                <p className="text-white/60 text-xs font-bold uppercase tracking-widest flex items-center gap-2 justify-center md:justify-start">
-                  Match Score <Info className="w-3 h-3" />
-                </p>
-                <h4 className="text-7xl font-normal tracking-tighter">{shop.score.toFixed(2)}</h4>
-                <p className="text-white/80 text-[14px] font-medium leading-relaxed max-w-[280px]">
-                  This shop is <span className="text-white font-bold">{Math.round(shop.score * 100)}% close</span> to the ideal laundry shop based on your preferences.
-                </p>
-                <p className="text-emerald-300 text-[11px] font-bold uppercase tracking-widest pt-2 flex items-center gap-2 justify-center md:justify-start">
-                  {showFormula ? 'Hide computation' : 'See computation'}
+          {/* Top Section Layout: Gauge (Left) & Methodology (Right) */}
+          <div className="grid grid-cols-1 xl:grid-cols-5 gap-3 md:gap-4">
+            {/* 1. Final Match Score - Gauge Design (Left) */}
+            <section className="bg-gradient-to-b from-[#F9FBF9] to-white p-8 rounded-[32px] text-center border border-[#014421]/10 shadow-[0_4px_24px_rgba(1,68,33,0.03)] relative xl:col-span-2 flex flex-col items-center justify-center overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#04e672]/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="w-[240px] md:w-[280px] mx-auto relative mb-4">
+                {/* Semi-circle Gauge SVG */}
+                <svg viewBox="0 0 100 60" className="w-full drop-shadow-[0_2px_8px_rgba(1,68,33,0.1)] overflow-visible">
+                   <defs>
+                     <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                       <stop offset="0%" stopColor="#04e672" />
+                       <stop offset="100%" stopColor="#014421" />
+                     </linearGradient>
+                   </defs>
+                   
+                   {/* Dashed Background Arc */}
+                   <path 
+                     d="M 10 45 A 40 40 0 0 1 90 45" 
+                     fill="none" 
+                     stroke="#E4EFE7" 
+                     strokeWidth="6" 
+                     strokeLinecap="round" 
+                     strokeDasharray="1.5 3.5" 
+                   />
+
+                   {/* Solid Foreground Arc */}
+                   <path 
+                     d="M 10 45 A 40 40 0 0 1 90 45" 
+                     fill="none" 
+                     stroke="url(#gaugeGradient)" 
+                     strokeWidth="6" 
+                     strokeLinecap="round" 
+                     strokeDasharray="125.66" 
+                     strokeDashoffset={125.66 * (1 - shop.score)}
+                     className="transition-all duration-1000 ease-out"
+                   />
+
+                   {/* Labels 0 & 100 */}
+                   <text x="10" y="56" fontSize="5" fill="#014421" opacity="0.4" textAnchor="middle" className="font-normal font-outfit tracking-tighter">0</text>
+                   <text x="90" y="56" fontSize="5" fill="#014421" opacity="0.4" textAnchor="middle" className="font-normal font-outfit tracking-tighter">100</text>
+                </svg>
+                
+                <div className="absolute inset-0 flex items-end justify-center pb-4 pointer-events-none">
+                   <div className="flex items-baseline mb-2">
+                     <h4 className="text-[56px] md:text-[64px] font-normal text-[#1D1D1F] tracking-tighter leading-none">
+                       {(shop.score * 100).toFixed(0)}
+                     </h4>
+                     <span className="text-[20px] font-normal text-[#014421]/40 ml-1">/ 100</span>
+                   </div>
+                </div>
+              </div>
+
+              <div className="relative z-10 px-2 mt-2">
+                <p className="text-[14px] font-normal text-[#014421]/60 leading-relaxed max-w-[280px] mx-auto">
+                  This shop is <span className="text-[#014421] bg-[#014421]/5 px-2 py-0.5 rounded-full font-medium">{Math.round(shop.score * 100)}% close</span> to the absolute ideal laundry shop based on your preferences.
                 </p>
               </div>
-              <div className="w-24 h-24 bg-white/10 rounded-full flex items-center justify-center backdrop-blur-md group-hover:rotate-12 transition-transform">
-                <Target className="w-12 h-12 text-emerald-300" />
+            </section>
+
+            {/* 2. Methodology Steps (Right) */}
+            <div className="xl:col-span-3 bg-white p-6 md:p-8 rounded-[32px] border border-[#014421]/10 shadow-[0_4px_24px_rgba(1,68,33,0.03)] flex flex-col justify-center">
+              <div className="mb-5 px-1">
+                <h5 className="text-[16px] font-normal text-[#1D1D1F]">How we computed this match using TOPSIS</h5>
+                <p className="text-[13px] font-normal text-[#014421]/60 mt-0.5">Technique for Order of Preference by Similarity to Ideal Solution</p>
+              </div>
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 flex-1">
+                <div className="bg-[#E4EFE7]/50 border border-[#014421]/15 p-5 rounded-[24px] shadow-[0_2px_10px_rgba(1,68,33,0.04)]">
+                  <h6 className="text-[16px] font-normal text-[#014421] mb-1">Step 1: Normalization</h6>
+                  <p className="text-[14px] font-normal text-[#014421]/80 leading-relaxed">We convert prices, distances, and ratings into a standardized metric scale so all different factors can be compared fairly.</p>
+                </div>
+                <div className="bg-[#014421]/[0.02] border border-[#014421]/5 p-5 rounded-[24px]">
+                  <h6 className="text-[16px] font-normal text-[#1D1D1F] mb-1">Step 2: Preference weighting</h6>
+                  <p className="text-[14px] font-normal text-[#014421]/60 leading-relaxed">We multiply these standardized scores by the priority weights you set. Factors you care about most get much higher points.</p>
+                </div>
+                <div className="bg-[#014421]/[0.02] border border-[#014421]/5 p-5 rounded-[24px]">
+                  <h6 className="text-[16px] font-normal text-[#1D1D1F] mb-1">Step 3: Distance to ideal</h6>
+                  <p className="text-[14px] font-normal text-[#014421]/60 leading-relaxed">We mathematically identify the absolute best and worst possible shop. We then measure how close this shop is to perfection.</p>
+                </div>
+                <div className="bg-[#E4EFE7]/50 border border-[#014421]/15 p-5 rounded-[24px] shadow-[0_2px_10px_rgba(1,68,33,0.04)]">
+                  <h6 className="text-[16px] font-normal text-[#014421] mb-1">Step 4: Relative score</h6>
+                  <p className="text-[14px] font-normal text-[#014421]/80 leading-relaxed">The closer the final mathematical distance is to 1.0, the better the shop matches your unique needs.</p>
+                </div>
               </div>
             </div>
-            <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-white/5 rounded-full blur-3xl animate-pulse" />
-          </section>
+          </div>
 
-          {/* 1.1 Hidden Computation Logic Section */}
-          {showFormula && (
-            <div className="space-y-8 animate-fadeUp bg-[#F8F9FA] p-8 md:p-10 rounded-[40px] border border-[#014421]/10">
-              <div className="flex items-center gap-4 border-b border-black/[0.05] pb-6">
-                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                  <ClipboardList className="w-6 h-6 text-[#014421]" />
-                </div>
-                <div>
-                  <h5 className="text-[16px] font-bold text-[#1D1D1F]">TOPSIS Methodology</h5>
-                  <p className="text-[12px] text-gray-500">Technique for Order of Preference by Similarity to Ideal Solution</p>
-                </div>
+          {/* Dashboard Control Center Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 pt-2">
+            {/* Widget 1: Shop Value vs Your Preference (2 columns) */}
+            <div className="flex flex-col h-full bg-[#F9FBF9] p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-[#014421]/15 shadow-[0_4px_24px_rgba(1,68,33,0.03)] relative overflow-hidden">
+              <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#04e672]/5 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="mb-6 relative z-10">
+                <h6 className="text-[16px] font-normal text-[#1D1D1F]">Shop Value vs Your Preference</h6>
+                <p className="text-[14px] font-normal text-[#014421]/70 mt-0.5">Actual data against your priority ranking</p>
               </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-6">
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 1: Normalize</span>
-                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">We convert raw data (₱, km, hrs) into a universal 0-1 scale so factors can be compared fairly.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 2: Weighted Matrix</span>
-                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">Your priority weights are applied. Factors at the top of your list score higher points.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 3: Ideal Points</span>
-                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">We identify an "Ideal Best" (cheapest, closest, fastest) and "Ideal Worst" in the group.</p>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-[10px] font-black text-[#014421] uppercase tracking-widest bg-[#014421]/5 px-3 py-1 rounded-full">Step 4: Match Ranking</span>
-                    <p className="text-[13px] text-gray-600 leading-relaxed font-medium">The results are sorted by their closeness to the ideal, giving you the best recommendations.</p>
-                  </div>
+              
+              <div className="flex-1 flex flex-col gap-3 relative z-10">
+                <div className="flex justify-between text-[12px] font-normal text-[#014421]/60 uppercase tracking-wider px-2">
+                  <span>Shop Value</span>
+                  <span>Your Preference</span>
                 </div>
-
-                <div className="bg-white p-8 rounded-[32px] border border-black/5 space-y-6 shadow-inner">
-                  <h6 className="text-xs font-black text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
-                    <Droplets className="w-4 h-4 text-[#014421]" /> The Formula
-                  </h6>
-                  <div className="bg-[#F8F9FA] p-6 rounded-2xl border border-black/5 flex flex-col items-center justify-center text-center space-y-4">
-                    <div className="space-y-1">
-                      <p className="text-[11px] text-gray-400 font-bold uppercase tracking-tighter">Relative Closeness</p>
-                      <p className="text-2xl font-normal text-[#1D1D1F] tracking-tighter">C<sub>i</sub> = d<sub>i</sub><sup>-</sup> / (d<sub>i</sub><sup>+</sup> + d<sub>i</sub><sup>-</sup>)</p>
-                    </div>
-                    <p className="text-[12px] text-gray-500 leading-relaxed">
-                      Matches are calculated based on how far a shop is from the <span className="text-[#7B1113] font-bold italic">Worst Case (d-)</span> vs the <span className="text-[#014421] font-bold italic">Best Case (d+)</span>.
-                    </p>
-                  </div>
-                  <div className="text-[11px] text-gray-400 font-medium italic text-center">A score of 1.0 means the shop is mathematically perfect based on your criteria.</div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* 2. Weighted Importance */}
-          <section className="space-y-4 px-2">
-            <h5 className="text-[14px] font-bold text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
-              <BarChart3 className="w-4 h-4" /> Weighted Importance
-            </h5>
-            <div className="bg-[#F8F9FA] p-6 rounded-[32px] border border-black/[0.03]">
-              <p className="text-[14px] font-medium text-gray-600 leading-relaxed italic">
-                Your ranking prioritizes:{" "}
-                {[...shop.details].sort((a, b) => a.criterion === 'distance' ? -1 : b.criterion === 'distance' ? 1 : 0).map((d, i) => {
-                  const label = d.criterion === 'turnaroundTime' ? 'Time' : d.criterion === 'distance' ? 'Range' : d.criterion.charAt(0).toUpperCase() + d.criterion.slice(1);
+                
+                {[...shop.details].sort((a,b)=> b.weight - a.weight).map((detail, idx) => {
+                  const info = getExplanation(detail);
+                  const rank = idx + 1;
+                  const priorityText = rank === 1 ? '1st Priority' : rank === 2 ? '2nd Priority' : rank === 3 ? '3rd Priority' : '4th Priority';
+                  const labels = { price: 'Price', turnaroundTime: 'Time', distance: 'Range', rating: 'Rating' };
+                  
                   return (
-                    <span key={d.criterion} className="text-[#1D1D1F] font-bold">
-                      {label} ({Math.round(d.weight * 100)}){i < shop.details.length - 1 ? " • " : ""}
-                    </span>
-                  );
-                })}
-              </p>
-              <p className="mt-3 text-[12px] text-gray-400">This helps explain why this shop achieved its specific match ranking.</p>
-            </div>
-          </section>
-
-          {/* 3. Criteria Performance */}
-          <section className="space-y-4 px-2">
-            <h5 className="text-[14px] font-bold text-[#1D1D1F] uppercase tracking-widest flex items-center gap-2">
-              <Activity className="w-4 h-4" /> Criteria Performance
-            </h5>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {/* Sorted so distance/range always comes first */}
-              {[...shop.details].sort((a, b) => a.criterion === 'distance' ? -1 : b.criterion === 'distance' ? 1 : 0).map((detail) => {
-                const info = getExplanation(detail);
-                const Icon = info.icon;
-
-                return (
-                  <div key={detail.criterion} className="bg-white p-6 rounded-[32px] border border-black/[0.04] shadow-sm hover:shadow-md transition-all group">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-[#F8F9FA] rounded-xl flex items-center justify-center group-hover:bg-[#014421] group-hover:text-white transition-all">
-                          <Icon className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <p className="text-[14px] font-bold text-[#1D1D1F]">{info.label}</p>
-                          {info.isDelay ? (
-                            <div className="flex items-center gap-4 mt-1 bg-[#7B1113]/[0.02] border border-[#7B1113]/10 p-2 rounded-xl">
-                              <div className="flex flex-col px-1">
-                                <span className="text-[9px] text-gray-400 font-bold uppercase tracking-widest leading-none mb-1">Stated</span>
-                                <span className="text-[13px] font-medium text-gray-400 leading-none">{info.promisedValue} {info.unit}</span>
-                              </div>
-                              <div className="h-6 w-[1px] bg-[#7B1113]/20" />
-                              <div className="flex flex-col px-1">
-                                <span className="text-[9px] text-[#7B1113] font-black uppercase tracking-widest leading-none mb-1">Reality</span>
-                                <span className="text-[13px] font-black text-[#7B1113] leading-none">{info.actualValue} {info.unit}</span>
-                              </div>
-                            </div>
-                          ) : (
-                            <p className="text-[12px] font-normal text-gray-500">
-                              {info.actualValue} {info.unit}
-                            </p>
-                          )}
-                        </div>
+                    <div key={detail.criterion} className="flex items-center justify-between bg-white p-4 md:px-6 rounded-[20px] shadow-[0_2px_8px_rgba(1,68,33,0.03)] border border-[#014421]/5">
+                      <div className="flex flex-col">
+                        <span className="text-[18px] md:text-[20px] font-normal text-[#1D1D1F] leading-none mb-1 shadow-sm-text">
+                          {info.actualValue} <span className="text-[14px] text-[#014421]/60 font-medium">{info.unit}</span>
+                        </span>
+                        <span className="text-[13px] text-[#014421]/80 font-normal">{labels[detail.criterion]}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-[14px] font-bold text-[#1D1D1F] block">{info.percentage}</span>
-                        {info.isDelay && <span className="text-[9px] text-[#7B1113] font-bold uppercase block opacity-60">Truth-Adjusted</span>}
+                         <span className="text-[13px] md:text-[14px] font-normal text-[#014421] bg-[#E4EFE7]/50 px-3 py-1.5 rounded-full shadow-[0_2px_10px_rgba(1,68,33,0.04)] border border-[#014421]/15 whitespace-nowrap">
+                           {priorityText}
+                         </span>
                       </div>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-[#014421] transition-all duration-1000"
-                        style={{ width: `${info.percentage}%` }}
-                      />
-                    </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
-          </section>
+
+            {/* Widget 2: The Formula Rectangle */}
+            <div className="bg-[#F9FBF9] p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-[#014421]/10 shadow-[0_4px_24px_rgba(1,68,33,0.03)] flex flex-col relative overflow-hidden">
+              <div className="absolute -bottom-20 -left-20 w-40 h-40 bg-[#04e672]/10 rounded-full blur-3xl pointer-events-none" />
+              
+              <div className="mb-6 relative z-10">
+                 <h6 className="text-[16px] font-normal text-[#1D1D1F]">Formula</h6>
+                 <p className="text-[14px] font-normal text-[#014421]/60 mt-0.5">The exact TOPSIS mathematical equation</p>
+              </div>
+              
+              <div className="flex-1 flex flex-col items-center justify-center bg-white rounded-[24px] p-6 border border-[#014421]/5 shadow-[0_2px_12px_rgba(1,68,33,0.03)] relative z-10">
+                 <div className="text-center w-full">
+                   {/* Styled Mathematical Equation */}
+                   <div className="flex items-center justify-center gap-3 text-[22px] font-normal text-[#1D1D1F] font-serif tracking-widest pt-4">
+                     <span className="italic flex items-center text-[#014421]">S<sub className="text-[14px] italic relative top-1">i</sub></span>
+                     <span className="mx-1 text-[#014421]/40">=</span>
+                     <div className="flex flex-col items-center justify-center">
+                       <span className="border-b-[1.5px] border-[#014421]/30 md:px-6 pb-1.5 mb-1.5 flex items-center italic">
+                         D<sub className="text-[12px] italic relative top-1">i</sub><sup className="text-[12px] italic relative bottom-2">-</sup>
+                       </span>
+                       <span className="flex items-center italic">
+                         D<sub className="text-[12px] italic relative top-1">i</sub><sup className="text-[12px] italic relative bottom-2">+</sup> <span className="mx-2 not-italic text-[#014421]/40">+</span> D<sub className="text-[12px] italic relative top-1">i</sub><sup className="text-[12px] italic relative bottom-2">-</sup>
+                       </span>
+                     </div>
+                   </div>
+                   
+                   {/* Legend / Key */}
+                   <div className="text-[13px] text-[#014421]/60 text-left w-full mt-10 space-y-3 border-t border-[#014421]/10 pt-5">
+                     <p className="flex items-start gap-2">
+                       <span className="text-[#014421] font-serif italic whitespace-nowrap w-[24px]">S<sub className="text-[9px]">i</sub></span> 
+                       <span><strong className="font-medium text-[#1D1D1F]">Final Relative Score</strong> (Closer to 1 is better)</span>
+                     </p>
+                     <p className="flex items-start gap-2">
+                       <span className="text-[#1D1D1F] font-serif italic whitespace-nowrap w-[24px]">D<sub className="text-[9px]">+</sub></span> 
+                       <span>Distance to the absolute <strong className="font-medium text-[#1D1D1F]">ideal</strong> shop</span>
+                     </p>
+                     <p className="flex items-start gap-2">
+                       <span className="text-[#1D1D1F] font-serif italic whitespace-nowrap w-[24px]">D<sub className="text-[9px]">-</sub></span> 
+                       <span>Distance from the absolute <strong className="font-medium text-[#1D1D1F]">worst</strong> shop</span>
+                     </p>
+                   </div>
+                 </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className="p-8 border-t border-black/[0.03] bg-[#F8F9FA]/50 text-center">
+        <div className="p-8 border-t border-[#014421]/5 bg-[#F9FBF9]/80 text-center">
           <button 
             onClick={onClose}
-            className="px-8 py-3 bg-[#1D1D1F] text-white rounded-2xl text-[14px] font-medium hover:bg-black transition-all shadow-xl shadow-black/10 active:scale-95"
+            className="px-8 py-3 bg-[#014421] text-white rounded-2xl text-[14px] font-medium hover:bg-[#028540] transition-all shadow-[0_4px_16px_rgba(1,68,33,0.3)] active:scale-95"
           >
             Close
           </button>
@@ -1000,7 +1016,9 @@ export default function ShopsPage() {
   const [showWeightManual, setShowWeightManual] = useState(false);
   const [showPriorityManual, setShowPriorityManual] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [matchPreview, setMatchPreview] = useState(null);
   const [surveyStep, setSurveyStep] = useState(1);
+
   const handleMovePriority = (index, direction) => {
     const newPriorities = [...priorities];
     const targetIndex = index + direction;
@@ -1026,19 +1044,6 @@ export default function ShopsPage() {
   const [showFilterPanel, setShowFilterPanel] = useState(false);
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [activeImageGallery, setActiveImageGallery] = useState(null); // { images: [], index: 0 }
-
-  const surveyQuestions = [
-    { id: "distance", icon: <Navigation2 className="w-4 h-4" />, label: "Distance preference (km)", subtitle: "Maximum distance you'd travel",
-      options: [{ label: "Near", value: 1 },{ label: "Mid", value: 5 },{ label: "Far", value: 15 }], stateKey: "distance", min: 0.5, max: 20, step: 0.5, unit: "km" },
-    { id: "price", icon: <Banknote className="w-4 h-4" />, label: "Budget preference (₱/kg)", subtitle: "Ideal cost per kilogram",
-      options: [{ label: "Cheap", value: 25 },{ label: "Mid", value: 50 },{ label: "Premium", value: 100 }], stateKey: "price", min: 10, max: 200, step: 5, unit: "₱" },
-    { id: "time", icon: <Timer className="w-4 h-4" />, label: "Time preference (hrs)", subtitle: "Ideal turnaround time",
-      options: [{ label: "Flash", value: 6 },{ label: "Normal", value: 24 },{ label: "Flexible", value: 72 }], stateKey: "time", min: 1, max: 96, step: 1, unit: "hrs" },
-    { id: "rating", icon: <Star className="w-4 h-4" />, label: "Minimum rating (★)", subtitle: "Lowest acceptable shop rating",
-      options: [{ label: "Any", value: 1 },{ label: "Excl", value: 3 },{ label: "High", value: 4.5 }], stateKey: "rating", min: 1, max: 5, step: 0.1, unit: "stars" }
-  ];
-  const isFirstStepDone = surveyStep > 1;
-
   const [isMapSheetExpanded, setIsMapSheetExpanded] = useState(false);
 
 
@@ -1100,9 +1105,6 @@ export default function ShopsPage() {
           const mapped = data.map(s => ({
             ...s,
             id: s._id,
-            price: Number(s.price) || 0,
-            turnaroundTime: Number(s.turnaroundTime) || 24,
-            rating: Number(s.rating) || 0,
             image: s.image || DEFAULT_SHOP_IMAGE,
           }));
           setShops(mapped);
@@ -1114,6 +1116,19 @@ export default function ShopsPage() {
   // Fetch reviews whenever a shop modal opens
   const handleSelectShop = (shop) => {
     setShowComputation(null);
+    
+    // In Computation results, we show details beside the list, not in a popup
+    if (sidebarTab === "computation" && surveyStep === 3) {
+      setMatchPreview(shop);
+      const shopId = shop._id || shop.id;
+      if (shopId) {
+        api.get(`/reviews/${shopId}`)
+          .then(({ data }) => setShopReviews(prev => ({ ...prev, [shopId]: data })))
+          .catch(() => { });
+      }
+      return;
+    }
+
     setSelectedShop(shop);
     const shopId = shop._id || shop.id;
     if (shopId) {
@@ -1236,16 +1251,14 @@ export default function ShopsPage() {
 
   // Auto-weights from priority order combined with weight ranges
   const combinedWeights = useMemo(() => {
-    // We use a base importance of 25 for all factors,
-    // then multiply by the user's priority position order (1st = 4x, 2nd = 3x, etc)
-    const baseImportance = { price: 25, time: 25, distance: 25, rating: 25 };
     const w = {};
-    const POSITION_WEIGHTS = [1.0, 0.75, 0.5, 0.25]; // Priority multipliers
     priorities.forEach((key, i) => {
-      w[key] = baseImportance[key] * (POSITION_WEIGHTS[i] || 1);
+      // Multiply the slider weight by the priority-based multiplier
+      // This ensures both values influence the final decision
+      w[key] = (weights[key] || 1) * POSITION_WEIGHTS[i];
     });
     return w;
-  }, [priorities]);
+  }, [priorities, weights]);
 
   const shopsWithDistance = useMemo(() => {
     return shops.map(s => ({
@@ -1255,27 +1268,28 @@ export default function ShopsPage() {
   }, [shops, userLocation]);
 
   const rankedShops = useMemo(() => {
-    if (!shopsWithDistance || shopsWithDistance.length === 0) return [];
-    
-    // Pass the actual weights from the state, merged with priority position multipliers
     const scores = calculateTopsis(shopsWithDistance, combinedWeights, priorities);
-    
-    // Merge scores back into shop objects by finding the match (standardizing ID check)
     return shopsWithDistance.map(shop => {
-      const shopId = shop.id || shop._id;
-      const scoreData = scores.find(s => s.id === shopId);
-      
+      const scoreData = scores.find(s => s.id === shop.id);
       return {
         ...shop,
         score: scoreData?.score ?? 0,
         details: scoreData?.details ?? []
       };
-    }).sort((a, b) => b.score - a.score); // Absolute sorting by TOPSIS score
+    }).sort((a, b) => b.score - a.score);
   }, [combinedWeights, shopsWithDistance, priorities]);
-
 
   const nearbyShops = useMemo(() => [...shopsWithDistance].sort((a, b) => a.distance - b.distance).slice(0, 3), [shopsWithDistance]);
   const top3 = useMemo(() => rankedShops.slice(0, 3), [rankedShops]);
+
+  // Auto-select first match in Step 3
+  useEffect(() => {
+    if (surveyStep === 3 && !matchPreview && top3.length > 0) {
+      handleSelectShop(top3[0]);
+    }
+    // Clean up preview if we go back to step 1
+    if (surveyStep === 1) setMatchPreview(null);
+  }, [surveyStep, top3, matchPreview]);
 
   const filteredShops = useMemo(() => {
     let result = [...rankedShops];
@@ -1319,7 +1333,7 @@ export default function ShopsPage() {
 
 
   return (
-    <div className="flex bg-[#FAFAF7] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden relative">
+    <div className="flex bg-gradient-to-br from-[#F1F4F2] to-[#E8EEEB] min-h-screen text-[#1D1D1F] font-outfit overflow-hidden relative">
       {/* Mobile Backdrop */}
       {isSidebarOpen && (
         <div
@@ -1328,62 +1342,36 @@ export default function ShopsPage() {
         />
       )}
 
-      {/* ── PREMIUM SIDEBAR ── */}
-      <aside className={`fixed inset-y-0 left-0 z-[100] w-72 h-screen lg:sticky lg:flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}>
-        <div className="h-full m-4 rounded-[40px] glass shadow-2xl shadow-green/10 flex flex-col overflow-hidden border border-white/40">
-          <div className="p-10">
-            <div className="flex items-center gap-4 group">
-              <div className="w-12 h-12 bg-premium-gradient rounded-2xl flex items-center justify-center text-white text-2xl font-normal shadow-green transform group-hover:rotate-12 transition-all duration-500">
-                E
-              </div>
-              <div>
-                <h1 className="text-2xl font-normal tracking-tighter text-gradient leading-none">ELaBada</h1>
-                <p className="text-[10px] font-black uppercase tracking-[0.2em] text-[#014421] mt-1 opacity-60">Executive Platform</p>
-              </div>
-            </div>
-          </div>
+      {/* Sidebar - Conditional classes for responsiveness */}
+      <aside className={`fixed lg:sticky top-0 h-screen transition-all duration-300 ease-in-out z-[100] bg-[#FAFAF7] border-r border-black/[0.05] flex flex-col p-8 shadow-[4px_0_24px_rgba(0,0,0,0.02)] 
+        ${isSidebarOpen ? 'left-0 w-[280px]' : '-left-full lg:left-0 w-[320px] min-w-[320px] lg:flex'}`}>
+        <div className="flex items-center gap-4 mb-16 px-2">
+          <div className="w-12 h-12 bg-[#014421] rounded-[18px] flex items-center justify-center text-white text-2xl shadow-lg shadow-[#014421]/20">E</div>
+          <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter font-outfit">ELaBada</span>
+        </div>
 
-          <nav className="flex-1 px-4 space-y-2 overflow-y-auto no-scrollbar">
-            {[
-              { id: 'overview', label: 'Overview', icon: LayoutDashboard },
-              { id: 'map', label: 'Registry Map', icon: MapPin },
-              { id: 'computation', label: 'Smart Search', icon: ShieldCheck, isNew: true },
-            ].map((tab) => {
-              const Icon = tab.icon;
-              const active = sidebarTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => { setSidebarTab(tab.id); setIsSidebarOpen(false); }}
-                  className={`w-full group relative flex items-center gap-4 px-6 py-5 rounded-[24px] transition-all duration-500 overflow-hidden ${active ? 'bg-premium-gradient text-white shadow-green scale-[1.02]' : 'text-[#8E8E93] hover:bg-white hover:text-[#014421]'}`}
-                >
-                  {active && <div className="absolute inset-0 animate-shimmer pointer-events-none opacity-20" />}
-                  <Icon className={`w-6 h-6 transition-all duration-500 ${active ? 'scale-110' : 'group-hover:scale-110 group-hover:text-[#014421]'}`} />
-                  <span className="text-[14px] font-bold tracking-tight">{tab.label}</span>
-                  {tab.isNew && !active && <span className="ml-auto w-2 h-2 rounded-full bg-[#7B1113] animate-pulse" />}
-                  {active && <ChevronRight className="ml-auto w-5 h-5 animate-slideInRight" />}
-                </button>
-              );
-            })}
-          </nav>
+        <nav className="flex-1 space-y-3">
+          <button onClick={() => { setSidebarTab("overview"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+            <LayoutDashboard className={`w-5 h-5 ${sidebarTab === "overview" ? "text-white" : "text-[#014421]"}`} />
+            Overview
+          </button>
 
-          <div className="p-8 mt-auto">
-            <div className="p-6 rounded-[32px] bg-[#014421]/[0.03] border border-[#014421]/[0.05] space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-white shadow-sm flex items-center justify-center">
-                  <Star className="w-5 h-5 text-[#FF8C00] fill-[#FF8C00]" />
-                </div>
-                <p className="text-[12px] font-bold text-[#1D1D1F]">Membership Status</p>
-              </div>
-              <p className="text-[11px] text-[#8E8E93] leading-relaxed">You are currently using the UP Executive Platform.</p>
-              <button 
-                onClick={handleLogout}
-                className="w-full py-4 rounded-xl text-[12px] font-bold text-[#7B1113] hover:bg-[#7B1113]/5 transition-all flex items-center justify-center gap-2"
-              >
-                <LogOut className="w-4 h-4" /> Sign out
-              </button>
-            </div>
-          </div>
+          <button onClick={() => { setSidebarTab("map"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+            <MapIcon className={`w-5 h-5 ${sidebarTab === "map" ? "text-white" : "text-[#014421]"}`} />
+            Location
+          </button>
+
+          <button onClick={() => { setSidebarTab("computation"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+            <BarChart3 className={`w-5 h-5 ${sidebarTab === "computation" ? "text-white" : "text-[#014421]"}`} />
+            Computation
+          </button>
+        </nav>
+
+        <div className="mt-auto pt-8 border-t border-[#F3F4F6]">
+          <button onClick={handleLogout} className="w-full py-4 px-6 rounded-2xl text-[#7B1113] hover:bg-[#7B1113]/[0.03] transition-all flex items-center gap-4 text-[14px] font-normal">
+            <LogOut className="w-5 h-5" />
+            Log out
+          </button>
         </div>
       </aside>
 
@@ -1398,10 +1386,10 @@ export default function ShopsPage() {
           </div>
         )}
 
-        {/* ── FIXED OVERVIEW HEADER ── */}
+        {/* ── FIXED OVERVIEW HEADER (welcome + search + quick-access buttons) ── */}
         {sidebarTab === "overview" && (
-          <div className="px-12 pt-6 pb-6 shrink-0 border-b border-black/5 bg-white z-10">
-            <div className="max-w-[1000px] mx-auto flex flex-row items-stretch gap-6 h-[160px]">
+          <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
+            <div className="flex flex-row items-stretch gap-3 md:gap-6 h-[160px]">
               <div 
                 className="flex-1 rounded-[24px] md:rounded-[40px] px-5 py-6 md:px-10 md:py-8 text-white shadow-2xl relative flex flex-col justify-center gap-4 h-full bg-no-repeat overflow-hidden"
                 style={{
@@ -1455,7 +1443,7 @@ export default function ShopsPage() {
                 <button onClick={() => setSidebarTab("computation")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <Sliders className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#014421] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <LocateFixed className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
               </div>
@@ -1463,10 +1451,12 @@ export default function ShopsPage() {
           </div>
         )}
 
-        {/* ── MAIN CONTENT AREA ── */}
-        {sidebarTab === "overview" && (
-          <div className="flex-1 overflow-y-auto no-scrollbar px-12">
-            <div className="max-w-[1000px] mx-auto py-10 space-y-6">
+        {/* ── SCROLLABLE CONTENT (shops grid / computation) ── */}
+        <div className={`flex-1 overflow-y-auto no-scrollbar animate-fadeUp ${sidebarTab === "overview" ? "px-6 md:px-10 pb-10 pt-3" : (sidebarTab === "computation" ? "p-0" : "p-6 md:p-10")}`}>
+
+
+          {sidebarTab === "overview" && (
+            <div className="space-y-6 lg:px-12">
               <div className="flex flex-col gap-6 pt-8">
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
@@ -1537,7 +1527,7 @@ export default function ShopsPage() {
                             <div className="w-7 h-7 rounded-full bg-[#014421]/5 flex items-center justify-center shrink-0">
                               <TrendingUp className="w-4 h-4 text-[#014421]" />
                             </div>
-                            <div className="flex flex-row items-baseline gap-2">
+                            <div className="flex flex-col -space-y-0.5">
                               <span className="text-[10px] font-bold text-[#1D1D1F]/40 uppercase tracking-tighter leading-none">Match</span>
                               <span className="text-[15px] font-normal text-[#1D1D1F] leading-none">{(s.score * 100).toFixed(0)}%</span>
                             </div>
@@ -1556,7 +1546,7 @@ export default function ShopsPage() {
                           )}
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                          <Star className="w-3.5 h-3.5 fill-[#7B1113] text-[#7B1113]" />
+                          <Star className="w-3.5 h-3.5 fill-[#FF8C00] text-[#FF8C00]" />
                           <span className="text-[12px] font-medium text-[#1D1D1F]">{s.rating} <span className="opacity-40">({s.reviewCount || 0})</span></span>
                         </div>
                       </div>
@@ -1596,243 +1586,479 @@ export default function ShopsPage() {
                     </div>
                   </div>
                 ))}
+              </div>
             </div>
-          </div>
-        </div>
-      )}
+          )}
 
-        {/* ── REDESIGNED MAP INTERFACE ── */}
-        {sidebarTab === "computation" && (
-          <div className="flex-1 animate-fadeUp relative overflow-hidden bg-white shadow-[0_0_80px_rgba(0,0,0,0.02)] h-screen flex flex-col">
-                {/* ── SHARED FIXED HEADER ── */}
-                <div className="px-12 pt-6 pb-6 shrink-0 border-b border-black/5 bg-white z-10">
-                  <div className="max-w-[1000px] mx-auto flex flex-row items-stretch gap-6 h-[160px] flex-col !items-center !text-center !justify-center">
-                    <div className="space-y-1">
-                      <h2 className="text-[28px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Computation</h2>
-                      <p className="text-[14px] text-black/40 font-normal leading-relaxed">Let's find the best shop for your specific needs.</p>
-                    </div>
+          {sidebarTab === "computation" && (() => {
+            const surveyQuestions = [
+              { id: "distance", icon: <Navigation2 className="w-3.5 h-3.5" />, label: "How far are you willing to travel?", subtitle: "We will highlight shops within your preferred range",
+                options: [{ label: "Very Near", sub: "Under 1 km", value: 1 },{ label: "Walking", sub: "1-3 km", value: 3 },{ label: "Anywhere", sub: "3 km+", value: 10 }], stateKey: "distance" },
+              { id: "price", icon: <Banknote className="w-3.5 h-3.5" />, label: "What is your ideal budget per kilogram?", subtitle: "We will prioritize shops within your range",
+                options: [{ label: "Budget", sub: "P1-P25/kg", value: 20 },{ label: "Moderate", sub: "P26-P50/kg", value: 45 },{ label: "Premium", sub: "P51+/kg", value: 80 }], stateKey: "price" },
+              { id: "time", icon: <Timer className="w-3.5 h-3.5" />, label: "How fast do you need your laundry done?", subtitle: "Turnaround time preference",
+                options: [{ label: "Same Day", sub: "1-6 hrs", value: 5 },{ label: "Next Day", sub: "7-18 hrs", value: 14 },{ label: "Flexible", sub: "18-48 hrs", value: 30 }], stateKey: "time" },
+              { id: "rating", icon: <Star className="w-3.5 h-3.5" />, label: "How important are shop ratings to you?", subtitle: "Minimum acceptable rating from customers",
+                options: [{ label: "Any Shop", sub: "1.0+ stars", value: 1 },{ label: "Good", sub: "3.0+ stars", value: 3 },{ label: "Excellent", sub: "4.5+ stars", value: 4.5 }], stateKey: "rating" }
+            ];
 
-                    <div className="flex items-center justify-between w-full relative px-2 max-w-[800px] mx-auto">
-                      {["Preferences", "Ranking", "Results"].map((label, i) => {
-                        const num = i + 1;
-                        const isActive = surveyStep === num;
-                        const isCompleted = surveyStep > num;
-                        return (
-                          <Fragment key={label}>
-                            <div className="flex flex-col items-center gap-3 relative z-10 w-fit">
-                              <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all border ${
-                                isCompleted ? "bg-[#014421] border-[#014421] text-white shadow-lg" : 
-                                isActive ? "bg-white border-[#014421] border-2" : 
-                                "bg-white border-black/10"
-                              }`}>
-                                {isCompleted ? <Check className="w-5 h-5" /> : isActive ? <div className="w-2.5 h-2.5 rounded-full bg-[#014421]" /> : null}
-                              </div>
-                              <span className={`text-[12px] whitespace-nowrap translate-y-1 text-[#1D1D1F] ${isActive ? "opacity-100 font-normal" : "opacity-40 font-normal"}`}>
-                                {label}
-                              </span>
+            const answeredCount = surveyQuestions.filter(q => q.options.some(o => o.value === weights[q.stateKey])).length;
+            const isFirstStepDone = answeredCount === 4;
+            return (
+              <div className="h-full flex flex-col bg-white overflow-hidden animate-fadeUp">
+
+                {/* ── FIXED HEADER ── */}
+                <div className="sticky top-0 bg-white z-30 pt-10 md:pt-[72px] pb-6 px-4 md:px-10 border-b border-black/[0.03]">
+                  <div className="text-center mb-10">
+                    <h1 className="text-[24px] md:text-[28px] font-medium tracking-tight text-[#1D1D1F] font-outfit mb-2">Computation</h1>
+                    <p className="text-[14px] text-black/40 font-normal">Let's find the best shop for your specific needs.</p>
+                  </div>
+
+
+                  {/* ── STEP INDICATOR ── */}
+                  <div className="flex items-center justify-center mb-16 px-4 max-w-4xl mx-auto w-full">
+                    {[1, 2, 3].map((num, i) => {
+                      const isActive = surveyStep === num;
+                      const isPassed = surveyStep > num;
+                      const labels = ["Preferences", "Ranking", "Results"];
+                      return (
+                        <Fragment key={num}>
+                          <div className="flex flex-col items-center relative z-10 shrink-0">
+                            <div className={`w-6 h-6 rounded-full flex items-center justify-center transition-all border ${
+                              isActive 
+                                ? "bg-white border-[#014421] shadow-md scale-105" 
+                                : isPassed 
+                                  ? "bg-[#014421] border-[#014421] text-white" 
+                                  : "bg-white border-black/10"
+                            }`}>
+                              {isPassed ? (
+                                <Check className="w-3 h-3 text-white stroke-[3]" />
+                              ) : isActive ? (
+                                <div className="w-1.5 h-1.5 bg-[#014421] rounded-full" />
+                              ) : null}
                             </div>
-                            {i < 2 && (
-                              <div className={`flex-1 h-[2px] transition-all -translate-y-5 ${isCompleted ? "bg-[#014421]" : "bg-black/5"}`} />
-                            )}
-                          </Fragment>
-                        );
-                      })}
-                    </div>
+                            <span className={`absolute top-full mt-3 text-[12px] font-normal tracking-tight whitespace-nowrap ${isActive || isPassed ? "text-[#1D1D1F]" : "text-black/20"}`}>
+                              {labels[i]}
+                            </span>
+                          </div>
+                          {i < 2 && (
+                            <div className={`flex-1 h-[1px] mx-2 md:mx-4 transition-all ${
+                              isPassed ? "bg-[#014421]/20" : "bg-black/[0.05]"
+                            }`} />
+                          )}
+                        </Fragment>
+                      );
+                    })}
                   </div>
                 </div>
 
-                {/* ── SCROLLABLE MIDDLE CONTENT AREA ── */}
-                <div className="flex-1 overflow-y-auto no-scrollbar px-12">
-                  <div className="max-w-[1000px] mx-auto py-10">
-                    {/* STEP 1: PREFERENCES */}
-                    {surveyStep === 1 && (
-                      <div className="animate-fadeUp space-y-12">
-                        <div className="space-y-0.5">
-                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Set your preferences</h3>
-                          <p className="text-[14px] text-black/40 font-normal">Adjust the sliders below</p>
-                        </div>
-                        <div className="space-y-10">
-                          {surveyQuestions.map((q, idx) => (
-                            <div key={q.id} className="group relative space-y-6 animate-fadeUp" style={{ animationDelay: `${idx * 150}ms` }}>
-                              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                                <div className="space-y-0.5">
-                                  <h3 className="text-[14px] font-normal text-[#1D1D1F] font-outfit leading-none">{q.label}</h3>
-                                  <p className="text-[12px] text-black/40 font-normal">{q.subtitle}</p>
-                                </div>
-                                <div className="text-right">
-                                  <span className="text-[22px] font-normal text-[#1D1D1F] font-outfit tabular-nums leading-none">{weights[q.stateKey]}</span>
-                                  <span className="text-[12px] ml-1 font-normal text-black/30 lowercase">{q.unit}</span>
-                                </div>
-                              </div>
-                              <div className="relative h-2 flex items-center">
-                                <div className="absolute inset-0 bg-black/[0.05] rounded-full overflow-hidden">
-                                  <div className="h-full bg-[#1D1D1F] transition-all duration-1000 ease-out" style={{ width: `${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}%` }} />
-                                </div>
-                                <input type="range" min={q.min} max={q.max} step={q.step} value={weights[q.stateKey]} onChange={(e) => {
-                                  const val = parseFloat(e.target.value);
-                                  setWeights(prev => ({ ...prev, [q.stateKey]: val }));
-                                  setIsApplied(false);
-                                }} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
-                                <div className="absolute h-6 w-6 bg-white border-2 border-[#1D1D1F] rounded-full shadow-lg pointer-events-none transition-all duration-200" style={{ left: `calc(${((weights[q.stateKey]-q.min)/(q.max-q.min)) * 100}% - 12px)` }} />
-                              </div>
-                            </div>
-                          ))}
-                        </div>
+                {/* ── SCROLLABLE CONTENT ── */}
+                <div className="flex-1 overflow-y-auto px-4 md:px-12 py-10 custom-scrollbar overscroll-contain">
+                  <div className="max-w-[1400px] mx-auto w-full">
+                    <div className="min-h-full flex flex-col">
+
+                  {surveyStep === 1 && (
+                    <div className="flex flex-col gap-6 max-w-full w-full animate-fadeUp">
+                      <div className="mb-10 text-left">
+                        <h2 className="text-[18px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Set your preferences</h2>
+                        <p className="text-[14px] text-black/40 font-normal">Adjust the sliders below</p>
                       </div>
-                    )}
 
-                    {/* STEP 2: RANKING */}
-                    {surveyStep === 2 && (
-                      <div className="animate-fadeUp space-y-12">
-                        <div className="space-y-0.5 mb-6">
-                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Rank the factors</h3>
-                          <p className="text-[14px] text-black/40 font-normal">Drag or use arrows to set priority</p>
-                        </div>
-                        <div className="space-y-4">
-                          {priorities.map((key, index) => {
-                            const labelMapping = {
-                              price: { label: "Price strategy", desc: "How much you value cost savings" },
-                              distance: { label: "Proximity", desc: "How much distance matters" },
-                              time: { label: "Velocity", desc: "Need for rapid service turnaround" },
-                              rating: { label: "Trust score", desc: "User review and quality weighting" }
-                            };
-                            const factor = labelMapping[key];
-                            return (
-                              <div key={key} className="p-6 rounded-[32px] border border-black/[0.05] hover:border-[#014421]/30 transition-all duration-300 flex items-center gap-8 group">
-                                <div className="w-16 h-16 rounded-[22px] border border-[#014421]/30 bg-[#014421]/5 text-[#014421] flex items-center justify-center font-normal text-2xl font-outfit">{index + 1}</div>
-                                <div className="flex-1 flex items-center justify-between">
-                                  <div>
-                                    <h4 className="text-[14px] font-normal text-[#1D1D1F] font-outfit tracking-wider">{factor.label}</h4>
-                                    <p className="text-[12px] text-black/30 font-normal">{factor.desc}</p>
-                                  </div>
-                                  <div className="flex gap-4">
-                                    <button onClick={() => handleMovePriority(index, -1)} disabled={index === 0} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all">
-                                      <ChevronUp className="w-6 h-6" />
-                                    </button>
-                                    <button onClick={() => handleMovePriority(index, 1)} disabled={index === priorities.length - 1} className="w-12 h-12 rounded-2xl border border-black/5 bg-white shadow-sm hover:bg-[#7B1113] hover:text-white flex items-center justify-center disabled:opacity-5 transition-all">
-                                      <ChevronDown className="w-6 h-6" />
-                                    </button>
-                                  </div>
+
+
+
+
+
+
+
+
+                      <div className="space-y-12">
+                        {[
+                          { id: "distance", label: "Distance (km)", sub: "Maximum distance you'd travel", min: 1, max: 20, unit: "km", stateKey: "distance" },
+                          { id: "price", label: "Price (₱/kg)", sub: "Maximum affordable price per kg", min: 10, max: 100, unit: "₱", stateKey: "price" },
+                          { id: "time", label: "Turnaround time (hrs)", sub: "Maximum acceptable waiting time", min: 6, max: 72, unit: "hrs", stateKey: "time" },
+                          { id: "rating", label: "Ratings", sub: "Minimum acceptable star rating", min: 1, max: 5, step: 0.5, unit: "stars", stateKey: "rating" }
+                        ].map((q) => {
+                          const val = weights[q.stateKey];
+                          const percent = ((val - q.min) / (q.max - q.min)) * 100;
+                          
+                          return (
+                            <div key={q.id} className="space-y-4">
+                              <div className="flex justify-between items-end gap-4">
+                                <div className="space-y-1 flex-1">
+                                  <h4 className="text-[14px] font-normal text-[#1D1D1F] font-outfit">{q.label}</h4>
+                                  <p className="text-[14px] text-black/40 font-normal">{q.sub}</p>
                                 </div>
-                              </div>
-                            );
-                          })}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* STEP 3: RESULTS */}
-                    {surveyStep === 3 && (
-                      <div className="animate-fadeUp space-y-12">
-                        <div className="space-y-0.5">
-                          <h3 className="text-[18px] font-normal text-[#1D1D1F] font-outfit tracking-tight">Best matches</h3>
-                          <p className="text-[14px] text-black/40 font-normal">Top recommendations based on your profile.</p>
-                        </div>
-                        <div className="space-y-6">
-                          {top3.slice(0, 3).map((s, i) => (
-                            <div 
-                              key={s._id || i} 
-                              onClick={() => handleSelectShop(s)} 
-                              className="group relative bg-white p-8 rounded-[40px] border border-black/[0.05] hover:border-[#014421]/20 hover:shadow-2xl hover:shadow-green/10 transition-all duration-500 cursor-pointer flex items-center gap-8 animate-slideInRight"
-                              style={{ animationDelay: `${i * 100}ms` }}
-                            >
-                              <div className="absolute top-0 right-0 p-6 opacity-0 group-hover:opacity-100 transition-all">
-                                <ArrowUpRight className="w-5 h-5 text-[#014421]" />
-                              </div>
-
-                              <div className="relative w-28 h-28 flex items-center justify-center shrink-0">
-                                <div className="absolute inset-0 rounded-full bg-[#014421]/5 animate-pulse" />
-                                <svg className="w-full h-full transform -rotate-90 z-10">
-                                  <circle cx="50%" cy="50%" r="44%" stroke="#F0F0F0" strokeWidth="10" fill="transparent" />
-                                  <circle 
-                                    cx="50%" 
-                                    cy="50%" 
-                                    r="44%" 
-                                    stroke="#014421" 
-                                    strokeWidth="10" 
-                                    fill="transparent" 
-                                    strokeDasharray="276" 
-                                    strokeDashoffset={276 - (276 * (s.score || 0))} 
-                                    strokeLinecap="round" 
-                                    className="transition-all duration-1000" 
-                                  />
-                                </svg>
-                                <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
-                                  <span className="text-[24px] font-normal text-gradient leading-none mb-1">{((s.score || 0) * 100).toFixed(0)}%</span>
-                                  <span className="text-[9px] text-[#014421] font-black uppercase tracking-[0.2em]">Match</span>
-                                </div>
-                              </div>
-
-                              <div className="flex-1 space-y-4">
-                                <h4 className="text-2xl font-normal text-[#1D1D1F] font-outfit tracking-tighter truncate">{s.name}</h4>
-                                <div className="flex flex-wrap items-center gap-3">
-                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
-                                    <MapPin className="w-3.5 h-3.5 text-[#7B1113] opacity-60" />
-                                    <span className="text-[13px] font-medium text-[#1D1D1F]/60">{s.address}</span>
-                                  </div>
-                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
-                                    <Banknote className="w-3.5 h-3.5 text-[#014421] opacity-60" />
-                                    <span className="text-[13px] font-medium text-[#1D1D1F]/60">₱{s.price}<span className="text-[10px] opacity-40">/kg</span></span>
-                                  </div>
-                                  <div className="flex items-center gap-2 px-4 py-2 bg-[#F8F9FA] rounded-[20px] border border-black/[0.03] group-hover:border-[#014421]/20 transition-all">
-                                    <Timer className="w-3.5 h-3.5 text-black/40" />
-                                    <span className="text-[13px] font-medium text-[#1D1D1F]/40">{s.turnaroundTime} hrs</span>
-                                  </div>
+                                
+                                {/* Right-Aligned Fixed Width Numbers */}
+                                <div className="text-right flex items-baseline justify-end gap-1.5 w-[90px] shrink-0">
+                                  <span className="text-[24px] font-medium text-[#555555] tracking-tight font-outfit">{val}</span>
+                                  <span className="text-[14px] text-[#555555]/60 font-medium">{q.id === 'rating' ? '' : q.unit}</span>
                                 </div>
                               </div>
                               
-                              <div className="shrink-0 w-14 h-14 rounded-full glass border border-black/[0.05] flex items-center justify-center text-black/20 group-hover:bg-[#014421] group-hover:text-white group-hover:shadow-green group-hover:scale-110 transition-all duration-500 transform group-hover:-translate-x-2">
-                                <ChevronRight className="w-6 h-6" />
+                              <div className="relative pt-4 pb-2 w-full">
+                                <div className="relative h-2 w-full bg-[#E5E7EB] rounded-full">
+                                  {/* Active Fill Track */}
+                                  <div 
+                                    className="absolute top-0 left-0 h-full bg-[#555555] rounded-full pointer-events-none transition-all duration-75"
+                                    style={{ width: `${percent}%` }}
+                                  />
+                                  
+                                  {/* Minimal Style Thumb */}
+                                  <div 
+                                    className="absolute top-1/2 w-4 h-4 bg-white border-[3px] border-[#555555] rounded-full pointer-events-none z-10 transition-all duration-75 shadow-md"
+                                    style={{ left: `${percent}%`, transform: `translate(-50%, -50%)` }}
+                                  />
+
+                                  {/* Invisible Interactive Range Input */}
+                                  <input
+                                    type="range"
+                                    min={q.min}
+                                    max={q.max}
+                                    step={q.step || 1}
+                                    value={val}
+                                    onChange={(e) => {
+                                      setWeights(prev => ({ ...prev, [q.stateKey]: parseFloat(e.target.value) }));
+                                      setIsApplied(false);
+                                    }}
+                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer m-0 z-20"
+                                  />
+                                </div>
                               </div>
                             </div>
-                          ))}
-                        </div>
-                        {top3.length === 0 && (
-                          <div className="py-20 text-center opacity-20">Optimizing inventory...</div>
-                        )}
+                          );
+                        })}
                       </div>
-                    )}
-                  </div>
-                </div>
 
-                {/* ── SHARED FIXED FOOTER ── */}
-                <div className="p-10 px-12 shrink-0 border-t border-black/5 bg-white z-10">
-                  <div className="max-w-[1000px] mx-auto flex items-center justify-between">
-                    {surveyStep === 1 ? (
-                      <>
-                        <div />
-                        <button onClick={() => setSurveyStep(2)} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
-                          Continue to priority
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                      </>
-                    ) : surveyStep === 2 ? (
-                      <>
-                        <button onClick={() => setSurveyStep(1)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] transition-all flex items-center gap-2">
-                          <ChevronLeft className="w-5 h-5" />
-                          Back to preferences
-                        </button>
-                        <button onClick={() => { setIsApplied(true); setSurveyStep(3); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
-                          Discover Best Matches
-                          <Zap className="w-5 h-5 fill-white" />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button onClick={() => setSurveyStep(2)} className="px-8 py-5 rounded-[22px] font-normal text-[14px] text-black/30 hover:text-[#014421] transition-all flex items-center gap-2">
-                          <ChevronLeft className="w-5 h-5" />
-                          Back to priority
-                        </button>
-                        <button onClick={() => { setSurveyStep(1); setIsApplied(false); }} className="px-12 py-5 rounded-[22px] bg-[#014421] text-white font-normal text-[14px] shadow-xl hover:scale-[1.02] transition-all flex items-center gap-3">
-                          <LogOut className="w-5 h-5 rotate-180" />
-                          Reset survey
-                        </button>
-                      </>
-                    )}
+                                     {/* No local footer here anymore, moved to global footer block */}
+                    </div>
+                  )}
+
+                  {surveyStep === 2 && (
+                    <div className="flex flex-col gap-8 max-w-full w-full animate-fadeUp">
+                      <div className="mb-10 text-left">
+                        <h2 className="text-[18px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Rank the factors</h2>
+                        <p className="text-[14px] text-black/40 font-normal">Drag or use arrows to set priority</p>
+                      </div>
+
+
+
+
+
+
+
+
+
+                      <div className="space-y-4">
+                        {priorities.map((key, index) => {
+                          const labelMapping = {
+                            price: { label: "Price", desc: "How much you value cost savings" },
+                            distance: { label: "Distance", desc: "How much distance matters" },
+                            time: { label: "Turnaround time", desc: "Need for rapid service turnaround" },
+                            rating: { label: "Ratings", desc: "User review and quality weighting" }
+                          };
+                          const factor = labelMapping[key];
+
+                          return (
+                            <div key={key} className="bg-white p-5 rounded-[24px] border-2 border-black/[0.04] flex items-center gap-6 animate-fadeUp transition-all hover:border-[#014421]/20 h-28" style={{ animationDelay: `${index * 100}ms` }}>
+                              <div className="w-14 h-14 rounded-full bg-[#F1F8F4] flex items-center justify-center text-[#014421] text-xl font-normal font-outfit">{index + 1}</div>
+
+                              <div className="flex-1">
+                                <h4 className="text-[14px] font-normal text-[#1D1D1F] font-outfit">{factor.label}</h4>
+
+                                <p className="text-[14px] text-black/40 font-normal">{factor.desc}</p>
+                              </div>
+
+
+
+                              <div className="flex gap-2">
+                                <button 
+                                  onClick={() => handleMovePriority(index, -1)}
+                                  disabled={index === 0}
+                                  className="w-12 h-12 rounded-2xl border border-black/[0.05] hover:bg-black/[0.02] flex items-center justify-center disabled:opacity-5 transition-all active:scale-90"
+                                >
+                                  <ChevronUp className="w-6 h-6 text-black/40" />
+                                </button>
+                                <button 
+                                  onClick={() => handleMovePriority(index, 1)}
+                                  disabled={index === priorities.length - 1}
+                                  className="w-12 h-12 rounded-2xl border border-black/[0.05] hover:bg-black/[0.02] flex items-center justify-center disabled:opacity-5 transition-all active:scale-90"
+                                >
+                                  <ChevronDown className="w-6 h-6 text-black/40" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                    </div>
                   </div>
+                )}
+
+                {surveyStep === 3 && (
+                  <div className="flex flex-col gap-10 max-w-full w-full animate-fadeUp">
+                      <div className="flex flex-col lg:flex-row gap-10 items-start">
+                        
+                        {/* ── LEFT: MATCH LIST (Fixed Sidebar) ── */}
+                        <div className="w-full lg:w-[420px] shrink-0 space-y-10">
+                          <div className="text-left px-2">
+                            <h2 className="text-[20px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Best matches</h2>
+                            <p className="text-[14px] text-black/40 font-normal tracking-tight">Top recommendations based on your profile.</p>
+                          </div>
+
+                          <div className="space-y-4">
+                            {top3.map((s, i) => {
+                              const isActive = matchPreview?.id === s.id || matchPreview?._id === s._id;
+                              const score = (s.score * 100).toFixed(0);
+                              
+                              return (
+                                <div
+                                  key={s.id || s._id || i}
+                                  onClick={() => handleSelectShop(s)}
+                                  className={`group flex items-center justify-between p-8 md:p-10 rounded-[40px] border-2 transition-all duration-300 cursor-pointer relative overflow-hidden gap-4 ${
+                                    isActive 
+                                      ? "bg-white border-[#014421] shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02] z-10" 
+                                      : "bg-[#F8F9FA]/50 border-black/[0.04] hover:bg-white hover:border-[#014421]/20 hover:shadow-lg"
+                                  }`}
+                                >
+                                  {/* Glassmorphism Ghost Background */}
+                                  <div 
+                                    className={`absolute inset-0 z-0 pointer-events-none transition-all duration-700 grayscale ${isActive ? 'opacity-[0.06] blur-[2px] scale-105' : 'opacity-[0.02] blur-[4px] scale-100'}`} 
+                                    style={{
+                                      backgroundImage: `url(${s.image || "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80"})`,
+                                      backgroundSize: 'cover',
+                                      backgroundPosition: 'center'
+                                    }}
+                                  />
+                                  {/* Fade gradient to ensure text readability */}
+                                  <div className={`absolute inset-0 z-0 bg-gradient-to-r ${isActive ? 'from-white via-white/80' : 'from-[#F8F9FA] via-[#F8F9FA]/90'} to-transparent pointer-events-none`} />
+
+                                  <div className="space-y-3 flex-1 min-w-[200px] relative z-10">
+                                     <div className={`text-[11px] font-medium uppercase tracking-[0.15em] transition-colors ${isActive ? 'text-[#014421]' : 'text-black/40'}`}>
+                                        #{i + 1} Best Match
+                                     </div>
+                                     <div className="flex items-center gap-3">
+                                        <h4 className={`text-[20px] font-normal leading-normal font-outfit truncate pb-1 transition-colors ${isActive ? 'text-[#014421]' : 'text-[#1D1D1F]'}`}>
+                                           {s.name}
+                                        </h4>
+                                        {s.permitStatus === 'approved' && (
+                                          <div className="w-5 h-5 rounded-full bg-[#228B22] flex items-center justify-center shrink-0 shadow-sm border border-white/20" title="Verified Permitted Shop">
+                                            <Check className="w-3 h-3 text-white stroke-[3]" />
+                                          </div>
+                                        )}
+                                     </div>
+                                  </div>
+
+                                  {/* Animated Progress Ring */}
+                                  <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shrink-0 transition-transform duration-500 z-10 ${isActive ? 'scale-110 drop-shadow-md' : 'scale-100'}`}>
+                                    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full -rotate-90">
+                                      <circle 
+                                        cx="50" cy="50" r="44" 
+                                        fill="none" 
+                                        stroke={isActive ? "rgba(1,68,33,0.1)" : "rgba(0,0,0,0.05)"} 
+                                        strokeWidth="5" 
+                                      />
+                                      <circle 
+                                        cx="50" cy="50" r="44" 
+                                        fill="none" 
+                                        stroke={isActive ? "#014421" : "rgba(1,68,33,0.25)"} 
+                                        strokeWidth="5" 
+                                        strokeLinecap="round"
+                                        strokeDasharray="276.46"
+                                        strokeDashoffset={276.46 - (s.score * 276.46)}
+                                        style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)' }}
+                                      />
+                                    </svg>
+                                    <span className={`text-[20px] font-normal leading-none font-outfit tracking-tight ${isActive ? 'text-[#014421]' : 'text-black/50'}`}>{score}%</span>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                          <div className="flex-1 sticky top-0 animate-fadeLeft">
+                          {matchPreview ? (
+                            <div className="bg-white rounded-[44px] border border-black/[0.1] shadow-2xl overflow-hidden flex flex-col h-full max-h-[calc(100vh-140px)]">
+                              {/* Modal Header */}
+                              <div className="px-8 py-6 border-b border-black/[0.03] flex items-center justify-between bg-white/50 backdrop-blur-sm sticky top-0 z-10">
+                                 <button onClick={() => setMatchPreview(null)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+                                    <ArrowLeft className="w-5 h-5 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
+                                 </button>
+                                 <button 
+                                   onClick={() => setShowComputation(matchPreview)}
+                                   className="bg-[#014421]/5 px-5 py-2.5 rounded-full border border-[#014421]/10 flex items-center gap-3 shadow-sm hover:bg-[#014421] hover:text-white transition-all group/match"
+                                 >
+                                    <TrendingUp className="w-4 h-4 text-[#014421] group-hover/match:text-white" />
+                                    <div className="flex items-center gap-2 text-[14px] font-normal">
+                                       <span className="opacity-50 group-hover/match:opacity-80">Match:</span>
+                                       <span className="font-medium">{(matchPreview.score * 100).toFixed(0)}%</span>
+                                       <div className="w-[1px] h-3 bg-black/10 group-hover/match:bg-white/20 mx-1" />
+                                       <span className="group-hover/match:translate-x-0.5 transition-transform">View computation</span>
+                                    </div>
+                                    <ChevronRight className="w-3.5 h-3.5 opacity-40 group-hover/match:opacity-100 group-hover/match:translate-x-0.5 transition-all" />
+                                 </button>
+                              </div>
+
+                              <div className="flex h-full min-h-0 flex-col md:flex-row overflow-y-auto custom-scrollbar p-2">
+                                 {/* LEFT: PICTURE & INSIGHTS */}
+                                 <div className="w-full md:w-[45%] p-8 shrink-0 space-y-8">
+                                   <div className="aspect-square w-full rounded-[44px] overflow-hidden shadow-2xl relative group">
+                                      <img 
+                                        src={matchPreview.image} 
+                                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                                        alt={matchPreview.name} 
+                                      />
+                                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
+                                      {matchPreview.status === 'open' && (
+                                        <div className="absolute top-6 left-6 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md bg-white/90 border-[#228B22]/20 text-[#228B22]">
+                                          <div className="w-1.5 h-1.5 rounded-full bg-[#228B22] animate-pulse" />
+                                          <span className="text-[12px] font-normal tracking-wide capitalize">open</span>
+                                        </div>
+                                      )}
+                                   </div>
+
+                                 </div>
+
+                                 {/* RIGHT: CORE DETAILS */}
+                                 <div className="flex-1 p-8 pt-4 md:pt-6 space-y-3 h-full flex flex-col">
+                                    <div className="space-y-2">
+                                       <div className="flex items-center gap-3">
+                                          <h3 className="text-[32px] font-normal font-outfit text-[#1D1D1F] tracking-tight leading-none">{matchPreview.name}</h3>
+                                          {matchPreview.permitStatus === 'approved' && (
+                                             <div className="w-6 h-6 rounded-full bg-[#228B22] flex items-center justify-center shrink-0">
+                                                <Check className="w-3.5 h-3.5 text-white stroke-[4]" />
+                                             </div>
+                                          )}
+                                       </div>
+                                       <div className="bg-[#F8F9FA] rounded-full px-6 py-4 border border-black/[0.03] space-y-0.5">
+                                          <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Location address</span>
+                                          <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight ml-1">{matchPreview.address}</p>
+                                       </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-2 gap-2">
+                                       <div className="bg-[#F8F9FA] py-4 px-6 rounded-full border border-black/[0.03] space-y-0.5 group">
+                                          <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Operating hours</span>
+                                          <p className="text-[14px] font-normal text-[#1D1D1F] ml-1">{matchPreview.operatingHours || '8:00 AM - 8:00 PM'}</p>
+                                       </div>
+                                       <div className="bg-[#F8F9FA] py-4 px-6 rounded-full border border-black/[0.03] space-y-0.5 group">
+                                          <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Shop status</span>
+                                          <p className={`text-[14px] font-normal ${matchPreview.status === 'open' ? 'text-emerald-600' : 'text-red-500'} capitalize ml-1`}>
+                                             {matchPreview.status || 'open'}
+                                          </p>
+                                       </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-3 gap-2">
+                                       {[
+                                          { label: "Price", value: `₱${matchPreview.price}/kg`, color: 'text-[#7B1113]' },
+                                          { label: "Turnaround", value: `${matchPreview.turnaroundTime} hrs`, color: 'text-[#014421]' },
+                                          { label: "Distance", value: `${matchPreview.distance?.toFixed(1)} km`, color: 'text-[#1D1D1F]' }
+                                       ].map((stat, si) => (
+                                          <div key={si} className="bg-[#F8F9FA] px-4 py-3 rounded-full border border-black/[0.03] flex flex-col items-center justify-center text-center">
+                                             <span className="text-[12px] font-normal text-gray-400 mb-0.5">{stat.label}</span>
+                                             <p className={`text-[14px] font-normal ${stat.color}`}>{stat.value}</p>
+                                          </div>
+                                       ))}
+                                    </div>
+
+                                    {matchPreview.actualTurnaroundTime > matchPreview.turnaroundTime && (
+                                       <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-2xl">
+                                          <p className="text-[13px] font-normal text-red-800 leading-snug">
+                                             <span className="font-bold">Warning:</span> The stated turnaround time is frequently exceeded. Actual computed return time is <span className="font-bold">{matchPreview.actualTurnaroundTime} hours</span>.
+                                          </p>
+                                       </div>
+                                    )}
+
+                                    <div className="pt-2">
+                                       <button
+                                          onClick={() => { setSidebarTab("map"); setActiveRouteShopId(matchPreview.id || matchPreview._id); }}
+                                          className="w-full py-5 rounded-full border-2 border-black/10 text-[14px] font-normal text-[#1D1D1F] flex items-center justify-center gap-3 hover:bg-[#F8F9FA] transition-all group/nav"
+                                       >
+                                          Get directions
+                                          <Navigation className="w-4 h-4 fill-[#014421] text-[#014421] group-hover/nav:animate-bounce" />
+                                       </button>
+                                    </div>
+                                 </div>
+                              </div>
+                            </div>
+                          ) : (
+                            <div className="bg-[#F8F9FA] rounded-[48px] border-2 border-dashed border-black/[0.05] h-[600px] flex flex-col items-center justify-center p-12 text-center group">
+                               <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center border border-black/[0.05] mb-8 transition-all group-hover:scale-110 shadow-sm">
+                                  <MousePointer2 className="w-10 h-10 text-black/10" />
+                               </div>
+                               <h4 className="text-[18px] font-normal font-outfit text-[#1D1D1F] mb-3">Shop Profile</h4>
+                               <p className="text-[14px] text-black/30 font-normal max-w-[240px] leading-relaxed">Select a candidate from the left to begin the technical evaluation and review the shop profile.</p>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
-          )}
+            </div>
+
+            {/* ── FIXED FOOTER ── */}
+            <div className="sticky bottom-0 bg-white z-30 py-6 px-4 md:px-12 border-t border-black/[0.03]">
+              <div className="max-w-[1400px] mx-auto w-full">
+                {surveyStep === 1 && (
+                  <div className="flex items-center justify-end">
+                    <button 
+                      onClick={() => setSurveyStep(2)}
+                      className="w-[200px] h-[56px] rounded-full bg-[#014421] text-white font-normal text-[14px] flex items-center justify-center transition-all hover:scale-[1.02] shadow-xl shadow-[#014421]/20 border-2 border-white/10"
+                    >
+                      Next
+                    </button>
+                  </div>
+                )}
+                {surveyStep === 2 && (
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setSurveyStep(1)}
+                      className="text-[14px] text-black/40 font-normal hover:text-[#014421] transition-all flex items-center gap-2"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                      Back
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsApplied(true);
+                        setSurveyStep(3);
+                      }}
+                      className="w-[200px] h-[56px] rounded-full bg-[#014421] text-white font-normal text-[14px] flex items-center justify-center transition-all hover:scale-[1.02] shadow-xl shadow-[#014421]/20 border-2 border-white/10"
+                    >
+                      Discover Best Matches
+                    </button>
+                  </div>
+                )}
+                {surveyStep === 3 && (
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => setSurveyStep(2)}
+                      className="text-[14px] text-black/40 font-normal hover:text-[#014421] transition-all flex items-center gap-2"
+                    >
+                      <ChevronLeft className="w-5 h-5" />
+                      Back
+                    </button>
+                    <button 
+                      onClick={() => { 
+                        setSurveyStep(1); 
+                        setIsApplied(false); 
+                      }}
+                      className="w-[200px] h-[56px] rounded-full border-2 border-[#014421] font-normal text-[14px] text-[#014421] hover:bg-[#014421] hover:text-white transition-all flex items-center justify-center hover:scale-[1.02] shadow-[0_4px_14px_rgba(1,68,33,0.08)] bg-white active:scale-95"
+                    >
+                      Reset survey
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
 
         {/* ── REDESIGNED MAP INTERFACE ── */}
           {sidebarTab === "map" && (
@@ -2018,7 +2244,7 @@ export default function ShopsPage() {
                                           <div className="flex items-center gap-1.5">
                                             <div className="flex items-center gap-0.5">
                                               {[...Array(5)].map((_, idx) => (
-                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#7B1113] text-[#7B1113]' : 'text-[#1D1D1F]/20'}`} />
+                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
                                               ))}
                                             </div>
                                             <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
@@ -2065,12 +2291,16 @@ export default function ShopsPage() {
                     </>
                   );
                 })()}
-                </div>
-              </div>
             </div>
           </div>
-        )}
-      </main>
+        </div>
+      </div>
+      )}
+
+      </div>
+    </main>
+
+
 
       {selectedShop && (
         <ShopDetailModal
@@ -2133,5 +2363,7 @@ export default function ShopsPage() {
         </div>
       )}
     </div>
+
+
   );
 }

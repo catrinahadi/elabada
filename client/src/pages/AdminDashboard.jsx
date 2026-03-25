@@ -134,19 +134,18 @@ export default function AdminDashboard() {
 
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col h-screen overflow-hidden">
-                <header className="h-24 px-12 flex items-center justify-between shrink-0 bg-[#F8F9FA]/80 backdrop-blur-2xl border-b border-black/[0.05] z-10">
+            <main className="flex-1 flex flex-col">
+                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20">E</div>
-                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada Admin</span>
+                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                     </div>
-                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] h-12 px-6 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal border border-[#800000]/10 hover:border-[#800000]/30 mr-8">
+                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] p-3 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal">
                         <LogOut className="w-4 h-4" /> Log out
                     </button>
                 </header>
 
-                <div className="flex-1 overflow-y-auto p-12 no-scrollbar">
-                    <div className="max-w-[1000px] mx-auto space-y-12 animate-fadeUp">
+                <div className="p-6 md:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
                     <div className="px-4">
                         <h2 className="text-4xl font-normal tracking-tight text-[#1D1D1F]">Admin Dashboard</h2>
                     </div>
@@ -331,17 +330,11 @@ export default function AdminDashboard() {
                                     </div>
                                 ))}
 
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <footer className="h-20 px-12 flex items-center justify-between shrink-0 bg-white border-t border-black/[0.05] z-10 font-outfit">
-        <p className="text-[12px] text-black/40 font-normal mt-2 pr-4">{shops.length} total establishments registered</p>
-        <div className="text-[12px] text-black/20 font-normal">© 2024 ELaBada Admin Dashboard</div>
-    </footer>
-</main>
+            </main>
 
             {/* MODALS */}
             {viewingPermit && <PermitModal shop={viewingPermit} onClose={() => setViewingPermit(null)} />}

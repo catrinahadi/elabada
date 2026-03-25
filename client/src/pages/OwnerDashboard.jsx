@@ -413,22 +413,20 @@ export default function OwnerDashboard() {
         <div className="min-h-screen bg-[#F8F9FA] text-[#1D1D1F] font-outfit pb-20">
             {/* Header - Hidden when modal is open */}
             {!isModalOpen && (
-                <header className="h-24 px-12 flex items-center justify-between shrink-0 bg-[#F8F9FA]/80 backdrop-blur-2xl border-b border-black/[0.05] z-10">
+                <header className="h-20 lg:h-24 px-6 md:px-12 flex items-center justify-between sticky top-0 z-10 bg-[#F8F9FA]/80 backdrop-blur-2xl">
                     <div className="flex items-center gap-4">
                         <div className="w-10 h-10 bg-[#014421] rounded-2xl flex items-center justify-center text-white font-normal text-xl shadow-lg shadow-[#014421]/20 transition-transform">E</div>
-                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada Owner</span>
+                        <span className="text-[#1D1D1F] font-normal text-2xl tracking-tighter">ELaBada</span>
                     </div>
-                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] h-12 px-6 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal border border-[#800000]/10 hover:border-[#800000]/30 mr-8">
+                    <button onClick={handleLogout} className="text-[#800000] hover:bg-[#800000]/[0.05] p-3 rounded-2xl transition-all flex items-center gap-2 text-[14px] font-normal">
                         <LogOut className="w-4 h-4" /> Log out
                     </button>
                 </header>
             )}
 
-            <main className="flex-1 flex flex-col h-screen overflow-hidden">
-                <div className="flex-1 overflow-y-auto p-12 no-scrollbar">
-                    <div className="max-w-[1000px] mx-auto space-y-12 animate-fadeUp">
-                        {/* Heading & Welcome Section */}
-                        <div className="space-y-8">
+            <main className="max-w-[1400px] mx-auto px-6 md:px-12 py-[15px] space-y-12">
+                {/* Heading & Welcome Section */}
+                <div className="space-y-8 animate-fadeUp">
 
                     <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                         <div className="space-y-2">
@@ -617,13 +615,6 @@ export default function OwnerDashboard() {
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-                <footer className="h-20 px-12 flex items-center justify-between shrink-0 bg-white border-t border-black/[0.05] z-10">
-                    <p className="text-[12px] text-black/40 font-normal mt-2 pr-4">{shops.length} establishments listed</p>
-                    <div className="text-[12px] text-black/20 font-normal">© 2024 ELaBada Owner Dashboard</div>
-                </footer>
             </main>
 
             {/* Modals & Feedback */}
