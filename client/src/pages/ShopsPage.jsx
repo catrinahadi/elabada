@@ -47,23 +47,17 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (rank) => {
-  const mainColor = "#FF8C00"; 
-  const maroonColor = "#7B1113";
-
   return L.divIcon({
     className: 'custom-shop-marker',
-    html: `<div class="flex flex-col items-center group cursor-pointer">
+    html: `<div class="flex flex-col items-center group cursor-pointer drop-shadow-md">
       <div class="relative transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110">
-        <svg width="42" height="54" viewBox="0 0 28 36" fill="none" xmlns="http://www.w3.org/2000/svg" class="drop-shadow-2xl">
-          <path d="M14 0C6.26801 0 0 6.26801 0 14C0 24.5 14 36 14 36C14 36 28 24.5 28 14C28 6.26801 21.732 0 14 0Z" fill="${mainColor}"/>
-          <path d="M14 2C7.37258 2 2 7.37258 2 14C2 22.5 14 32.5 14 32.5C14 32.5 26 22.5 26 14C26 7.37258 20.6274 2 14 2Z" fill="${maroonColor}" opacity="0.1"/>
-          <circle cx="14" cy="14" r="6" fill="#FFFFFF" class="shadow-sm"/>
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="#FF8C00" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
         </svg>
-        <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1 bg-black/20 rounded-full blur-[2px] opacity-0 group-hover:opacity-100 transition-opacity"></div>
       </div>
     </div>`,
-    iconSize: [42, 54],
-    iconAnchor: [21, 54]
+    iconSize: [36, 36],
+    iconAnchor: [18, 36]
   });
 };
 
@@ -432,7 +426,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 
   if (showAllReviews) {
     return (
-      <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000]">
+      <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000] lg:pl-[320px]">
         <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-[1000px] h-[95vh] md:h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
           <div className="sticky top-0 bg-white z-20">
             <div className="p-6 border-b border-black/5">
@@ -509,7 +503,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   }
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000]">
+    <div className="modal-overlay flex items-center justify-center p-4 md:p-8 z-[1000] lg:pl-[320px]">
       <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-[1000px] h-[95vh] md:h-[90vh] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.25)] animate-scaleIn flex flex-col relative font-outfit border border-black/5">
         <div className="sticky top-0 bg-white z-20">
           <div className="p-6 border-b border-black/5 flex items-center justify-between">
@@ -780,7 +774,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
   };
 
   return (
-    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[2000] backdrop-blur-md bg-[#014421]/30">
+    <div className="modal-overlay flex items-center justify-center p-2 md:p-4 z-[2000] backdrop-blur-md bg-[#014421]/30 lg:pl-[320px]">
       <div className="bg-white rounded-[32px] md:rounded-[48px] w-full max-w-[850px] max-h-[90vh] mt-2 md:mt-4 shadow-[0_40px_100px_rgba(1,68,33,0.15)] animate-scaleIn flex flex-col overflow-hidden border border-[#014421]/10 font-outfit">
         {/* Header (Minimalist Close Button Only) */}
         <div className="pt-6 pr-6 md:pt-8 md:pr-8 flex justify-end">
@@ -1065,10 +1059,13 @@ export default function ShopsPage() {
     refreshLocation();
   }, []);
 
-  // Reset map states when changing tabs
+  // Reset map and modal states when changing tabs
   useEffect(() => {
     setActiveRouteShopId(null);
     setRoutePath([]);
+    setSelectedShop(null);
+    setShowComputation(null);
+    setActiveImageGallery(null);
   }, [sidebarTab]);
 
   // Fetch real road route using OSRM when a shop is selected for routing
@@ -2107,51 +2104,38 @@ export default function ShopsPage() {
 
               <div className="absolute inset-0 z-10 pointer-events-none p-4 pt-6 md:p-10 flex flex-col">
                 <div className="flex flex-col md:flex-row items-stretch md:items-start justify-between pointer-events-auto gap-4">
-                  <div className="flex items-center gap-3 p-2.5 bg-white/60 backdrop-blur-3xl rounded-[32px] md:rounded-[44px] border border-white shadow-[0_32px_64px_-16px_rgba(0,0,0,0.15)] group/search-container">
+                  <div className="flex items-center gap-3">
                     <button
                       onClick={() => { setSidebarTab("overview"); setActiveRouteShopId(null); }}
-                      className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[24px] md:rounded-[36px] bg-white text-[#1D1D1F] shadow-lg hover:bg-[#1D1D1F] hover:text-white transition-all transform active:scale-95 group-hover/search-container:scale-[1.02]"
+                      className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white text-[#1D1D1F] shadow-md hover:bg-[#1D1D1F] hover:text-white transition-all transform active:scale-95"
                     >
-                      <ArrowLeft className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
+                      <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
                     </button>
                     <button
                       onClick={refreshLocation}
-                      className="flex items-center justify-center w-12 h-12 md:w-16 md:h-16 rounded-[24px] md:rounded-[36px] bg-white text-[#014421] shadow-lg hover:bg-[#014421] hover:text-white transition-all transform active:scale-95 group-hover/search-container:scale-[1.02]"
+                      className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white text-[#1D1D1F] shadow-md hover:bg-[#1D1D1F] hover:text-white transition-all transform active:scale-95"
                       title="Detect my current location"
                     >
-                      <LocateFixed className="w-5 h-5 md:w-6 md:h-6 drop-shadow-md" />
+                      <LocateFixed className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
                     </button>
-                    <div className="relative flex-1 md:w-[480px] group/input">
-                      <div className="absolute left-6 top-1/2 -translate-y-1/2 text-[#014421] opacity-60 z-10 group-focus-within/input:opacity-100 transition-opacity"><Search className="w-5 h-5 md:w-6 md:h-6 drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]" /></div>
+                    <div className="relative flex-1 md:w-[480px] group/input shadow-sm rounded-full border border-black/[0.02]">
                       <input
                         type="text"
-                        placeholder="Search laundry near you..."
+                        placeholder="Search..."
                         value={mapSearchQuery}
                         onChange={(e) => setMapSearchQuery(e.target.value)}
                         onFocus={() => setShowMapSuggestions(true)}
                         onBlur={() => setTimeout(() => setShowMapSuggestions(false), 200)}
-                        className="w-full h-12 md:h-16 bg-white/80 rounded-[24px] md:rounded-[36px] pl-16 pr-6 text-[14px] md:text-[16px] font-medium shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] border border-white/50 outline-none transition-all placeholder:text-gray-400 text-[#1D1D1F] focus:bg-white focus:ring-8 focus:ring-[#014421]/5"
+                        className="w-full h-12 md:h-14 bg-[#F0F0F0] rounded-full pl-6 pr-14 text-[16px] md:text-[18px] font-normal shadow-inner placeholder:text-[#A0A0A0] text-[#1D1D1F] outline-none transition-all focus:bg-[#EAEAEA]"
                       />
+                      <div className="absolute right-5 top-1/2 -translate-y-1/2 text-black pointer-events-none">
+                        <Search className="w-5 h-5 md:w-6 md:h-6" strokeWidth={3} />
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                {activeRouteShopId && (
-                  <div className="mt-6 self-start pointer-events-auto animate-fadeDown">
-                    <div className="bg-[#014421] text-white px-6 py-4 rounded-[28px] shadow-2xl flex items-center gap-5 border border-white/20 backdrop-blur-xl">
-                      <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center animate-pulse">
-                        <Navigation className="w-5 h-5 fill-white" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[14px] font-bold tracking-tight">Navigating to {shops.find(s => s.id === activeRouteShopId || s._id === activeRouteShopId)?.name}</span>
-                        <span className="text-[11px] font-medium opacity-70">Estimated travel dist: {shopsWithDistance.find(s => s.id === activeRouteShopId || s._id === activeRouteShopId)?.distance?.toFixed(1)} km</span>
-                      </div>
-                      <button onClick={() => setActiveRouteShopId(null)} className="ml-2 p-2 hover:bg-white/10 rounded-full transition-colors">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                )}
+
 
                 <div className="mt-auto self-start pointer-events-auto flex flex-col gap-4 animate-fadeUp delay-300">
                   <div className="bg-white/90 backdrop-blur-2xl p-5 rounded-[40px] border border-white shadow-2xl flex items-center gap-6 min-w-[280px]">
@@ -2196,7 +2180,7 @@ export default function ShopsPage() {
                           </div>
                           <div className="space-y-4">
                             <div className="flex items-center justify-between">
-                              <h3 className="text-[22px] font-black text-[#1D1D1F] tracking-tighter leading-none">{filtered.length} Shops Around You</h3>
+                              <h3 className="text-[22px] font-normal text-[#1D1D1F] tracking-tighter leading-none">{filtered.length} Shops Around You</h3>
                             </div>
                           </div>
                         </div>
@@ -2322,8 +2306,8 @@ export default function ShopsPage() {
 
 
       {activeImageGallery && (
-        <div className="fixed inset-0 bg-black/95 z-[2000] flex flex-col items-center justify-center p-6 animate-fadeIn">
-          <div className="absolute top-8 left-8 z-[2001]">
+        <div className="fixed inset-0 bg-black/95 z-[2000] flex flex-col items-center justify-center p-6 animate-fadeIn lg:pl-[320px]">
+          <div className="absolute top-8 left-8 lg:left-[calc(32px+320px)] z-[2001]">
             <button
               onClick={() => setActiveImageGallery(null)}
               className="p-3 bg-white/10 hover:bg-white/20 rounded-full transition-all group backdrop-blur-md"
