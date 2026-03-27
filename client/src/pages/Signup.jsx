@@ -43,7 +43,7 @@ export default function Signup() {
         }
 
         if (result.role === "owner") navigate("/owner", { replace: true });
-        else navigate("/", { replace: true });
+        else navigate("/shops", { replace: true });
     };
 
     return (
@@ -58,7 +58,7 @@ export default function Signup() {
 
             <div className="w-full max-w-[520px] mt-20 md:mt-0 bg-white rounded-[40px] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.12)] border border-black/[0.03] px-10 py-4 md:px-14 md:py-4 flex flex-col gap-6 animate-scaleIn">
                 <div className="flex flex-col items-center text-center space-y-4 mt-4">
-                    <Link to="/login" className="self-start w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+                    <Link to="/" className="self-start w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
                         <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
                     </Link>
                     <div className="space-y-1 mt-4">
@@ -147,7 +147,7 @@ export default function Signup() {
 
                 <div className="pt-6 border-t border-black/[0.04] text-center mb-4">
                     <p className="text-[14px] font-normal text-[#8E8E93]">
-                        Already have an account? <Link to="/login" className="text-[#014421] font-bold hover:underline ml-1">Log in here</Link>
+                        Already have an account? <Link to="/" className="text-[#014421] font-bold hover:underline ml-1">Log in here</Link>
                     </p>
                 </div>
             </div>

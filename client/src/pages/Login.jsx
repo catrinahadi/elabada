@@ -36,7 +36,7 @@ export default function Login() {
 
         if (result.role === "admin") navigate("/admin", { replace: true });
         else if (result.role === "owner") navigate("/owner", { replace: true });
-        else navigate("/", { replace: true });
+        else navigate("/shops", { replace: true });
     };
 
     const roles = [
@@ -134,7 +134,7 @@ export default function Login() {
                     <p className="text-[14px] font-normal text-[#8E8E93]">
                         No account yet? <Link to="/signup" className="text-[#014421] hover:underline font-bold">Create account</Link>
                     </p>
-                    <Link to="/" className="text-[14px] font-normal text-[#555] hover:text-black transition-colors block">
+                    <Link to="/shops" className="text-[14px] font-normal text-[#555] hover:text-black transition-colors block">
                         Continue as guest
                     </Link>
                 </div>

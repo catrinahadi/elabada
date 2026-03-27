@@ -8,7 +8,7 @@ export default function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
 
   return (
@@ -51,7 +51,7 @@ export default function Navbar() {
             </button>
           </div>
         ) : (
-          <Link to="/login"
+          <Link to="/"
             className="btn-primary">
             Sign In
           </Link>

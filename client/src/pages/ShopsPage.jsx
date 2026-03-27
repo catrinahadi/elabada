@@ -593,7 +593,7 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                     {/* Distance Card */}
                     <div className="bg-[#F8F9FA] p-4 rounded-[24px] border border-black/[0.03] flex flex-col gap-1 items-center justify-center text-center hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight">Distance</span>
-                      <p className="text-[14px] font-normal text-blue-900">{(shop.distance || 0).toFixed(1)} km</p>
+                      <p className="text-[14px] font-normal text-[#014421]">{(shop.distance || 0).toFixed(1)} km</p>
                     </div>
                   </div>
 
@@ -741,7 +741,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
       price: 'Price',
       turnaroundTime: 'Turnaround Time',
       rating: 'Rating',
-      distance: 'Range'
+      distance: 'Distance'
     };
 
     const isDelay = criterion === 'turnaroundTime' && shop.actualTurnaroundTime > shop.turnaroundTime;
@@ -893,7 +893,7 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
                   const info = getExplanation(detail);
                   const rank = idx + 1;
                   const priorityText = rank === 1 ? '1st Priority' : rank === 2 ? '2nd Priority' : rank === 3 ? '3rd Priority' : '4th Priority';
-                  const labels = { price: 'Price', turnaroundTime: 'Time', distance: 'Range', rating: 'Rating' };
+                  const labels = { price: 'Price', turnaroundTime: 'Time', distance: 'Distance', rating: 'Rating' };
                   
                   return (
                     <div key={detail.criterion} className="flex items-center justify-between bg-white p-4 md:px-6 rounded-[20px] shadow-[0_2px_8px_rgba(1,68,33,0.03)] border border-[#014421]/5">
@@ -1168,7 +1168,7 @@ export default function ShopsPage() {
     distance: 50
   };
 
-  const handleLogout = () => { logout(); navigate("/login"); };
+  const handleLogout = () => { logout(); navigate("/"); };
 
   // unified drag/drop state
   const [touchDragIndex, setTouchDragIndex] = useState(null);

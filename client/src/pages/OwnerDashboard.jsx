@@ -205,9 +205,9 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const isLoading = loading || uploading;
 
     return (
-        <div className="modal-overlay fixed inset-0 flex items-center justify-center p-6 md:p-12 z-[200] backdrop-blur-xl bg-black/40">
-            <div className="bg-white rounded-[48px] md:rounded-[64px] w-full max-w-5xl h-auto max-h-[92vh] shadow-[0_80px_160px_rgba(0,0,0,0.4)] animate-scaleIn overflow-hidden border border-white/20 flex flex-col">
-                <div className="px-10 pt-10 pb-6 flex items-start justify-between">
+        <div className="modal-overlay fixed inset-0 flex items-center justify-center p-12 md:p-20 z-[200] backdrop-blur-xl bg-black/40">
+            <div className="bg-white rounded-[48px] md:rounded-[64px] w-full max-w-[1440px] h-auto shadow-[0_80px_160px_rgba(0,0,0,0.4)] animate-scaleIn overflow-hidden border border-white/20 flex flex-col">
+                <div className="px-12 pt-10 pb-6 flex items-start justify-between">
                     <div className="space-y-1">
                         <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter">{initialData ? "Edit Shop Details" : "Register New Shop"}</h2>
                         <p className="text-[14px] font-normal text-[#8E8E93]">Fill in the essentials to get your establishment listed.</p>
@@ -217,41 +217,78 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto px-10 pb-10 space-y-3 pt-4 no-scrollbar">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-                        {/* Left Column: Visuals & Core Info */}
-                        <div className="space-y-3">
+                <form onSubmit={handleSubmit} className="px-12 pb-10 space-y-6 pt-4">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+                        {/* Left Column: Visuals & Location */}
+                        <div className="space-y-4">
                             <UploadBox
                                 label="Upload a photo of your shop"
                                 onFileSelected={pickShopImage}
                                 preview={shopImagePreview}
-                                extraClass="h-72"
+                                extraClass="h-[340px]"
                             />
 
-                            <div className="space-y-3">
+                            <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                    <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
+                                    <div className="relative">
+                                        <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-30" />
+                                        <input
+                                            type="text"
+                                            value={form.address}
+                                            onChange={e => set("address", e.target.value)}
+                                            placeholder="Enter the complete physical address"
+                                            className="w-full h-12 bg-[#F8F9FA] rounded-[16px] pl-10 pr-5 text-[14px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="h-[230px] rounded-[24px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
+                                    <MapContainer
+                                        center={[parseFloat(form.latitude), parseFloat(form.longitude)]}
+                                        zoom={15}
+                                        className="w-full h-full z-0"
+                                        zoomControl={false}
+                                    >
+                                        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+                                        <MapPicker
+                                            position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
+                                            onPositionChange={([lat, lng]) => {
+                                                set("latitude", lat.toFixed(6).toString());
+                                                set("longitude", lng.toFixed(6).toString());
+                                            }}
+                                        />
+                                    </MapContainer>
+                                    <div className="absolute top-4 right-4 z-[1000] bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-black/5 shadow-sm">
+                                        <span className="text-[10px] font-normal text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Right Column: Core Info & Documents */}
+                        <div className="space-y-4">
+                            <div className="space-y-4">
                                 <Field
                                     label="Establishment Name"
                                     value={form.name}
                                     onChange={e => set("name", e.target.value)}
                                     placeholder="e.g. Master Cleaners"
                                 />
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Field
-                                        label={<>Price per Kilo <span className="text-[#8E8E93]">(₱)</span></>}
-                                        value={form.price}
-                                        onChange={e => set("price", e.target.value)}
-                                        type="number"
-                                        placeholder="45.00"
-                                    />
-                                    <Field
-                                        label={<>Turnaround Time <span className="text-[#8E8E93]">(hrs)</span></>}
-                                        value={form.turnaroundTime}
-                                        onChange={e => set("turnaroundTime", e.target.value)}
-                                        type="number"
-                                        placeholder="24"
-                                    />
-                                </div>
+                                <Field
+                                    label={<>Price per Kilo <span className="text-[#8E8E93]">(₱)</span></>}
+                                    value={form.price}
+                                    onChange={e => set("price", e.target.value)}
+                                    type="number"
+                                    placeholder="45.00"
+                                />
+                                <Field
+                                    label={<>Turnaround Time <span className="text-[#8E8E93]">(hrs)</span></>}
+                                    value={form.turnaroundTime}
+                                    onChange={e => set("turnaroundTime", e.target.value)}
+                                    type="number"
+                                    placeholder="24"
+                                />
                                 <Field
                                     label="Operating Hours"
                                     value={form.operatingHours}
@@ -259,58 +296,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     placeholder="e.g. 8:00 AM - 8:00 PM"
                                 />
                             </div>
-                        </div>
-
-                        {/* Right Column: Location & Documents */}
-                        <div className="space-y-3">
-                            <div className="space-y-2">
-                                <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-30" />
-                                    <input
-                                        type="text"
-                                        value={form.address}
-                                        onChange={e => set("address", e.target.value)}
-                                        placeholder="Enter the complete physical address"
-                                        className="w-full h-14 bg-[#F8F9FA] rounded-[20px] pl-12 pr-5 text-[14px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="h-64 rounded-[32px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
-                                <MapContainer
-                                    center={[parseFloat(form.latitude), parseFloat(form.longitude)]}
-                                    zoom={15}
-                                    className="w-full h-full z-0"
-                                    zoomControl={false}
-                                >
-                                    <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                                    <MapPicker
-                                        position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
-                                        onPositionChange={([lat, lng]) => {
-                                            set("latitude", lat.toFixed(6).toString());
-                                            set("longitude", lng.toFixed(6).toString());
-                                        }}
-                                    />
-                                </MapContainer>
-                                <div className="absolute top-4 right-4 z-[1000] bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-black/5 shadow-sm">
-                                    <span className="text-[10px] font-normal text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
-                                </div>
-                            </div>
 
                             {!initialData && (
-                                <div className="space-y-3">
+                                <div className="space-y-4 pt-1.5">
                                     <label className="block text-[14px] font-normal text-[#1D1D1F]">Operating Permit / LTO</label>
                                     <UploadBox
                                         label={permitFile ? "Permit Uploaded Successfully" : "Upload Business Permit"}
-                                        hint="Strictly JPG, PNG or PDF format only"
+                                        hint="JPG, PNG or PDF only"
                                         onFileSelected={pickPermit}
                                         preview={permitPreview}
-                                        extraClass="h-36"
+                                        extraClass="h-[330px]"
                                     />
                                 </div>
                             )}
-
                         </div>
                     </div>
 
@@ -344,7 +342,7 @@ export default function OwnerDashboard() {
 
     const isModalOpen = showAddShop || !!editingShop || !!deletingId;
 
-    const handleLogout = () => { logout(); navigate("/login"); };
+    const handleLogout = () => { logout(); navigate("/"); };
 
     const fetchShops = async () => {
         if (!user?.id) return;
@@ -424,7 +422,7 @@ export default function OwnerDashboard() {
                 </header>
             )}
 
-            <main className="max-w-[1400px] mx-auto px-6 md:px-12 py-[15px] space-y-12">
+            <main className="w-full px-6 md:px-12 py-[15px] space-y-12">
                 {/* Heading & Welcome Section */}
                 <div className="space-y-8 animate-fadeUp">
 
@@ -445,28 +443,28 @@ export default function OwnerDashboard() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 animate-fadeUp" style={{ animationDelay: "50ms" }}>
                     {[
                         {
-                            label: "Total Establishments",
+                            label: "Total Shops",
                             count: shops.length,
                             icon: Store,
-                            color: "#003366",
-                            bg: "bg-[#00336610]"
+                            color: "#014421",
+                            bg: "bg-[#01442110]"
                         },
                         {
-                            label: "Active Listings",
+                            label: "Approved Shops",
                             count: shops.filter(s => s.permitStatus === "approved").length,
                             icon: CheckCircle,
                             color: "#228B22",
                             bg: "bg-[#228B2210]"
                         },
                         {
-                            label: "Rejected Requests",
+                            label: "Rejected Shops",
                             count: shops.filter(s => s.permitStatus === "rejected").length,
                             icon: XCircle,
                             color: "#800000",
                             bg: "bg-[#80000010]"
                         },
                         {
-                            label: "Awaiting Review",
+                            label: "Pending Shops",
                             count: shops.filter(s => s.permitStatus === "pending").length,
                             icon: Clock,
                             color: "#F59E0B",
@@ -475,11 +473,8 @@ export default function OwnerDashboard() {
                     ].map((stat, idx) => (
                         <div
                             key={idx}
-                            className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4 transition-all hover:shadow-md group"
+                            className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group"
                         >
-                            <div className={`w-12 h-12 rounded-2xl ${stat.bg} flex items-center justify-center`}>
-                                <stat.icon className="w-6 h-6" style={{ color: stat.color }} />
-                            </div>
                             <div>
                                 <h3 className="text-5xl font-black tracking-tighter" style={{ color: stat.color }}>{stat.count}</h3>
                                 <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">{stat.label}</p>
@@ -491,12 +486,12 @@ export default function OwnerDashboard() {
                 {/* Registry Management Table */}
                 <div className="pt-[15px] space-y-8 animate-fadeUp" style={{ animationDelay: "100ms" }}>
                     <div className="space-y-1">
-                        <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tight">Active Registries</h2>
+                        <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tight">Shop Registries</h2>
                     </div>
 
                     <div className="flex flex-nowrap overflow-x-auto no-scrollbar gap-3 mb-4 -mx-4 px-4">
                         {[
-                            { id: "all", label: "Total Establishments" },
+                            { id: "all", label: "Total Shops" },
                             { id: "pending", label: "Pending" },
                             { id: "approved", label: "Approved" },
                             { id: "rejected", label: "Rejected" }
@@ -504,7 +499,7 @@ export default function OwnerDashboard() {
                             <button
                                 key={f.id}
                                 onClick={() => { setStatusFilter(f.id); setSelectedShopId(null); }}
-                                className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${statusFilter === f.id ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
+                                className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${statusFilter === f.id ? 'bg-[#014421] text-white border-[#014421] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
                             >
                                 {f.label}
                             </button>
@@ -516,12 +511,13 @@ export default function OwnerDashboard() {
                         <table className="w-full text-left border-collapse">
                             <thead>
                                 <tr className="border-b border-black/[0.03]">
-                                    <th className="py-8 pl-10 pr-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Ref #</th>
-                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Establishment</th>
-                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Locale</th>
+                                    <th className="py-8 pl-10 pr-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Shop #</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Name</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Owner</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Location</th>
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Price</th>
-                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Lead Time</th>
-                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Timestamp</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Turnaround Time</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Date Created</th>
                                     <th className="py-8 px-4 pr-10 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em] text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -536,7 +532,7 @@ export default function OwnerDashboard() {
                                             <div className="w-16 h-16 bg-[#F8F9FA] rounded-[24px] flex items-center justify-center mx-auto mb-4 opacity-50">
                                                 <Store className="w-8 h-8 text-[#1D1D1F]" />
                                             </div>
-                                            <p className="text-[14px] font-bold text-[#1D1D1F]">No establishments registered.</p>
+                                            <p className="text-[14px] font-bold text-[#1D1D1F]">No shops registered.</p>
                                             <p className="text-[12px] font-medium text-[#8E8E93]">Start by registering your first laundry shop.</p>
                                         </td>
                                     </tr>
@@ -546,38 +542,35 @@ export default function OwnerDashboard() {
                                 }).map((shop, idx) => (
                                     <tr key={shop._id} className="group hover:bg-[#F8F9FA]/80 transition-all">
                                         <td className="py-8 pl-10 pr-4">
-                                            <span className="text-[14px] font-bold text-[#1D1D1F]/15">{(idx + 1).toString().padStart(2, '0')}</span>
+                                            <span className="text-[14px] font-normal text-[#1D1D1F]">{(idx + 1).toString().padStart(2, '0')}</span>
                                         </td>
                                         <td className="py-8 px-4">
                                             <div className="flex items-center gap-4">
                                                 <div className="flex flex-col">
                                                     <div className="flex items-center gap-1.5">
-                                                        <span className="text-[14px] font-bold text-[#1D1D1F] tracking-tight">{shop.name}</span>
-                                                        {shop.permitStatus === 'approved' && (
-                                                            <div className="w-3.5 h-3.5 rounded-full bg-[#1A6B1A] flex items-center justify-center">
-                                                                <Check className="w-2 h-2 text-white stroke-[3]" />
-                                                            </div>
-                                                        )}
+                                                        <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{shop.name}</span>
                                                     </div>
-                                                    <span className="text-[11px] font-medium text-[#8E8E93]">Owner: {user?.name || 'You'}</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td className="py-8 px-4">
-                                            <div className="flex items-center text-[#8E8E93]">
+                                            <span className="text-[14px] font-medium text-[#1D1D1F]">{user?.name || 'You'}</span>
+                                        </td>
+                                        <td className="py-8 px-4">
+                                            <div className="flex items-center text-[#1D1D1F]">
                                                 <span className="text-[12px] font-medium max-w-[200px] truncate">{shop.address}</span>
                                             </div>
                                         </td>
                                         <td className="py-8 px-4 whitespace-nowrap">
-                                            <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">₱{shop.price}<span className="text-[10px] opacity-40 ml-0.5 tracking-normal">/kg</span></span>
+                                            <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">₱{shop.price}<span className="text-[10px] text-[#1D1D1F] ml-0.5 tracking-normal">/kg</span></span>
                                         </td>
                                         <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center text-[#8E8E93]">
+                                            <div className="flex items-center text-[#1D1D1F]">
                                                 <span className="text-[12px] font-medium">{shop.turnaroundTime} hrs</span>
                                             </div>
                                         </td>
                                         <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center text-[#8E8E93]">
+                                            <div className="flex items-center text-[#1D1D1F]">
                                                 <span className="text-[12px] font-medium">{new Date(shop.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                                             </div>
                                         </td>

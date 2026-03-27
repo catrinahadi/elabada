@@ -9,7 +9,7 @@ import "./index.css";
 
 function ProtectedRoute({ role, element }) {
   const { user } = useAuth();
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/" replace />;
   if (user.role !== role) return <Navigate to="/" replace />;
   return element;
 }
@@ -17,8 +17,9 @@ function ProtectedRoute({ role, element }) {
 function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<ShopsPage />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/" element={<LoginPage />} />
+      <Route path="/shops" element={<ShopsPage />} />
+      <Route path="/login" element={<Navigate to="/" replace />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/admin" element={<ProtectedRoute role="admin" element={<AdminDashboard />} />} />
       <Route path="/owner" element={<ProtectedRoute role="owner" element={<OwnerDashboard />} />} />

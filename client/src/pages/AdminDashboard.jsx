@@ -42,15 +42,9 @@ function Toast({ message, onClose }) {
     return (
         <div className="fixed top-6 right-6 lg:top-auto lg:bottom-12 lg:right-12 z-[500] animate-fadeDown lg:animate-fadeUp">
             <div className="bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.03] p-5 pr-8 flex items-center gap-4 min-w-[320px]">
-                <div className="w-10 h-10 rounded-2xl bg-[#228B2210] flex items-center justify-center shrink-0">
-                    <CheckCircle className="w-5 h-5 text-[#228B22]" />
-                </div>
                 <div>
                     <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight">{message}</p>
                 </div>
-                <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1D1D1F]/20 hover:text-[#1D1D1F]">
-                    <X className="w-4 h-4" />
-                </button>
             </div>
         </div>
     );
@@ -68,6 +62,7 @@ export default function AdminDashboard() {
     const [filterStatus, setFilterStatus] = useState("pending");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
+    const [confirmingDelete, setConfirmingDelete] = useState(null);
 
     useEffect(() => {
         const handleClickOutside = () => setOpenDropdownId(null);
@@ -95,7 +90,7 @@ export default function AdminDashboard() {
         return shops.filter(s => s.permitStatus === filterStatus);
     }, [shops, filterStatus]);
 
-    const handleLogout = () => { logout(); navigate("/login"); };
+    const handleLogout = () => { logout(); navigate("/"); };
 
     const handleApprove = async (id) => {
         try {
@@ -120,10 +115,11 @@ export default function AdminDashboard() {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm("Permanently delete this shop?")) return;
         try {
             await api.delete(`/admin/shops/${id}`);
             setShops(prev => prev.filter(s => s._id !== id));
+            setConfirmingDelete(null);
+            setSuccessMsg("Shop deleted permanently.");
         } catch (err) {
             console.error("Failed to delete shop:", err.message);
         }
@@ -145,7 +141,7 @@ export default function AdminDashboard() {
                     </button>
                 </header>
 
-                <div className="p-6 md:p-12 space-y-8 md:space-y-12 max-w-[1600px] w-full mx-auto animate-fadeUp">
+                <div className="p-6 md:p-12 space-y-8 md:space-y-12 w-full animate-fadeUp">
                     <div className="px-4">
                         <h2 className="text-4xl font-normal tracking-tight text-[#1D1D1F]">Admin Dashboard</h2>
                     </div>
@@ -153,43 +149,31 @@ export default function AdminDashboard() {
                     {/* PREMIUM STAT TILES */}
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4">
                         {/* Total Establishments */}
-                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-[#00336610] flex items-center justify-center shadow-inner">
-                                <Store className="w-6 h-6 text-[#003366]" />
-                            </div>
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group">
                             <div>
-                                <h3 className="text-5xl font-black tracking-tighter text-[#003366]">{shops.length}</h3>
-                                <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">Total Establishments</p>
+                                <h3 className="text-5xl font-black tracking-tighter text-[#014421]">{shops.length}</h3>
+                                <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">Total Shops</p>
                             </div>
                         </div>
                         {/* Active Listings */}
-                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-[#228B2210] flex items-center justify-center">
-                                <CheckCircle className="w-6 h-6 text-[#228B22]" />
-                            </div>
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group">
                             <div>
                                 <h3 className="text-5xl font-black tracking-tighter text-[#228B22]">{approvedShops.length}</h3>
-                                <p className="text-[12px] font-bold text-[#228B22] uppercase tracking-[0.1em] mt-1">Active Listings</p>
+                                <p className="text-[12px] font-bold text-[#228B22] uppercase tracking-[0.1em] mt-1">Approved Shops</p>
                             </div>
                         </div>
                         {/* Rejected Requests */}
-                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-[#80000010] flex items-center justify-center">
-                                <XCircle className="w-6 h-6 text-[#800000]" />
-                            </div>
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group">
                             <div>
                                 <h3 className="text-5xl font-black tracking-tighter text-[#800000]">{rejectedShops.length}</h3>
-                                <p className="text-[12px] font-bold text-[#800000] uppercase tracking-[0.1em] mt-1">Rejected Requests</p>
+                                <p className="text-[12px] font-bold text-[#800000] uppercase tracking-[0.1em] mt-1">Rejected Shops</p>
                             </div>
                         </div>
                         {/* Awaiting Review */}
-                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col gap-4">
-                            <div className="w-12 h-12 rounded-2xl bg-[#F59E0B15] flex items-center justify-center">
-                                <Clock className="w-6 h-6 text-[#F59E0B]" />
-                            </div>
+                        <div className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group">
                             <div>
                                 <h3 className="text-5xl font-black tracking-tighter text-[#F59E0B] font-outfit">{pendingShops.length}</h3>
-                                <p className="text-[12px] font-bold text-[#F59E0B] uppercase tracking-[0.1em] mt-1">Awaiting Review</p>
+                                <p className="text-[12px] font-bold text-[#F59E0B] uppercase tracking-[0.1em] mt-1">Pending Shops</p>
                             </div>
                         </div>
                     </div>
@@ -207,9 +191,9 @@ export default function AdminDashboard() {
                                     <button
                                         key={s}
                                         onClick={() => setFilterStatus(s)}
-                                        className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${filterStatus === s ? 'bg-[#003366] text-white border-[#003366] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
+                                        className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${filterStatus === s ? 'bg-[#014421] text-white border-[#014421] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
                                     >
-                                        {s === 'all' ? 'All Registry' : s}
+                                        {s === 'all' ? 'Total Shops' : s}
                                     </button>
                                 ))}
                             </div>
@@ -218,13 +202,14 @@ export default function AdminDashboard() {
 
                             <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-72">
                                 {/* Table Header */}
-                                <div className="hidden lg:grid grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
-                                    <span>Ref #</span>
-                                    <span>Establishment</span>
-                                    <span>Locale</span>
+                                <div className="hidden lg:grid grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
+                                    <span>Shop #</span>
+                                    <span>Name</span>
+                                    <span>Owner</span>
+                                    <span>Location</span>
                                     <span>Price</span>
-                                    <span>Lead Time</span>
-                                    <span>Timestamp</span>
+                                    <span>Turnaround Time</span>
+                                    <span>Date Created</span>
                                     <span className="text-right">Actions</span>
                                 </div>
 
@@ -232,50 +217,50 @@ export default function AdminDashboard() {
                                 {filteredList.map((shop, idx) => (
                                     <div
                                         key={shop._id}
-                                        className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_2fr_2fr_1fr_1fr_1.5fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
+                                        className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
                                     >
-                                        <span className="text-[14px] font-normal text-[#1D1D1F]/20 lg:block hidden tracking-tight tabular-nums truncate">
+                                        <span className="text-[14px] font-normal text-[#1D1D1F] lg:block hidden tracking-tight tabular-nums truncate">
                                             {(idx + 1).toString().padStart(2, '0')}
                                         </span>
 
-                                        {/* Establishment */}
-                                        <div className="flex items-center gap-4 min-w-0">
-                                            <div className="w-12 h-12 rounded-2xl bg-[#F8F9FA] flex items-center justify-center shrink-0 border border-black/[0.03]">
-                                                <Store className="w-5 h-5 text-[#1D1D1F]" />
-                                            </div>
+                                        {/* Name */}
+                                        <div className="flex items-center min-w-0 px-2">
                                             <div className="flex flex-col min-w-0">
-                                                <h4 className="text-[15px] font-normal text-[#1D1D1F] tracking-tight truncate leading-tight">{shop.name}</h4>
-                                                <span className="text-[13px] text-[#8E8E93] truncate">Owner: {shop.ownerName}</span>
+                                                <div className="flex items-center gap-1.5">
+                                                    <h4 className="text-[15px] font-normal text-[#1D1D1F] tracking-tight truncate">{shop.name}</h4>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        {/* Locale */}
+                                        {/* Owner */}
                                         <div className="flex flex-col min-w-0">
-                                            <p className="text-[14px] font-normal text-[#1D1D1F] truncate flex items-center gap-2 opacity-60">
-                                                <MapPin className="w-4 h-4 shrink-0 text-[#8E8E93]" /> {shop.address}
+                                            <span className="text-[14px] font-normal text-[#1D1D1F] truncate">{shop.ownerName}</span>
+                                        </div>
+
+                                        {/* Location */}
+                                        <div className="flex flex-col min-w-0">
+                                            <p className="text-[14px] font-normal text-[#1D1D1F] truncate">
+                                                {shop.address}
                                             </p>
                                         </div>
 
                                         {/* Price */}
                                         <div className="flex flex-col">
-                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
-                                                <Banknote className="w-4 h-4 text-[#8E8E93]" />
-                                                <span>₱{shop.price || 0}<span className="text-[#8E8E93] text-xs"> /kg</span></span>
+                                            <div className="flex items-center text-[14px] font-normal text-[#1D1D1F]">
+                                                <span>₱{shop.price || 0}<span className="text-[#1D1D1F] text-xs"> /kg</span></span>
                                             </div>
                                         </div>
 
-                                        {/* Lead Time */}
+                                        {/* Turnaround Time */}
                                         <div className="flex flex-col">
-                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
-                                                <Clock className="w-4 h-4 text-[#8E8E93]" />
+                                            <div className="flex items-center text-[14px] font-normal text-[#1D1D1F]">
                                                 <span>{shop.turnaroundTime || 0} hrs</span>
                                             </div>
                                         </div>
 
-                                        {/* Timestamp */}
+                                        {/* Date Created */}
                                         <div className="flex flex-col">
-                                            <div className="flex items-center gap-2 text-[14px] font-normal text-[#1D1D1F]">
-                                                <Calendar className="w-4 h-4 text-[#8E8E93]" />
+                                            <div className="flex items-center text-[14px] font-normal text-[#1D1D1F]">
                                                 <span>{shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
                                             </div>
                                         </div>
@@ -283,17 +268,17 @@ export default function AdminDashboard() {
                                         <div className="flex items-center justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">
                                             <button
                                                 onClick={() => setViewingPermit(shop)}
-                                                className="h-11 px-6 rounded-[20px] border-2 border-[#003366] text-[#003366] bg-transparent hover:bg-[#003366] hover:text-white transition-all text-[14px] font-normal flex items-center gap-2.5"
+                                                className="h-11 px-6 rounded-[20px] border-2 border-[#003366] text-[#003366] bg-transparent hover:bg-[#003366] hover:text-white transition-all text-[14px] font-normal flex items-center justify-center"
                                             >
-                                                <FileText className="w-4 h-4" /> Review Permit
+                                                Review Permit
                                             </button>
 
                                             <div className="relative">
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setOpenDropdownId(openDropdownId === shop._id ? null : shop._id); }}
-                                                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-[#F8F9FA] border border-black/[0.05] hover:bg-black hover:text-white ${openDropdownId === shop._id ? 'bg-black text-white' : 'text-[#8E8E93]'}`}
+                                                    className={`w-11 h-11 rounded-2xl flex items-center justify-center transition-all bg-[#F8F9FA] border border-black/[0.05] hover:bg-black hover:text-white ${openDropdownId === shop._id ? 'bg-black text-white' : 'text-[#8E8E93]'} text-lg font-bold leading-none`}
                                                 >
-                                                    <MoreVertical className="w-5 h-5" />
+                                                    ...
                                                 </button>
 
                                                 {openDropdownId === shop._id && (
@@ -305,23 +290,23 @@ export default function AdminDashboard() {
                                                             <>
                                                                 <button
                                                                     onClick={(e) => { e.stopPropagation(); setConfirmingApproval(shop); setOpenDropdownId(null); }}
-                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#228B22] hover:bg-[#228B22]/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#228B22] hover:bg-[#228B22]/5 flex items-center transition-colors whitespace-nowrap"
                                                                 >
-                                                                    <CheckCircle className="w-4 h-4" /> Approve Listing
+                                                                    Approve Listing
                                                                 </button>
                                                                 <button
                                                                     onClick={() => { handleReject(shop._id); setOpenDropdownId(null); }}
-                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#800000] hover:bg-[#800000]/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                                    className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#800000] hover:bg-[#800000]/5 flex items-center transition-colors whitespace-nowrap"
                                                                 >
-                                                                    <XCircle className="w-4 h-4" /> Reject Request
+                                                                    Reject Request
                                                                 </button>
                                                             </>
                                                         )}
                                                         <button
-                                                            onClick={() => { handleDelete(shop._id); setOpenDropdownId(null); }}
-                                                            className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#1D1D1F] hover:bg-black/5 flex items-center gap-3 transition-colors whitespace-nowrap"
+                                                            onClick={() => { setConfirmingDelete(shop); setOpenDropdownId(null); }}
+                                                            className="w-full px-7 py-3.5 text-left text-[14px] font-normal text-[#1D1D1F] hover:bg-black/5 flex items-center transition-colors whitespace-nowrap"
                                                         >
-                                                            <Trash2 className="w-4 h-4" /> Permanently Delete
+                                                            Permanently Delete
                                                         </button>
                                                     </div>
                                                 )}
@@ -353,6 +338,16 @@ export default function AdminDashboard() {
                 onConfirm={() => handleApprove(confirmingApproval?._id)}
                 onCancel={() => setConfirmingApproval(null)}
             />
+            <ConfirmationModal 
+                isOpen={!!confirmingDelete}
+                title="Permanently Delete Shop"
+                message={`Are you sure you want to delete "${confirmingDelete?.name}"? This action cannot be undone and will remove all associated data.`}
+                confirmText="Delete"
+                cancelText="Cancel"
+                type="danger"
+                onConfirm={() => handleDelete(confirmingDelete?._id)}
+                onCancel={() => setConfirmingDelete(null)}
+            />
         </div>
     );
 }
@@ -366,8 +361,8 @@ function PermitModal({ shop, onClose }) {
                     <div>
                         <h2 className="text-[16px] font-normal text-[#1D1D1F] tracking-tight">Verification</h2>
                     </div>
-                    <button onClick={onClose} className="p-2 -mr-2 text-black hover:bg-black/5 rounded-full transition-colors">
-                        <X className="w-6 h-6" />
+                    <button onClick={onClose} className="px-4 py-2 text-black hover:bg-black/5 rounded-full transition-colors text-[14px]">
+                        Close
                     </button>
                 </div>
                 <div className="flex-1 overflow-y-auto p-6 md:p-10 space-y-8 no-scrollbar bg-[#F3F4F6]">
