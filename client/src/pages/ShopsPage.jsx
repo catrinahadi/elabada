@@ -79,27 +79,27 @@ function MapController({ routePath, userLocation }) {
 const isShopOpen = (operatingHours) => {
   if (!operatingHours || operatingHours.toLowerCase().includes('24')) return true;
   try {
-    const hoursPart = operatingHours.split(/[,-]/)[0] + (operatingHours.includes('-') ? '-' + operatingHours.split('-')[1] : '');
-    const segments = hoursPart.split('-');
+    const cleanHours = operatingHours.replace(/\s+/g, ' ').trim().toUpperCase();
+    const segments = cleanHours.split(/[-\u2013\u2014]| TO /);
     if (segments.length !== 2) return true;
     
     const parseMins = (str) => {
-      const match = str.trim().match(/(\d+):?(\d*)\s*(AM|PM)/i);
+      const match = str.trim().match(/(\d+)(?::(\d+))?\s*(AM|PM)?/i);
       if (!match) return null;
       let [_, h, m, mdn] = match;
       h = parseInt(h); m = parseInt(m) || 0;
-      if (h === 12) h = 0;
-      if (mdn.toUpperCase() === 'PM') h += 12;
+      mdn = mdn || (h < 12 ? 'AM' : 'PM');
+      if (h === 12 && mdn === 'AM') h = 0;
+      if (h < 12 && mdn === 'PM') h += 12;
       return h * 60 + m;
     };
     
     const startMins = parseMins(segments[0]);
     const endMins = parseMins(segments[1]);
-    
     if (startMins === null || endMins === null) return true;
+    
     const now = new Date();
     const currMins = now.getHours() * 60 + now.getMinutes();
-    
     if (startMins > endMins) return currMins >= startMins || currMins <= endMins;
     return currMins >= startMins && currMins <= endMins;
   } catch (e) {
@@ -562,13 +562,15 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Operating hours</span>
-                      <p className="text-[14px] font-normal text-[#1D1D1F]">{shop.operatingHours || '8:00 AM - 8:00 PM'}</p>
+                      <p className="text-[14px] font-normal text-[#1D1D1F]">{shop.operatingHours || 'Contact shop for hours'}</p>
                     </div>
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
-                      <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Shop status</span>
-                      <p className={`text-[14px] font-normal ${shop.status === 'open' ? 'text-emerald-600' : 'text-red-500'} capitalize`}>
-                        {shop.status || 'open'}
-                      </p>
+                      <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Live Status</span>
+                      <div className="flex items-center gap-2">
+                        <span className={`text-[15px] font-normal ${isShopOpen(shop.operatingHours) && shop.status !== 'closed' ? 'text-emerald-600' : 'text-[#7B1113]'}`}>
+                          {isShopOpen(shop.operatingHours) && shop.status !== 'closed' ? 'Open' : 'Closed'}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -1940,9 +1942,9 @@ export default function ShopsPage() {
                                           <p className="text-[14px] font-normal text-[#1D1D1F] ml-1">{matchPreview.operatingHours || '8:00 AM - 8:00 PM'}</p>
                                        </div>
                                        <div className="bg-[#F8F9FA] py-4 px-6 rounded-full border border-black/[0.03] space-y-0.5 group">
-                                          <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Shop status</span>
-                                          <p className={`text-[14px] font-normal ${matchPreview.status === 'open' ? 'text-emerald-600' : 'text-red-500'} capitalize ml-1`}>
-                                             {matchPreview.status || 'open'}
+                                          <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Live Status</span>
+                                          <p className={`text-[14px] font-normal ${isShopOpen(matchPreview.operatingHours) && matchPreview.status !== 'closed' ? 'text-emerald-600' : 'text-[#7B1113]'} capitalize ml-1`}>
+                                             {isShopOpen(matchPreview.operatingHours) && matchPreview.status !== 'closed' ? 'Open' : 'Closed'}
                                           </p>
                                        </div>
                                     </div>

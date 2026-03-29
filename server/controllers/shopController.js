@@ -34,12 +34,13 @@ exports.getOwnerShops = async (req, res) => {
 // POST create a new shop (owner)
 exports.createShop = async (req, res) => {
     try {
-        const { name, address, price, turnaroundTime, phone, latitude, longitude, ownerId, ownerName, permitImage, image, amenities } = req.body;
+        const { name, address, price, turnaroundTime, phone, operatingHours, latitude, longitude, ownerId, ownerName, permitImage, image, amenities } = req.body;
         if (!name || !address) {
             return res.status(400).json({ message: "Name and address are required." });
         }
         const shop = await Shop.create({
             name, address, price: Number(price), turnaroundTime: Number(turnaroundTime), phone,
+            operatingHours: operatingHours || "8:00 AM - 8:00 PM",
             latitude: Number(latitude), longitude: Number(longitude),
             ownerId, ownerName,
             permitStatus: "pending",
@@ -57,9 +58,10 @@ exports.createShop = async (req, res) => {
 // PUT update shop (owner/admin)
 exports.updateShop = async (req, res) => {
     try {
-        const { name, address, price, turnaroundTime, phone, latitude, longitude, status, image, amenities } = req.body;
+        const { name, address, price, turnaroundTime, phone, operatingHours, latitude, longitude, status, image, amenities } = req.body;
         const updated = await Shop.findByIdAndUpdate(req.params.id, {
             name, address, phone,
+            operatingHours,
             price: Number(price),
             turnaroundTime: Number(turnaroundTime),
             latitude: Number(latitude),
