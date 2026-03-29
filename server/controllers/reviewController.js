@@ -19,21 +19,26 @@ const updateShopMetrics = async (shopId) => {
 
     const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount;
     
+    // Rolling Window Logic: Only consider the last 15 reviews for performance metrics
+    const ROLLING_WINDOW_SIZE = 15;
+    const recentReviews = [...allReviews].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt)).slice(0, ROLLING_WINDOW_SIZE);
+    const recentCount = recentReviews.length;
+
     // Formula Requirements:
     // 1. Min Threshold: 5 reviews
-    // 2. Weighted Average: ((PromisedTime * 10) + Sum(ActualTimes)) / (10 + ReviewCount)
+    // 2. Weighted Average (Bayesian): ((PromisedTime * 10) + Sum(ActualTimes)) / (10 + ReviewCount)
     // 3. Cap Outliers: max 2x PromisedTime
     
     let avgActualTime;
-    if (reviewCount < 5) {
-        // Fallback to promised time if below threshold
+    if (recentCount < 5) {
+        // Fallback to promised time if below threshold in recent window
         avgActualTime = shop.turnaroundTime;
     } else {
         const BASE_WEIGHT = 10;
         const CAP_MULTIPLIER = 2;
         const maxAllowedTime = shop.turnaroundTime * CAP_MULTIPLIER;
 
-        const totalActualTimeSum = allReviews.reduce((sum, r) => {
+        const totalActualTimeSum = recentReviews.reduce((sum, r) => {
             let reviewTime;
             if (r.wasOnTime !== false) {
                 reviewTime = shop.turnaroundTime;
@@ -44,11 +49,11 @@ const updateShopMetrics = async (shopId) => {
             return sum + reviewTime;
         }, 0);
 
-        avgActualTime = ((shop.turnaroundTime * BASE_WEIGHT) + totalActualTimeSum) / (BASE_WEIGHT + reviewCount);
+        avgActualTime = ((shop.turnaroundTime * BASE_WEIGHT) + totalActualTimeSum) / (BASE_WEIGHT + recentCount);
     }
 
-    const onTimeCount = allReviews.filter(r => r.wasOnTime !== false).length;
-    const reliability = onTimeCount / reviewCount;
+    const recentOnTimeCount = recentReviews.filter(r => r.wasOnTime !== false).length;
+    const reliability = recentOnTimeCount / recentCount;
 
     return await Shop.findByIdAndUpdate(shopId, {
         rating: Math.round(avgRating * 10) / 10,
@@ -77,6 +82,26 @@ exports.postReview = async (req, res) => {
             return res.status(400).json({ message: "shopId and rating are required." });
         }
 
+        // ONE REVIEW PER USER RULE (UPSERT)
+        // 1. Check if user already reviewed this shop
+        const existingReview = await Review.findOne({ shopId, userId: userId || "anonymous" });
+
+        if (existingReview && userId && userId !== "anonymous") {
+            // Update existing review instead of creating new one (Spam prevention)
+            existingReview.rating = rating;
+            existingReview.comment = comment || "";
+            existingReview.wasOnTime = wasOnTime !== undefined ? wasOnTime : true;
+            existingReview.actualTimeTaken = !wasOnTime ? (actualTimeTaken || null) : null;
+            existingReview.images = images || [];
+            existingReview.reviewerName = isAnonymous ? "Anonymous" : (reviewerName || "Anonymous");
+            existingReview.isAnonymous = !!isAnonymous;
+            
+            await existingReview.save();
+            await updateShopMetrics(shopId);
+            return res.json(existingReview);
+        }
+
+        // 2. Create new review if it's their first time
         const review = await Review.create({
             shopId,
             userId: userId || "anonymous",

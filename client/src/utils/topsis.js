@@ -32,7 +32,13 @@ export function calculateTopsis(shops, weights, priorities = ['price', 'time', '
     // Step 2 & 3: Construct the Decision Matrix and Normalize the Matrix (Vector Normalization)
     const columnNorms = criteria.map(c => {
         const sumSq = shops.reduce((sum, s) => {
-            const val = typeof s[c.key] === "number" ? s[c.key] : 0;
+            let val = typeof s[c.key] === "number" ? s[c.key] : 0;
+            
+            // Truth-Adjustment: Use the same value for norm calculation
+            if (c.key === 'turnaroundTime' && s.actualTurnaroundTime > s.turnaroundTime) {
+                val = s.actualTurnaroundTime;
+            }
+            
             return sum + (val * val);
         }, 0);
         return Math.sqrt(sumSq) || 0.0001;
