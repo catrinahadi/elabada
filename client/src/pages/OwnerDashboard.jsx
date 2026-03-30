@@ -277,10 +277,10 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-12 pb-10 space-y-6 pt-4">
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-start">
+                <form onSubmit={handleSubmit} className="px-12 pb-10 space-y-6 pt-4 h-full">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch h-full">
                         {/* Left Column: Visuals & Location */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 flex flex-col h-full">
                             <UploadBox
                                 label="Upload a photo of your shop"
                                 onFileSelected={pickShopImage}
@@ -288,7 +288,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 extraClass="h-[340px]"
                             />
 
-                            <div className="space-y-4">
+                            <div className="flex-1 flex flex-col space-y-4">
                                 <div className="space-y-1.5">
                                     <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
                                     <div className="relative">
@@ -303,22 +303,14 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     </div>
                                 </div>
 
-                                <div className="h-[230px] rounded-[24px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
-                                    <MapContainer
-                                        center={[parseFloat(form.latitude), parseFloat(form.longitude)]}
-                                        zoom={15}
-                                        className="w-full h-full z-0"
-                                        zoomControl={false}
-                                    >
-                                        <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
-                                        <MapPicker
-                                            position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
-                                            onPositionChange={([lat, lng]) => {
-                                                set("latitude", lat.toFixed(6).toString());
-                                                set("longitude", lng.toFixed(6).toString());
-                                            }}
-                                        />
-                                    </MapContainer>
+                                <div className="flex-1 min-h-[230px] rounded-[24px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
+                                    <MemoizedMap 
+                                        position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
+                                        onPositionChange={([lat, lng]) => {
+                                            set("latitude", lat.toFixed(6).toString());
+                                            set("longitude", lng.toFixed(6).toString());
+                                        }}
+                                    />
                                     <div className="absolute top-4 right-4 z-[1000] bg-white/90 backdrop-blur px-3 py-1.5 rounded-xl border border-black/5 shadow-sm">
                                         <span className="text-[10px] font-normal text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
                                     </div>
@@ -350,9 +342,8 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     placeholder="24"
                                 />
                                 <div className="space-y-4 pt-2">
-                                    <label className="block text-[14px] font-normal text-[#1D1D1F] border-b border-black/5 pb-2 flex items-center justify-between">
+                                    <label className="block text-[14px] font-normal text-[#1D1D1F] border-b border-black/5 pb-2">
                                         Operating Hours
-                                        <span className="text-[11px] text-[#8E8E93] uppercase tracking-widest font-bold">Standardize your schedule</span>
                                     </label>
                                     <div className="grid grid-cols-1 gap-2">
                                         {DAYS.map(day => (
