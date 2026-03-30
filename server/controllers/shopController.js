@@ -40,7 +40,7 @@ exports.createShop = async (req, res) => {
         }
         const shop = await Shop.create({
             name, address, price: Number(price), turnaroundTime: Number(turnaroundTime), phone,
-            operatingHours: operatingHours || "8:00 AM - 8:00 PM",
+            operatingHours,
             latitude: Number(latitude), longitude: Number(longitude),
             ownerId, ownerName,
             permitStatus: "pending",

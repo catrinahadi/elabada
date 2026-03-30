@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef, Fragment } from "react";
+import { useState, useMemo, useEffect, useRef, Fragment, memo } from "react";
 import api from "../services/api";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -46,18 +46,22 @@ const createUserLocationIcon = () => L.divIcon({
   iconAnchor: [28, 28]
 });
 
-const createShopMarkerIcon = (rank) => {
+const createShopMarkerIcon = (isOpen, isActive = false) => {
+  const color = isOpen ? "#228B22" : "#7B1113";
+  const size = isActive ? 48 : 36;
   return L.divIcon({
     className: 'custom-shop-marker',
     html: `<div class="flex flex-col items-center group cursor-pointer drop-shadow-md">
-      <div class="relative transition-all duration-300 transform group-hover:-translate-y-1 group-hover:scale-110">
-        <svg width="36" height="36" viewBox="0 0 24 24" fill="#FF8C00" xmlns="http://www.w3.org/2000/svg">
-          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+      <div class="relative transition-all duration-300 transform ${isActive ? 'scale-110' : 'group-hover:-translate-y-1 group-hover:scale-110'}">
+        <svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="${color}" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5" fill="white"/>
         </svg>
+        ${isOpen ? '<div class="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full flex items-center justify-center shadow-sm"><div class="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse"></div></div>' : ''}
       </div>
     </div>`,
-    iconSize: [36, 36],
-    iconAnchor: [18, 36]
+    iconSize: [size, size],
+    iconAnchor: [size/2, size]
   });
 };
 
@@ -77,9 +81,45 @@ function MapController({ routePath, userLocation }) {
 
 
 const isShopOpen = (operatingHours) => {
-  if (!operatingHours || operatingHours.toLowerCase().includes('24')) return true;
+  if (!operatingHours) return true;
+  
+  // New Object format (preferred)
+  if (typeof operatingHours === 'object' && !Array.isArray(operatingHours)) {
+    try {
+      const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+      const now = new Date();
+      const dayName = days[now.getDay()]; 
+      
+      // Handle potential Map type or plain object
+      const dayConfig = (operatingHours instanceof Map) 
+        ? operatingHours.get(dayName) 
+        : (operatingHours[dayName] || operatingHours[dayName.charAt(0).toUpperCase() + dayName.slice(1)]);
+
+      // If no config for today, default to closed for safety
+      if (!dayConfig || dayConfig.closed || !dayConfig.open || !dayConfig.close) return false;
+
+      const [openH, openM] = dayConfig.open.split(':').map(Number);
+      const [closeH, closeM] = dayConfig.close.split(':').map(Number);
+      
+      const currMins = now.getHours() * 60 + now.getMinutes();
+      const openMins = openH * 60 + openM;
+      const closeMins = closeH * 60 + closeM;
+
+      if (openMins > closeMins) { // Overnight hours
+          return currMins >= openMins || currMins <= closeMins;
+      }
+      return currMins >= openMins && currMins <= closeMins;
+    } catch (e) {
+      console.warn("Error parsing structured operating hours:", e);
+      return true; 
+    }
+  }
+
+  // Legacy String format
   try {
-    const cleanHours = operatingHours.replace(/\s+/g, ' ').trim().toUpperCase();
+    const cleanHours = operatingHours.toString().replace(/\s+/g, ' ').trim().toUpperCase();
+    if (cleanHours.includes('24')) return true;
+    
     const segments = cleanHours.split(/[-\u2013\u2014]| TO /);
     if (segments.length !== 2) return true;
     
@@ -106,6 +146,52 @@ const isShopOpen = (operatingHours) => {
     return true;
   }
 };
+
+const formatOperatingHours = (operatingHours) => {
+  if (!operatingHours) return 'Contact shop for hours';
+  if (typeof operatingHours === 'string') return operatingHours;
+  
+  try {
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+    const now = new Date();
+    const dayName = days[now.getDay()];
+    
+    const config = operatingHours[dayName] || operatingHours[dayName.charAt(0).toUpperCase() + dayName.slice(1)];
+    
+    if (!config || config.closed) return 'Closed today';
+    
+    const to12h = (time) => {
+      if (!time) return '';
+      let [h, m] = time.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      h = h % 12 || 12;
+      return `${h}:${m.toString().padStart(2, '0')} ${ampm}`;
+    };
+    
+    return `${to12h(config.open)} - ${to12h(config.close)}`;
+  } catch (e) {
+    return 'Contact shop for hours';
+  }
+};
+
+const ShopMarkers = memo(({ shops, activeShopId, onSelectShop }) => {
+  return (
+    <>
+      {shops.map(s => (
+        <Marker
+          key={s.id || s._id}
+          position={[s.latitude, s.longitude]}
+          icon={createShopMarkerIcon(isShopOpen(s.operatingHours), activeShopId === (s.id || s._id))}
+          eventHandlers={{
+            click: () => onSelectShop(s.id || s._id)
+          }}
+        />
+      ))}
+    </>
+  );
+}, (prev, next) => {
+  return prev.shops === next.shops && prev.activeShopId === next.activeShopId;
+});
 
 const reviewCategories = [
   "Overall Service", "Cleanliness", "Folding Quality", "Fabric Care", "Smell/Fragrance"
@@ -562,13 +648,13 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
                   <div className="grid grid-cols-2 gap-2">
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Operating hours</span>
-                      <p className="text-[14px] font-normal text-[#1D1D1F]">{shop.operatingHours || 'Contact shop for hours'}</p>
+                      <p className="text-[14px] font-normal text-[#1D1D1F]">{formatOperatingHours(shop.operatingHours)}</p>
                     </div>
                     <div className="bg-[#F8F9FA] py-4 px-6 rounded-[32px] border border-black/[0.03] space-y-1 hover:bg-white hover:shadow-sm transition-all duration-300">
                       <span className="text-[14px] font-normal text-gray-400 tracking-tight block">Live Status</span>
                       <div className="flex items-center gap-2">
-                        <span className={`text-[15px] font-normal ${isShopOpen(shop.operatingHours) && shop.status !== 'closed' ? 'text-emerald-600' : 'text-[#7B1113]'}`}>
-                          {isShopOpen(shop.operatingHours) && shop.status !== 'closed' ? 'Open' : 'Closed'}
+                        <span className={`text-[15px] font-normal ${isShopOpen(shop.operatingHours) ? 'text-emerald-600' : 'text-[#7B1113]'}`}>
+                          {isShopOpen(shop.operatingHours) ? 'Open' : 'Closed'}
                         </span>
                       </div>
                     </div>
@@ -1297,7 +1383,7 @@ export default function ShopsPage() {
     if (filters.rating > 0) result = result.filter(s => s.rating >= filters.rating);
     if (filters.price < 100) result = result.filter(s => s.price <= filters.price);
     if (filters.distance < 50) result = result.filter(s => s.distance <= filters.distance);
-    if (filters.openNow) result = result.filter(s => s.status === 'open');
+    if (filters.openNow) result = result.filter(s => isShopOpen(s.operatingHours));
 
     const query = searchQuery.toLowerCase().trim();
     if (query) {
@@ -1513,9 +1599,9 @@ export default function ShopsPage() {
                           e.target.src = "https://images.unsplash.com/photo-1545173168-9f18c82b997e?w=800&q=80";
                         }}
                       />
-                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-[#7B1113]/20 text-[#7B1113]'}`}>
-                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'bg-[#228B22]' : 'bg-[#7B1113]'}`} />
-                        <span className="text-[12px] font-normal capitalize tracking-wide">{isShopOpen(s.operatingHours) && s.status !== 'closed' ? 'open' : 'closed'}</span>
+                      <div className={`absolute top-3 left-3 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(s.operatingHours) ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-[#7B1113]/20 text-[#7B1113]'}`}>
+                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) ? 'bg-[#228B22]' : 'bg-[#7B1113]'}`} />
+                        <span className="text-[12px] font-normal capitalize tracking-wide">{isShopOpen(s.operatingHours) ? 'open' : 'closed'}</span>
                       </div>
                       <div className="absolute bottom-3 right-3 flex flex-col items-end gap-2 pointer-events-none">
                         {isApplied && s.score > 0 && (
@@ -1909,12 +1995,10 @@ export default function ShopsPage() {
                                         alt={matchPreview.name} 
                                       />
                                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
-                                      {matchPreview.status === 'open' && (
-                                        <div className="absolute top-6 left-6 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md bg-white/90 border-[#228B22]/20 text-[#228B22]">
-                                          <div className="w-1.5 h-1.5 rounded-full bg-[#228B22] animate-pulse" />
-                                          <span className="text-[12px] font-normal tracking-wide capitalize">open</span>
-                                        </div>
-                                      )}
+                                      <div className={`absolute top-6 left-6 flex items-center gap-1.5 px-4 py-2.5 rounded-2xl border transition-all shadow-md backdrop-blur-md ${isShopOpen(matchPreview.operatingHours) ? 'bg-white/90 border-[#228B22]/20 text-[#228B22]' : 'bg-white/90 border-[#7B1113]/20 text-[#7B1113]'}`}>
+                                        <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(matchPreview.operatingHours) ? 'bg-[#228B22]' : 'bg-[#7B1113]'} ${isShopOpen(matchPreview.operatingHours) ? 'animate-pulse' : ''}`} />
+                                        <span className="text-[12px] font-normal tracking-wide capitalize">{isShopOpen(matchPreview.operatingHours) ? 'open' : 'closed'}</span>
+                                      </div>
                                    </div>
 
                                  </div>
@@ -1939,12 +2023,12 @@ export default function ShopsPage() {
                                     <div className="grid grid-cols-2 gap-2">
                                        <div className="bg-[#F8F9FA] py-4 px-6 rounded-full border border-black/[0.03] space-y-0.5 group">
                                           <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Operating hours</span>
-                                          <p className="text-[14px] font-normal text-[#1D1D1F] ml-1">{matchPreview.operatingHours || '8:00 AM - 8:00 PM'}</p>
+                                          <p className="text-[14px] font-normal text-[#1D1D1F] ml-1">{formatOperatingHours(matchPreview.operatingHours)}</p>
                                        </div>
                                        <div className="bg-[#F8F9FA] py-4 px-6 rounded-full border border-black/[0.03] space-y-0.5 group">
                                           <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Live Status</span>
-                                          <p className={`text-[14px] font-normal ${isShopOpen(matchPreview.operatingHours) && matchPreview.status !== 'closed' ? 'text-emerald-600' : 'text-[#7B1113]'} capitalize ml-1`}>
-                                             {isShopOpen(matchPreview.operatingHours) && matchPreview.status !== 'closed' ? 'Open' : 'Closed'}
+                                          <p className={`text-[14px] font-normal ${isShopOpen(matchPreview.operatingHours) ? 'text-emerald-600' : 'text-[#7B1113]'} capitalize ml-1`}>
+                                             {isShopOpen(matchPreview.operatingHours) ? 'Open' : 'Closed'}
                                           </p>
                                        </div>
                                     </div>
@@ -2075,20 +2159,12 @@ export default function ShopsPage() {
                   {/* User Location Marker */}
                   <Marker position={userLocation} icon={createUserLocationIcon()} />
 
-                  {/* Shop Marker for Selected Shop Only */}
-                  {(() => {
-                    if (!activeRouteShopId) return null;
-                    const selectedShopIndex = rankedShops.findIndex(s => s.id === activeRouteShopId || s._id === activeRouteShopId);
-                    const s = rankedShops[selectedShopIndex];
-                    if (!s) return null;
-                    return (
-                      <Marker
-                        key={s.id}
-                        position={[s.latitude, s.longitude]}
-                        icon={createShopMarkerIcon(selectedShopIndex + 1)}
-                      />
-                    );
-                  })()}
+                  {/* Show all filtered shops on map */}
+                  <ShopMarkers 
+                    shops={filteredShops} 
+                    activeShopId={activeRouteShopId} 
+                    onSelectShop={setActiveRouteShopId} 
+                  />
 
                   {/* Routing Line - Road Following */}
                   {routePath.length > 0 && (
@@ -2223,6 +2299,15 @@ export default function ShopsPage() {
                                                 <Check className="w-3 h-3 text-white stroke-[4]" />
                                               </div>
                                             )}
+                                          </div>
+                                          {/* REAL-TIME STATUS INDICATOR */}
+                                          <div className="flex items-center gap-2 mt-0.5">
+                                            <div className={`w-2 h-2 rounded-full ${isShopOpen(s.operatingHours) ? 'bg-emerald-500 animate-pulse' : 'bg-[#7B1113]'}`} />
+                                            <span className={`text-[12px] font-medium tracking-tight ${isShopOpen(s.operatingHours) ? 'text-emerald-600' : 'text-[#7B1113]'}`}>
+                                              {isShopOpen(s.operatingHours) ? 'Open Now' : 'Closed'}
+                                            </span>
+                                            <span className="text-[12px] text-black/20">•</span>
+                                            <span className="text-[12px] text-black/40 font-normal">{formatOperatingHours(s.operatingHours)}</span>
                                           </div>
                                         </div>
 

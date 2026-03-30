@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, memo } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -21,6 +21,25 @@ import {
     FileText, Check, MapPin, XCircle, CheckCircle, Plus,
     Zap, AlertTriangle, X, Loader, UploadCloud, ImagePlus, Camera, LocateFixed, Info, Search, ShieldCheck, Bell, Menu
 } from "lucide-react";
+
+const MemoizedMap = memo(({ position, onPositionChange }) => {
+    return (
+        <MapContainer
+            center={position}
+            zoom={15}
+            className="w-full h-full z-0"
+            zoomControl={false}
+        >
+            <TileLayer url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png" />
+            <MapPicker
+                position={position}
+                onPositionChange={onPositionChange}
+            />
+        </MapContainer>
+    );
+}, (prev, next) => {
+    return prev.position[0] === next.position[0] && prev.position[1] === next.position[1];
+});
 
 // Using baseURL from services/api.js instead of hardcoded strings
 
@@ -139,9 +158,36 @@ function MapPicker({ position, onPositionChange }) {
     );
 }
 
+const DAYS = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"];
+
 function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
-    const [form, setForm] = useState(initialData || {
-        name: "", address: "", price: "", turnaroundTime: "", operatingHours: "8:00 AM - 8:00 PM",
+    const getInitialHours = (h) => {
+        if (h && typeof h === 'object' && !Array.isArray(h) && (h.monday || h.Tuesday)) return h; // Tuesday if capitalized by some chance
+        // Standardize keys to lowercase
+        if (h && typeof h === 'object' && !Array.isArray(h)) {
+            const normalized = {};
+            DAYS.forEach(d => {
+                normalized[d] = h[d] || h[d.charAt(0).toUpperCase() + d.slice(1)] || { open: "08:00", close: "20:00", closed: false };
+            });
+            return normalized;
+        }
+        return DAYS.reduce((acc, d) => ({ 
+            ...acc, 
+            [d]: { open: "08:00", close: "20:00", closed: d === "sunday" } 
+        }), {});
+    };
+
+    const [form, setForm] = useState(initialData ? {
+        ...initialData,
+        price: initialData.price?.toString() || "",
+        turnaroundTime: initialData.turnaroundTime?.toString() || "",
+        operatingHours: getInitialHours(initialData.operatingHours)
+    } : {
+        name: "", address: "", price: "", turnaroundTime: "", 
+        operatingHours: DAYS.reduce((acc, d) => ({ 
+            ...acc, 
+            [d]: { open: "08:00", close: "18:00", closed: true } 
+        }), {}),
         latitude: "14.1675", longitude: "121.2433",
         permitImage: "", image: ""
     });
@@ -181,6 +227,12 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         // Comprehensive validation
         if (!form.name || !form.address || !form.price || !form.turnaroundTime || !form.operatingHours) return;
         
+        const hasOpenDay = Object.values(form.operatingHours).some(d => !d.closed);
+        if (!hasOpenDay) {
+            alert("Please set operating hours for at least one day (Toggle a day to open it).");
+            return;
+        }
+        
         // Required files check for new registrations
         if (!initialData) {
             if (!shopImageFile || !permitFile) {
@@ -191,10 +243,18 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
 
         setUploading(true);
         try {
-            let finalForm = { ...form };
-            if (shopImageFile) finalForm.image = await uploadFile(shopImageFile);
-            if (permitFile) finalForm.permitImage = await uploadFile(permitFile);
-            onSubmit(finalForm);
+            const [imageUrl, permitUrl] = await Promise.all([
+                shopImageFile ? uploadFile(shopImageFile) : Promise.resolve(form.image),
+                permitFile ? uploadFile(permitFile) : Promise.resolve(form.permitImage)
+            ]);
+
+            const finalForm = { 
+                ...form, 
+                image: imageUrl, 
+                permitImage: permitUrl 
+            };
+            
+            await onSubmit(finalForm);
         } catch (err) {
             console.error("Upload error:", err.message);
             alert("Upload failed: " + (err.response?.data?.message || err.message));
@@ -289,12 +349,64 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     type="number"
                                     placeholder="24"
                                 />
-                                <Field
-                                    label="Operating Hours"
-                                    value={form.operatingHours}
-                                    onChange={e => set("operatingHours", e.target.value)}
-                                    placeholder="e.g. 8:00 AM - 8:00 PM"
-                                />
+                                <div className="space-y-4 pt-2">
+                                    <label className="block text-[14px] font-normal text-[#1D1D1F] border-b border-black/5 pb-2 flex items-center justify-between">
+                                        Operating Hours
+                                        <span className="text-[11px] text-[#8E8E93] uppercase tracking-widest font-bold">Standardize your schedule</span>
+                                    </label>
+                                    <div className="grid grid-cols-1 gap-2">
+                                        {DAYS.map(day => (
+                                            <div key={day} className={`flex items-center justify-between gap-4 p-3 rounded-[24px] border transition-all ${form.operatingHours[day].closed ? 'bg-red-50/30 border-red-100/50' : 'bg-[#F8F9FA] border-black/[0.03]'}`}>
+                                                <div className="flex items-center gap-4 min-w-[120px]">
+                                                    <div 
+                                                        onClick={() => {
+                                                            const newHours = { ...form.operatingHours };
+                                                            newHours[day] = { ...newHours[day], closed: !newHours[day].closed };
+                                                            set("operatingHours", newHours);
+                                                        }}
+                                                        className={`w-10 h-6 rounded-full transition-all relative cursor-pointer ${form.operatingHours[day].closed ? 'bg-[#7B1113]/10' : 'bg-[#014421]/10'}`}
+                                                    >
+                                                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all shadow-sm ${form.operatingHours[day].closed ? 'bg-[#7B1113] left-5' : 'bg-[#014421] left-1'}`}></div>
+                                                    </div>
+                                                    <span className={`text-[13px] capitalize tracking-tight ${form.operatingHours[day].closed ? 'text-red-500/60' : 'text-[#1D1D1F]'}`}>{day}</span>
+                                                </div>
+                                                {!form.operatingHours[day].closed ? (
+                                                    <div className="flex items-center gap-2 animate-fadeUp">
+                                                        <div className="relative group/time">
+                                                            <input 
+                                                                type="time" 
+                                                                value={form.operatingHours[day].open}
+                                                                onChange={(e) => {
+                                                                    const newHours = { ...form.operatingHours };
+                                                                    newHours[day] = { ...newHours[day], open: e.target.value };
+                                                                    set("operatingHours", newHours);
+                                                                }}
+                                                                className="bg-white border border-black/5 rounded-xl px-3 py-1.5 text-[13px] outline-none focus:ring-2 focus:ring-[#014421]/5 focus:border-[#014421]/20 font-medium text-[#1D1D1F]"
+                                                            />
+                                                        </div>
+                                                        <span className="text-black/10 font-light">—</span>
+                                                        <div className="relative group/time">
+                                                            <input 
+                                                                type="time" 
+                                                                value={form.operatingHours[day].close}
+                                                                onChange={(e) => {
+                                                                    const newHours = { ...form.operatingHours };
+                                                                    newHours[day] = { ...newHours[day], close: e.target.value };
+                                                                    set("operatingHours", newHours);
+                                                                }}
+                                                                className="bg-white border border-black/5 rounded-xl px-3 py-1.5 text-[13px] outline-none focus:ring-2 focus:ring-[#014421]/5 focus:border-[#014421]/20 font-medium text-[#1D1D1F]"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="pr-4 flex items-center gap-2 text-red-500/40 italic text-[12px] animate-pulse">
+                                                        <span>Closed for the day</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
 
                             {!initialData && (
