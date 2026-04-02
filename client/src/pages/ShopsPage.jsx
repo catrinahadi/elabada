@@ -1885,7 +1885,7 @@ export default function ShopsPage() {
 
                 {surveyStep === 3 && (
                   <div className="flex flex-col gap-10 max-w-full w-full animate-fadeUp">
-                      <div className="flex flex-col lg:flex-row gap-10 items-start">
+                      <div className="flex flex-col lg:flex-row gap-10 items-stretch">
                         
                         {/* ── LEFT: MATCH LIST (Fixed Sidebar) ── */}
                         <div className="w-full lg:w-[420px] shrink-0 space-y-10">
@@ -1970,9 +1970,7 @@ export default function ShopsPage() {
                             <div className="bg-white rounded-[44px] border border-black/[0.1] shadow-2xl overflow-hidden flex flex-col h-full max-h-[calc(100vh-140px)]">
                               {/* Modal Header */}
                               <div className="px-8 py-6 border-b border-black/[0.03] flex items-center justify-between bg-white/50 backdrop-blur-sm sticky top-0 z-10">
-                                 <button onClick={() => setMatchPreview(null)} className="w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
-                                    <ArrowLeft className="w-5 h-5 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
-                                 </button>
+                                 <div className="w-fit p-2.5" />
                                  <button 
                                    onClick={() => setShowComputation(matchPreview)}
                                    className="bg-[#014421]/5 px-5 py-2.5 rounded-full border border-[#014421]/10 flex items-center gap-3 shadow-sm hover:bg-[#014421] hover:text-white transition-all group/match"
@@ -1990,8 +1988,8 @@ export default function ShopsPage() {
 
                               <div className="flex h-full min-h-0 flex-col md:flex-row overflow-y-auto custom-scrollbar p-2">
                                  {/* LEFT: PICTURE & INSIGHTS */}
-                                 <div className="w-full md:w-[45%] p-8 shrink-0 space-y-8">
-                                   <div className="aspect-square w-full rounded-[44px] overflow-hidden shadow-2xl relative group">
+                                 <div className="w-full md:w-[45%] p-8 pr-4 shrink-0 flex flex-col h-full">
+                                   <div className="flex-1 h-full w-full rounded-[44px] overflow-hidden shadow-2xl relative group">
                                       <img 
                                         src={matchPreview.image} 
                                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
@@ -2007,7 +2005,7 @@ export default function ShopsPage() {
                                  </div>
 
                                  {/* RIGHT: CORE DETAILS */}
-                                 <div className="flex-1 p-8 pt-4 md:pt-6 space-y-3 h-full flex flex-col">
+                                 <div className="flex-1 p-8 pl-4 h-full flex flex-col justify-between">
                                     <div className="space-y-2">
                                        <div className="flex items-center gap-3">
                                           <h3 className="text-[32px] font-normal font-outfit text-[#1D1D1F] tracking-tight leading-none">{matchPreview.name}</h3>
