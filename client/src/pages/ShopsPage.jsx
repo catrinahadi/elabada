@@ -47,7 +47,7 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (isOpen, isActive = false) => {
-  const color = isOpen ? "#228B22" : "#7B1113";
+  const color = isOpen ? "#FF8C00" : "#7B1113";
   const size = isActive ? 48 : 36;
   return L.divIcon({
     className: 'custom-shop-marker',
@@ -177,7 +177,7 @@ const formatOperatingHours = (operatingHours) => {
 const ShopMarkers = memo(({ shops, activeShopId, onSelectShop }) => {
   return (
     <>
-      {shops.map(s => (
+      {shops.filter(s => !activeShopId || activeShopId === (s.id || s._id)).map(s => (
         <Marker
           key={s.id || s._id}
           position={[s.latitude, s.longitude]}
@@ -1555,14 +1555,17 @@ export default function ShopsPage() {
                         onClick={() => setShowSortDropdown(!showSortDropdown)}
                         className={`px-5 py-3 rounded-2xl border border-black/[0.05] shadow-sm bg-white flex items-center gap-2 transition-all hover:bg-gray-50 active:scale-95 text-[12px] font-normal text-[#1D1D1F] ${showSortDropdown ? 'ring-2 ring-[#1D1D1F]/5' : ''}`}
                       >
-                        Sort by
+                        {activeSort === 'distance' ? 'By Distance' : 
+                         activeSort === 'price' ? 'Lowest Price' :
+                         activeSort === 'rating' ? 'Highest Rating' :
+                         activeSort === 'topsis' ? 'Best Match' : 'Sort by'}
                         <ChevronDown className={`w-4 h-4 transition-transform ${showSortDropdown ? 'rotate-180' : ''}`} />
                       </button>
 
                       {showSortDropdown && (
                         <div className="absolute top-full right-0 mt-3 w-48 bg-white rounded-[24px] shadow-2xl border border-black/[0.05] py-3 z-[150] animate-fadeUp">
                           {[
-                            { id: 'distance', label: 'By Range' },
+                            { id: 'distance', label: 'By Distance' },
                             { id: 'price', label: 'Lowest Price' },
                             { id: 'rating', label: 'Highest Rating' },
                             ...(isApplied ? [{ id: 'topsis', label: 'Best Match' }] : []),
@@ -2189,13 +2192,7 @@ export default function ShopsPage() {
                     >
                       <ArrowLeft className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
                     </button>
-                    <button
-                      onClick={refreshLocation}
-                      className="flex items-center justify-center w-12 h-12 md:w-14 md:h-14 rounded-full bg-white text-[#1D1D1F] shadow-md hover:bg-[#1D1D1F] hover:text-white transition-all transform active:scale-95"
-                      title="Detect my current location"
-                    >
-                      <LocateFixed className="w-5 h-5 md:w-6 md:h-6" strokeWidth={2.5} />
-                    </button>
+
                     <div className="relative flex-1 md:w-[480px] group/input shadow-sm rounded-full border border-black/[0.02]">
                       <input
                         type="text"
@@ -2301,34 +2298,33 @@ export default function ShopsPage() {
                                             )}
                                           </div>
                                           {/* REAL-TIME STATUS INDICATOR */}
-                                          <div className="flex items-center gap-2 mt-0.5">
-                                            <div className={`w-2 h-2 rounded-full ${isShopOpen(s.operatingHours) ? 'bg-emerald-500 animate-pulse' : 'bg-[#7B1113]'}`} />
-                                            <span className={`text-[12px] font-medium tracking-tight ${isShopOpen(s.operatingHours) ? 'text-emerald-600' : 'text-[#7B1113]'}`}>
-                                              {isShopOpen(s.operatingHours) ? 'Open Now' : 'Closed'}
-                                            </span>
-                                            <span className="text-[12px] text-black/20">•</span>
-                                            <span className="text-[12px] text-black/40 font-normal">{formatOperatingHours(s.operatingHours)}</span>
-                                          </div>
+
                                         </div>
 
                                         <div className="mt-2 space-y-2">
-                                          <div className="flex items-center gap-1.5">
-                                            <div className="flex items-center gap-0.5">
-                                              {[...Array(5)].map((_, idx) => (
-                                                <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
-                                              ))}
+                                          <div className="flex items-center gap-4">
+                                            <div className="flex items-center gap-1.5">
+                                              <div className="flex items-center gap-0.5">
+                                                {[...Array(5)].map((_, idx) => (
+                                                  <Star key={idx} className={`w-3.5 h-3.5 ${idx < Math.floor(s.rating) ? 'fill-[#FF8C00] text-[#FF8C00]' : 'text-[#1D1D1F]/20'}`} />
+                                                ))}
+                                              </div>
+                                              <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
                                             </div>
-                                            <span className="text-[12px] font-medium text-[#1D1D1F] ml-1">{s.rating} <span className="text-[#1D1D1F] font-medium">({s.reviewCount || 0})</span></span>
+                                            <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border transition-all shadow-sm backdrop-blur-sm ${isShopOpen(s.operatingHours) ? 'bg-[#228B22]/5 border-[#228B22]/20 text-[#228B22]' : 'bg-[#7B1113]/5 border-[#7B1113]/20 text-[#7B1113]'}`}>
+                                              <div className={`w-1.5 h-1.5 rounded-full ${isShopOpen(s.operatingHours) ? 'bg-[#228B22]' : 'bg-[#7B1113]'}`} />
+                                              <span className="text-[10px] font-normal uppercase tracking-wider">{isShopOpen(s.operatingHours) ? 'open' : 'closed'}</span>
+                                            </div>
                                           </div>
 
                                           <div className="flex flex-col gap-2">
-                                            <div className="flex items-center gap-6">
+                                            <div className="flex items-center gap-4">
                                               <div className="flex items-center gap-2">
-                                                <span className="text-[14px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase">/kg</span></span>
+                                                <span className="text-[15px] font-normal text-[#7B1113] leading-none">₱{s.price}<span className="text-[12px] ml-0.5 opacity-60 lowercase font-normal">/kg</span></span>
                                               </div>
                                               <div className="flex items-center gap-2">
-                                                <Clock className="w-4 h-4 text-[#1D1D1F]" />
-                                                <span className="text-[12px] font-normal text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
+                                                <Clock className="w-3.5 h-3.5 text-[#1D1D1F]/60" />
+                                                <span className="text-[13px] font-medium text-[#1D1D1F]">{s.turnaroundTime} hrs</span>
                                               </div>
                                             </div>
                                             <div className="flex items-center gap-3 mt-0.5">
@@ -2345,11 +2341,13 @@ export default function ShopsPage() {
                                         </div>
                                       </div>
 
-                                      <div className="w-24 h-24 md:w-28 md:h-28 rounded-[28px] md:rounded-[32px] overflow-hidden shrink-0 shadow-lg border-2 border-white relative">
+                                      <div className="w-32 h-32 md:w-36 md:h-36 rounded-[36px] md:rounded-[44px] overflow-hidden shrink-0 shadow-2xl border-4 border-white relative group/img">
                                         <img src={s.image} className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" alt={s.name} />
                                         {isActive && (
-                                          <div className="absolute inset-0 bg-[#014421]/20 backdrop-blur-[2px] flex items-center justify-center">
-                                            <Navigation className="w-6 h-6 text-white" />
+                                          <div className="absolute inset-0 flex items-center justify-center">
+                                            <div className="bg-white/80 rounded-full p-2.5 shadow-xl">
+                                              <Navigation className="w-5 h-5 text-[#014421]" />
+                                            </div>
                                           </div>
                                         )}
                                       </div>
