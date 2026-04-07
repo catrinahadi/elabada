@@ -627,16 +627,20 @@ export default function OwnerDashboard() {
                             <tbody className="divide-y divide-black/[0.02]">
                                 {loadingShops ? (
                                     <tr>
-                                        <td colSpan="7" className="py-32 text-center text-[#8E8E93] text-sm animate-pulse">Loading registries...</td>
+                                        <td colSpan="8" className="py-32 text-center text-[#8E8E93] text-sm animate-pulse">Loading registries...</td>
                                     </tr>
                                 ) : shops.length === 0 ? (
                                     <tr>
-                                        <td colSpan="7" className="py-32 text-center space-y-4">
-                                            <div className="w-16 h-16 bg-[#F8F9FA] rounded-[24px] flex items-center justify-center mx-auto mb-4 opacity-50">
-                                                <Store className="w-8 h-8 text-[#1D1D1F]" />
+                                        <td colSpan="8" className="py-40 text-center">
+                                            <div className="flex flex-col items-center justify-center space-y-4">
+                                                <div className="w-20 h-20 bg-[#F8F9FA] rounded-[32px] flex items-center justify-center mx-auto mb-4 opacity-50 shadow-inner">
+                                                    <Store className="w-10 h-10 text-[#1D1D1F]" />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <p className="text-[16px] font-bold text-[#1D1D1F]">No shops registered.</p>
+                                                    <p className="text-[14px] font-medium text-[#8E8E93]">Start by registering your first laundry shop.</p>
+                                                </div>
                                             </div>
-                                            <p className="text-[14px] font-bold text-[#1D1D1F]">No shops registered.</p>
-                                            <p className="text-[12px] font-medium text-[#8E8E93]">Start by registering your first laundry shop.</p>
                                         </td>
                                     </tr>
                                 ) : shops.filter(s => {
