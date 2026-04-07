@@ -45,15 +45,15 @@ const MemoizedMap = memo(({ position, onPositionChange }) => {
 
 
 const Field = ({ label, value, onChange, type = "text", placeholder, step }) => (
-    <div className="space-y-1.5">
-        <label className="block text-[14px] font-normal text-[#1D1D1F]">{label}</label>
+    <div className="space-y-1">
+        <label className="block text-[12px] font-medium text-[#1D1D1F] px-1">{label}</label>
         <input
             type={type}
             step={step}
             value={value}
             onChange={onChange}
             placeholder={placeholder}
-            className="w-full h-11 bg-[#F8F9FA] rounded-[14px] px-4 text-[14px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+            className="w-full h-10 bg-[#F8F9FA] rounded-[12px] px-4 text-[13px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
             required
         />
     </div>
@@ -265,9 +265,9 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const isLoading = loading || uploading;
 
     return (
-        <div className="modal-overlay fixed inset-0 flex items-center justify-center p-12 md:p-20 z-[200] backdrop-blur-xl bg-black/40">
-            <div className="bg-white rounded-[48px] md:rounded-[64px] w-full max-w-[1440px] h-auto shadow-[0_80px_160px_rgba(0,0,0,0.4)] animate-scaleIn overflow-hidden border border-white/20 flex flex-col">
-                <div className="px-12 pt-10 pb-6 flex items-start justify-between">
+        <div className="modal-overlay fixed inset-0 flex items-center justify-center p-4 md:p-10 z-[200] backdrop-blur-xl bg-black/40">
+            <div className="bg-white rounded-[32px] md:rounded-[40px] w-full max-w-[1100px] max-h-[90vh] shadow-[0_80px_160px_rgba(0,0,0,0.4)] animate-scaleIn overflow-hidden border border-white/20 flex flex-col">
+                <div className="px-10 pt-8 pb-4 flex items-start justify-between">
                     <div className="space-y-1">
                         <h2 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter">{initialData ? "Edit Shop Details" : "Register New Shop"}</h2>
                         <p className="text-[14px] font-normal text-[#8E8E93]">Fill in the essentials to get your establishment listed.</p>
@@ -277,7 +277,8 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="px-12 pb-10 space-y-6 pt-4 h-full">
+                <form onSubmit={handleSubmit} className="flex-1 overflow-hidden flex flex-col">
+                    <div className="flex-1 overflow-y-auto px-10 space-y-5 pt-2 custom-scrollbar">
                     <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-stretch h-full">
                         {/* Left Column: Visuals & Location */}
                         <div className="space-y-4 flex flex-col h-full">
@@ -285,25 +286,25 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 label="Upload a photo of your shop"
                                 onFileSelected={pickShopImage}
                                 preview={shopImagePreview}
-                                extraClass="h-[340px]"
+                                extraClass="h-[140px]"
                             />
 
                             <div className="flex-1 flex flex-col space-y-4">
-                                <div className="space-y-1.5">
-                                    <label className="block text-[14px] font-normal text-[#1D1D1F]">Business Address</label>
+                                <div className="space-y-1">
+                                    <label className="block text-[12px] font-medium text-[#1D1D1F] px-1">Business Address</label>
                                     <div className="relative">
                                         <MapPin className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-[#1D1D1F] opacity-30" />
                                         <input
                                             type="text"
                                             value={form.address}
                                             onChange={e => set("address", e.target.value)}
-                                            placeholder="Enter the complete physical address"
-                                            className="w-full h-12 bg-[#F8F9FA] rounded-[16px] pl-10 pr-5 text-[14px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
+                                            placeholder="Enter complete address"
+                                            className="w-full h-10 bg-[#F8F9FA] rounded-[12px] pl-10 pr-5 text-[13px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
                                         />
                                     </div>
                                 </div>
 
-                                <div className="flex-1 min-h-[230px] rounded-[24px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
+                                <div className="flex-1 min-h-[240px] h-[240px] rounded-[24px] overflow-hidden border border-black/5 relative group bg-[#F8F9FA]">
                                     <MemoizedMap 
                                         position={[parseFloat(form.latitude), parseFloat(form.longitude)]}
                                         onPositionChange={([lat, lng]) => {
@@ -315,6 +316,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                         <span className="text-[10px] font-normal text-[#1D1D1F] opacity-60 uppercase tracking-widest">Interactive Map</span>
                                     </div>
                                 </div>
+
+                                {!initialData && (
+                                    <div className="space-y-1 pt-1">
+                                        <label className="block text-[12px] font-medium text-[#1D1D1F]">Operating Permit / LTO</label>
+                                        <UploadBox
+                                            label={permitFile ? "Permit Uploaded Successfully" : "Upload Business Permit"}
+                                            hint="JPG, PNG or PDF only"
+                                            onFileSelected={pickPermit}
+                                            preview={permitPreview}
+                                            extraClass="h-[140px]"
+                                        />
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -345,19 +359,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                     <label className="block text-[14px] font-normal text-[#1D1D1F] border-b border-black/5 pb-2">
                                         Operating Hours
                                     </label>
-                                    <div className="grid grid-cols-1 gap-2">
+                                    <div className="grid grid-cols-1 gap-1.5">
                                         {DAYS.map(day => (
-                                            <div key={day} className={`flex items-center justify-between gap-4 p-3 rounded-[24px] border transition-all ${form.operatingHours[day].closed ? 'bg-red-50/30 border-red-100/50' : 'bg-[#F8F9FA] border-black/[0.03]'}`}>
-                                                <div className="flex items-center gap-4 min-w-[120px]">
+                                            <div key={day} className={`flex items-center justify-between gap-3 p-2 rounded-[16px] border transition-all ${form.operatingHours[day].closed ? 'bg-red-50/30 border-red-100/40' : 'bg-[#F8F9FA] border-black/[0.03]'}`}>
+                                                <div className="flex items-center gap-3 min-w-[100px]">
                                                     <div 
                                                         onClick={() => {
                                                             const newHours = { ...form.operatingHours };
                                                             newHours[day] = { ...newHours[day], closed: !newHours[day].closed };
                                                             set("operatingHours", newHours);
                                                         }}
-                                                        className={`w-10 h-6 rounded-full transition-all relative cursor-pointer ${form.operatingHours[day].closed ? 'bg-[#7B1113]/10' : 'bg-[#014421]/10'}`}
+                                                        className={`w-9 h-5 rounded-full transition-all relative cursor-pointer ${form.operatingHours[day].closed ? 'bg-[#7B1113]/10' : 'bg-[#014421]/10'}`}
                                                     >
-                                                        <div className={`absolute top-1 w-4 h-4 rounded-full transition-all shadow-sm ${form.operatingHours[day].closed ? 'bg-[#7B1113] left-5' : 'bg-[#014421] left-1'}`}></div>
+                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all shadow-sm ${form.operatingHours[day].closed ? 'bg-[#7B1113] left-4.5' : 'bg-[#014421] left-0.5'}`}></div>
                                                     </div>
                                                     <span className={`text-[13px] capitalize tracking-tight ${form.operatingHours[day].closed ? 'text-red-500/60' : 'text-[#1D1D1F]'}`}>{day}</span>
                                                 </div>
@@ -400,28 +414,18 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 </div>
                             </div>
 
-                            {!initialData && (
-                                <div className="space-y-4 pt-1.5">
-                                    <label className="block text-[14px] font-normal text-[#1D1D1F]">Operating Permit / LTO</label>
-                                    <UploadBox
-                                        label={permitFile ? "Permit Uploaded Successfully" : "Upload Business Permit"}
-                                        hint="JPG, PNG or PDF only"
-                                        onFileSelected={pickPermit}
-                                        preview={permitPreview}
-                                        extraClass="h-[330px]"
-                                    />
-                                </div>
-                            )}
                         </div>
                     </div>
 
-                    <div className="py-3">
+                    </div>
+                    
+                    <div className="px-10 py-5 bg-white border-t border-black/5 mt-auto">
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full py-5 rounded-[24px] bg-[#7B1113] text-white text-[14px] font-normal hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#7B1113]/20 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
+                            className="w-full py-4 rounded-[20px] bg-[#7B1113] text-white text-[14px] font-normal hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#7B1113]/20 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
                         >
-                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : "Confirm"}
+                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : "Register Establishment"}
                         </button>
                     </div>
                 </form>
