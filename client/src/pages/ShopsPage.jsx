@@ -48,7 +48,7 @@ const createUserLocationIcon = () => L.divIcon({
 
 const createShopMarkerIcon = (isOpen, isActive = false) => {
   const color = isOpen ? "#FF8C00" : "#7B1113";
-  const size = isActive ? 48 : 36;
+  const size = 36;
   return L.divIcon({
     className: 'custom-shop-marker',
     html: `<div class="flex flex-col items-center group cursor-pointer drop-shadow-md">
