@@ -58,9 +58,16 @@ export default function Signup() {
 
             <div className="w-full max-w-[520px] mt-20 md:mt-0 bg-white rounded-[40px] overflow-hidden shadow-[0_32px_120px_rgba(0,0,0,0.12)] border border-black/[0.03] px-10 py-4 md:px-14 md:py-4 flex flex-col gap-6 animate-scaleIn">
                 <div className="flex flex-col items-center text-center space-y-4 mt-4">
-                    <Link to="/" className="self-start w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group">
+                    <button
+                        type="button"
+                        onClick={() => {
+                            if (window.history.length > 2) navigate(-1);
+                            else navigate("/");
+                        }}
+                        className="self-start w-fit p-2.5 hover:bg-[#F3F4F6] rounded-full transition-all group"
+                    >
                         <ArrowLeft className="w-6 h-6 text-[#1D1D1F] group-hover:-translate-x-1 transition-transform" />
-                    </Link>
+                    </button>
                     <div className="space-y-1 mt-4">
                         <h2 className="text-[24px] font-bold text-[#1D1D1F] tracking-tight">Create account</h2>
                         <p className="text-[14px] font-normal text-[#8E8E93]">Start your journey with ELaBada today</p>

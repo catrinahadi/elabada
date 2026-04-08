@@ -130,13 +130,10 @@ export default function Login() {
                     </form>
                 </div>
 
-                <div className="pt-6 border-t border-black/[0.04] text-center space-y-4 mb-4">
+                <div className="pt-6 border-t border-black/[0.04] text-center mb-4">
                     <p className="text-[14px] font-normal text-[#8E8E93]">
                         No account yet? <Link to="/signup" className="text-[#014421] hover:underline font-bold">Create account</Link>
                     </p>
-                    <Link to="/shops" className="text-[14px] font-normal text-[#555] hover:text-black transition-colors block">
-                        Continue as guest
-                    </Link>
                 </div>
             </div>
         </div>
