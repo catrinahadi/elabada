@@ -11,7 +11,7 @@ import {
   ArrowUp, ArrowDown, Map as GoogleMap,
   MoreHorizontal, Heart, ArrowLeft, ChevronLeft, MoreVertical, LocateFixed, Camera,
   LayoutDashboard, LogOut, Settings, BarChart3, Sliders, Navigation, Navigation2, Plus, Trash2, Menu, ChevronUp,
-  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle, MousePointer2
+  Store, ClipboardList, CheckCircle, XCircle, Target, Activity, Tag, Shield, Timer, Circle, ChevronDown, Banknote, Wifi, Coffee, TrendingUp, AlertCircle, MousePointer2, Calculator
 } from "lucide-react";
 
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
@@ -1526,10 +1526,10 @@ export default function ShopsPage() {
               </div>
               <div className="flex flex-col justify-between gap-2 h-[160px]">
                 <button onClick={() => setSidebarTab("computation")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
-                  <Sliders className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
+                  <Calculator className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
                 <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
-                  <LocateFixed className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
+                  <MapIcon className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
               </div>
             </div>
@@ -1696,9 +1696,9 @@ export default function ShopsPage() {
               <div className="h-full flex flex-col bg-white overflow-hidden animate-fadeUp">
 
                 {/* ── FIXED HEADER ── */}
-                <div className="sticky top-0 bg-white z-30 pt-10 md:pt-[72px] pb-6 px-4 md:px-10 border-b border-black/[0.03]">
-                  <div className="text-center mb-10">
-                    <h1 className="text-[24px] md:text-[28px] font-medium tracking-tight text-[#1D1D1F] font-outfit mb-2">Computation</h1>
+                <div className="sticky top-0 bg-white z-30 pt-5 md:pt-[30px] pb-2 px-4 md:px-10 border-b border-black/[0.03]">
+                  <div className="text-center mb-4">
+                    <h1 className="text-[24px] md:text-[28px] font-medium tracking-tight text-[#1D1D1F] font-outfit mb-1">Computation</h1>
                     <p className="text-[14px] text-black/40 font-normal">Let's find the best shop for your specific needs.</p>
                   </div>
 
@@ -2113,7 +2113,7 @@ export default function ShopsPage() {
                       }}
                       className="w-[200px] h-[56px] rounded-full bg-[#014421] text-white font-normal text-[14px] flex items-center justify-center transition-all hover:scale-[1.02] shadow-xl shadow-[#014421]/20 border-2 border-white/10"
                     >
-                      Discover Best Matches
+                      Compute
                     </button>
                   </div>
                 )}
@@ -2133,7 +2133,7 @@ export default function ShopsPage() {
                       }}
                       className="w-[200px] h-[56px] rounded-full border-2 border-[#014421] font-normal text-[14px] text-[#014421] hover:bg-[#014421] hover:text-white transition-all flex items-center justify-center hover:scale-[1.02] shadow-[0_4px_14px_rgba(1,68,33,0.08)] bg-white active:scale-95"
                     >
-                      Reset survey
+                      Reset computation
                     </button>
                   </div>
                 )}
