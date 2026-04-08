@@ -47,7 +47,7 @@ const createUserLocationIcon = () => L.divIcon({
 });
 
 const createShopMarkerIcon = (isOpen, isActive = false) => {
-  const color = isOpen ? "#FF8C00" : "#7B1113";
+  const color = "#7B1113";
   const size = 36;
   return L.divIcon({
     className: 'custom-shop-marker',
@@ -2212,7 +2212,7 @@ export default function ShopsPage() {
 
                 <div className="mt-auto self-start pointer-events-auto flex flex-col gap-4 animate-fadeUp delay-300">
                   <div className="bg-white/90 backdrop-blur-2xl p-5 rounded-[40px] border border-white shadow-2xl flex items-center gap-6 min-w-[280px]">
-                    <div className="w-12 h-12 rounded-3xl bg-[#014421]/10 flex items-center justify-center text-[#014421]">
+                    <div className="w-12 h-12 rounded-3xl bg-[#7B1113]/10 flex items-center justify-center text-[#7B1113]">
                       <MapIcon className="w-6 h-6" />
                     </div>
                     <div className="flex flex-col">
@@ -2283,8 +2283,8 @@ export default function ShopsPage() {
                                         <div className="flex flex-col gap-1">
                                           {i === 0 && (
                                             <div className="flex items-center gap-1.5 mb-1 animate-pulse">
-                                              <MapPin className="w-3 h-3 text-[#014421] fill-[#014421]/10" />
-                                              <span className="text-[10px] font-black text-[#014421] uppercase tracking-[0.2em]">Nearest to you</span>
+                                              <MapPin className="w-3 h-3 text-[#7B1113] fill-[#7B1113]/10" />
+                                              <span className="text-[10px] font-black text-[#7B1113] uppercase tracking-[0.2em]">Nearest to you</span>
                                             </div>
                                           )}
                                           <div className="flex items-center gap-2">
@@ -2326,8 +2326,8 @@ export default function ShopsPage() {
                                               </div>
                                             </div>
                                             <div className="flex items-center gap-3 mt-0.5">
-                                              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#014421] bg-[#014421]/5 px-2.5 py-1 rounded-full border border-[#014421]/10">
-                                                <Navigation2 className="w-3 h-3 fill-[#014421]" />
+                                              <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#7B1113] bg-[#7B1113]/5 px-2.5 py-1 rounded-full border border-[#7B1113]/10">
+                                                <Navigation2 className="w-3 h-3 fill-[#7B1113]" />
                                                 {(s.distance || 0).toFixed(1)} km away
                                               </div>
                                               <div className="flex items-center gap-1.5 text-[11px] font-medium text-[#1D1D1F]/60">
@@ -2344,7 +2344,7 @@ export default function ShopsPage() {
                                         {isActive && (
                                           <div className="absolute inset-0 flex items-center justify-center">
                                             <div className="bg-white/80 rounded-full p-2.5 shadow-xl">
-                                              <Navigation className="w-5 h-5 text-[#014421]" />
+                                              <Navigation className="w-5 h-5 text-[#7B1113]" />
                                             </div>
                                           </div>
                                         )}
