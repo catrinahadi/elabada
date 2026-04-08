@@ -1888,13 +1888,13 @@ export default function ShopsPage() {
                       <div className="flex flex-col lg:flex-row gap-10 items-stretch">
                         
                         {/* ── LEFT: MATCH LIST (Fixed Sidebar) ── */}
-                        <div className="w-full lg:w-[420px] shrink-0 space-y-10">
-                          <div className="text-left px-2">
+                        <div className="w-full lg:w-[500px] shrink-0 flex flex-col h-full">
+                          <div className="text-left px-2 mb-10">
                             <h2 className="text-[20px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Best matches</h2>
                             <p className="text-[14px] text-black/40 font-normal tracking-tight">Top recommendations based on your profile.</p>
                           </div>
 
-                          <div className="space-y-4">
+                          <div className="flex-1 flex flex-col justify-start gap-3 pb-1">
                             {top3.map((s, i) => {
                               const isActive = matchPreview?.id === s.id || matchPreview?._id === s._id;
                               const score = (s.score * 100).toFixed(0);
@@ -1903,7 +1903,7 @@ export default function ShopsPage() {
                                 <div
                                   key={s.id || s._id || i}
                                   onClick={() => handleSelectShop(s)}
-                                  className={`group flex items-center justify-between p-8 md:p-10 rounded-[40px] border-2 transition-all duration-300 cursor-pointer relative overflow-hidden gap-4 ${
+                                  className={`group flex items-center justify-between px-8 py-6 md:px-10 md:py-8 h-[130px] md:h-[150px] rounded-[40px] border-2 transition-all duration-300 cursor-pointer relative overflow-hidden gap-4 mb-4 last:mb-0 ${
                                     isActive 
                                       ? "bg-white border-[#014421] shadow-[0_8px_30px_rgb(0,0,0,0.08)] scale-[1.02] z-10" 
                                       : "bg-[#F8F9FA]/50 border-black/[0.04] hover:bg-white hover:border-[#014421]/20 hover:shadow-lg"
@@ -1921,11 +1921,11 @@ export default function ShopsPage() {
                                   {/* Fade gradient to ensure text readability */}
                                   <div className={`absolute inset-0 z-0 bg-gradient-to-r ${isActive ? 'from-white via-white/80' : 'from-[#F8F9FA] via-[#F8F9FA]/90'} to-transparent pointer-events-none`} />
 
-                                  <div className="space-y-3 flex-1 min-w-[200px] relative z-10">
+                                  <div className="space-y-3 flex-1 relative z-10 w-full">
                                      <div className={`text-[11px] font-medium uppercase tracking-[0.15em] transition-colors ${isActive ? 'text-[#014421]' : 'text-black/40'}`}>
                                         #{i + 1} Best Match
                                      </div>
-                                     <div className="flex items-center gap-3">
+                                     <div className="flex items-center gap-3 min-w-0">
                                         <h4 className={`text-[20px] font-normal leading-normal font-outfit truncate pb-1 transition-colors ${isActive ? 'text-[#014421]' : 'text-[#1D1D1F]'}`}>
                                            {s.name}
                                         </h4>
@@ -1937,27 +1937,9 @@ export default function ShopsPage() {
                                      </div>
                                   </div>
 
-                                  {/* Animated Progress Ring */}
-                                  <div className={`relative w-20 h-20 rounded-full flex items-center justify-center shrink-0 transition-transform duration-500 z-10 ${isActive ? 'scale-110 drop-shadow-md' : 'scale-100'}`}>
-                                    <svg viewBox="0 0 100 100" className="absolute inset-0 w-full h-full -rotate-90">
-                                      <circle 
-                                        cx="50" cy="50" r="44" 
-                                        fill="none" 
-                                        stroke={isActive ? "rgba(1,68,33,0.1)" : "rgba(0,0,0,0.05)"} 
-                                        strokeWidth="5" 
-                                      />
-                                      <circle 
-                                        cx="50" cy="50" r="44" 
-                                        fill="none" 
-                                        stroke={isActive ? "#014421" : "rgba(1,68,33,0.25)"} 
-                                        strokeWidth="5" 
-                                        strokeLinecap="round"
-                                        strokeDasharray="276.46"
-                                        strokeDashoffset={276.46 - (s.score * 276.46)}
-                                        style={{ transition: 'stroke-dashoffset 1.5s cubic-bezier(0.16, 1, 0.3, 1)' }}
-                                      />
-                                    </svg>
-                                    <span className={`text-[20px] font-normal leading-none font-outfit tracking-tight ${isActive ? 'text-[#014421]' : 'text-black/50'}`}>{score}%</span>
+                                  <div className={`relative z-10 shrink-0 flex flex-col items-end transition-all duration-500`}>
+                                     <span className={`text-[24px] font-normal font-outfit tracking-tighter ${isActive ? 'text-[#014421]' : 'text-black/40'}`}>{score}%</span>
+                                     <span className={`text-[10px] font-bold uppercase tracking-widest opacity-30 -mt-1`}>Match</span>
                                   </div>
                                 </div>
                               );
@@ -2005,15 +1987,17 @@ export default function ShopsPage() {
                                  </div>
 
                                  {/* RIGHT: CORE DETAILS */}
-                                 <div className="flex-1 p-8 pl-4 h-full flex flex-col justify-between">
+                                 <div className="flex-1 p-8 pl-4 h-full flex flex-col justify-start gap-4">
                                     <div className="space-y-2">
-                                       <div className="flex items-center gap-3">
-                                          <h3 className="text-[32px] font-normal font-outfit text-[#1D1D1F] tracking-tight leading-none">{matchPreview.name}</h3>
-                                          {matchPreview.permitStatus === 'approved' && (
-                                             <div className="w-6 h-6 rounded-full bg-[#228B22] flex items-center justify-center shrink-0">
-                                                <Check className="w-3.5 h-3.5 text-white stroke-[4]" />
-                                             </div>
-                                          )}
+                                       <div className="min-h-[72px] flex flex-col justify-center mb-2">
+                                          <div className="flex items-center gap-3">
+                                             <h3 className="text-[28px] md:text-[32px] font-normal font-outfit text-[#1D1D1F] tracking-tight leading-tight">{matchPreview.name}</h3>
+                                             {matchPreview.permitStatus === 'approved' && (
+                                                <div className="w-6 h-6 rounded-full bg-[#228B22] flex items-center justify-center shrink-0">
+                                                   <Check className="w-3.5 h-3.5 text-white stroke-[4]" />
+                                                </div>
+                                             )}
+                                          </div>
                                        </div>
                                        <div className="bg-[#F8F9FA] rounded-full px-6 py-4 border border-black/[0.03] space-y-0.5">
                                           <span className="text-[12px] font-normal text-gray-400 tracking-tight block ml-1">Location address</span>
