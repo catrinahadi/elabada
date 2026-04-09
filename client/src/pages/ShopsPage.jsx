@@ -1385,7 +1385,7 @@ export default function ShopsPage() {
 
     const query = searchQuery.toLowerCase().trim();
     if (selectedExactId) {
-      result = result.filter(s => s.id === selectedExactId || s._id === selectedExactId);
+      result = result.filter(s => String(s.id || s._id) === String(selectedExactId));
     } else if (query) {
       result = result.filter(s =>
         s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query)
@@ -1514,7 +1514,7 @@ export default function ShopsPage() {
                           key={s.id}
                           onClick={() => { 
                             setSearchQuery(s.name); 
-                            setSelectedExactId(s.id);
+                            setSelectedExactId(s.id || s._id);
                             setShowSuggestions(false); 
                           }}
                           className="w-full px-8 py-5 flex items-center justify-between hover:bg-[#F8F9FA] transition-all border-b border-black/[0.02] last:border-0 group"
