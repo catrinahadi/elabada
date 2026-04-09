@@ -550,9 +550,18 @@ export default function OwnerDashboard() {
                 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 px-4 animate-fadeUp" style={{ animationDelay: "50ms" }}>
                     {[
                         {
-                            label: "Total Shops",
-                            count: shops.length,
-                            icon: Store,
+                            label: "Overall Rating",
+                            count: (() => {
+                                const totalReviews = shops.reduce((acc, s) => acc + (s.reviewCount || 0), 0);
+                                if (totalReviews === 0) {
+                                    return shops.length > 0 
+                                        ? (shops.reduce((acc, s) => acc + (s.rating || 0), 0) / shops.length).toFixed(1)
+                                        : "0.0";
+                                }
+                                const totalStars = shops.reduce((acc, s) => acc + ((s.rating || 0) * (s.reviewCount || 0)), 0);
+                                return (totalStars / totalReviews).toFixed(1);
+                            })(),
+                            icon: Star,
                             color: "#014421",
                             bg: "bg-[#01442110]"
                         },
@@ -583,7 +592,9 @@ export default function OwnerDashboard() {
                             className="rounded-[40px] p-8 bg-white border border-black/[0.03] shadow-[0_10px_30px_rgba(0,0,0,0.05)] flex flex-col justify-center h-[150px] gap-4 transition-all hover:shadow-md group"
                         >
                             <div>
-                                <h3 className="text-5xl font-black tracking-tighter" style={{ color: stat.color }}>{stat.count}</h3>
+                                <h3 className="text-5xl font-black tracking-tighter" style={{ color: stat.color }}>
+                                    {stat.count}
+                                </h3>
                                 <p className="text-[12px] font-bold text-[#8E8E93] uppercase tracking-[0.1em] mt-1">{stat.label}</p>
                             </div>
                         </div>
@@ -625,6 +636,7 @@ export default function OwnerDashboard() {
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Price</th>
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Turnaround Time</th>
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Date Created</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Rating</th>
                                     <th className="py-8 px-4 pr-10 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em] text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -683,6 +695,11 @@ export default function OwnerDashboard() {
                                         <td className="py-8 px-4 whitespace-nowrap">
                                             <div className="flex items-center text-[#1D1D1F]">
                                                 <span className="text-[12px] font-medium">{new Date(shop.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                            </div>
+                                        </td>
+                                        <td className="py-8 px-4 whitespace-nowrap">
+                                            <div className="flex items-center text-[#1D1D1F]">
+                                                <span className="text-[14px] font-medium">{shop.rating || 0}/5</span>
                                             </div>
                                         </td>
                                         <td className="py-8 px-4 pr-10 text-right whitespace-nowrap">
