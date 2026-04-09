@@ -822,7 +822,38 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
   );
 }
 
-function ComputationDetailsModal({ shop, weights, onClose }) {
+function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
+  const conclusionText = useMemo(() => {
+    if (!shop || !shop.details) return "";
+    const sortedByWeight = [...shop.details].sort((a, b) => b.weight - a.weight);
+    const topFactor = sortedByWeight[0];
+    const labels = {
+      price: 'affordable pricing',
+      turnaroundTime: 'quick service',
+      distance: 'location convenience',
+      rating: 'customer satisfaction'
+    };
+
+    const matchPercent = Math.round(shop.score * 100);
+    
+    let summary = `This match score of ${matchPercent}% is determined by calculating how close ${shop.name} is to a theoretical "Ideal Solution." Rather than evaluating factors one by one, our system performs a multi-dimensional analysis that assesses all your preferences at the same time. `;
+
+    if (topFactor.rating > 0.85) {
+      summary += `Your primary priority was ${labels[topFactor.criterion]}, and since this shop aligns closely with that preference, it represents your strongest recommendation. `;
+    } else {
+      summary += `Although ${labels[topFactor.criterion]} was your primary priority, this shop was selected as the optimal "balanced compromise" among all alternatives. `;
+    }
+
+    const strongPoints = sortedByWeight.slice(1).filter(d => d.rating > 0.8).map(d => labels[d.criterion]);
+    if (strongPoints.length > 0) {
+      summary += ` Its performance in ${strongPoints.join(' and ')} significantly contributes to its high similarity to your ideal preference.`;
+    }
+
+    summary += ` Overall, this shop provides the best results for your specific weighted priorities.`;
+
+    return summary;
+  }, [shop]);
+
   const getExplanation = (detail) => {
     const { criterion, rating, actualValue, isBenefit, weight } = detail;
     const labels = {
@@ -967,20 +998,23 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#04e672]/5 rounded-full blur-3xl pointer-events-none" />
               
               <div className="mb-6 relative z-10">
-                <h6 className="text-[16px] font-normal text-[#1D1D1F]">Shop Value vs Your Preference</h6>
-                <p className="text-[14px] font-normal text-[#014421]/70 mt-0.5">Actual data against your priority ranking</p>
+                <h6 className="text-[16px] font-bold text-[#1D1D1F]">Impact on Score</h6>
+                <p className="text-[14px] font-normal text-[#014421]/70 mt-0.5">How each factor shaped your final match result</p>
               </div>
               
               <div className="flex-1 flex flex-col gap-3 relative z-10">
-                <div className="flex justify-between text-[12px] font-normal text-[#014421]/60 uppercase tracking-wider px-2">
-                  <span>Shop Value</span>
-                  <span>Your Preference</span>
+                <div className="flex justify-between text-[11px] font-bold text-[#014421]/40 uppercase tracking-[0.1em] px-2 mb-2">
+                  <span>Shop Data</span>
+                  <span>Impact on Score</span>
                 </div>
                 
-                {[...shop.details].sort((a,b)=> b.weight - a.weight).map((detail, idx) => {
+                {/* Sorted by weight to show mathematical dominance, but labeled by User's Rank if available */}
+                {[...shop.details].sort((a, b) => b.weight - a.weight).map((detail, idx) => {
                   const info = getExplanation(detail);
-                  const rank = idx + 1;
-                  const priorityText = rank === 1 ? '1st Priority' : rank === 2 ? '2nd Priority' : rank === 3 ? '3rd Priority' : '4th Priority';
+                  
+                  // Label them based on the User's explicit priority rank from Step 2
+                  const userRank = priorities ? priorities.indexOf(detail.criterion) + 1 : (idx + 1);
+                  const priorityText = idx === 0 ? 'Highest Impact' : idx === 1 ? 'Significant' : idx === 2 ? 'Moderate' : 'Minor Impact';
                   const labels = { price: 'Price', turnaroundTime: 'Time', distance: 'Distance', rating: 'Rating' };
                   
                   return (
@@ -1046,6 +1080,16 @@ function ComputationDetailsModal({ shop, weights, onClose }) {
               </div>
             </div>
           </div>
+
+          {/* Conclusion Section - Relocated below Formula */}
+          <section className="bg-emerald-50/50 p-6 md:p-8 rounded-[32px] md:rounded-[40px] border border-emerald-100/50 mt-4">
+            <h6 className="text-[16px] font-bold text-[#014421] mb-2 px-1">
+              Conclusion: What does this match mean?
+            </h6>
+            <p className="text-[14px] md:text-[16px] text-gray-700 leading-relaxed font-normal italic">
+              "{conclusionText}"
+            </p>
+          </section>
         </div>
 
         <div className="p-8 border-t border-[#014421]/5 bg-[#F9FBF9]/80 text-center">
@@ -2392,6 +2436,7 @@ export default function ShopsPage() {
                   );
                 })()}
             </div>
+
           </div>
         </div>
       </div>
@@ -2418,7 +2463,7 @@ export default function ShopsPage() {
           setActiveImageGallery={setActiveImageGallery}
         />
       )}
-      {showComputation && <ComputationDetailsModal shop={showComputation} weights={weights} onClose={() => setShowComputation(null)} />}
+      {showComputation && <ComputationDetailsModal shop={showComputation} weights={weights} priorities={priorities} onClose={() => setShowComputation(null)} />}
 
 
       {activeImageGallery && (
