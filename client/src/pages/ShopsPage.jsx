@@ -1099,6 +1099,7 @@ export default function ShopsPage() {
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [matchPreview, setMatchPreview] = useState(null);
   const [surveyStep, setSurveyStep] = useState(1);
+  const [selectedExactId, setSelectedExactId] = useState(null);
 
   const handleMovePriority = (index, direction) => {
     const newPriorities = [...priorities];
@@ -1383,7 +1384,9 @@ export default function ShopsPage() {
     if (filters.openNow) result = result.filter(s => isShopOpen(s.operatingHours));
 
     const query = searchQuery.toLowerCase().trim();
-    if (query) {
+    if (selectedExactId) {
+      result = result.filter(s => s.id === selectedExactId || s._id === selectedExactId);
+    } else if (query) {
       result = result.filter(s =>
         s?.name?.toLowerCase().includes(query) || s?.address?.toLowerCase().includes(query)
       );
@@ -1397,7 +1400,7 @@ export default function ShopsPage() {
       case 'topsis': return result.sort((a, b) => b.score - a.score);
       default: return result;
     }
-  }, [rankedShops, searchQuery, activeSort, filters]);
+  }, [rankedShops, searchQuery, activeSort, filters, selectedExactId]);
 
   // Suggestions logic
   const suggestions = useMemo(() => {
@@ -1473,7 +1476,7 @@ export default function ShopsPage() {
           <div className="px-4 md:px-10 pt-4 md:pt-10 pb-3 shrink-0">
             <div className="flex flex-row items-stretch gap-3 md:gap-6 h-[160px]">
               <div 
-                className="flex-1 rounded-[24px] md:rounded-[40px] px-5 py-6 md:px-10 md:py-8 text-white shadow-2xl relative flex flex-col justify-center gap-4 h-full bg-no-repeat overflow-hidden"
+                className="flex-1 rounded-[24px] md:rounded-[40px] px-5 py-6 md:px-10 md:py-8 text-white shadow-2xl relative flex flex-col justify-center gap-4 h-full bg-no-repeat"
                 style={{
                   backgroundSize: 'cover',
                   backgroundPosition: 'center 55%',
@@ -1481,14 +1484,14 @@ export default function ShopsPage() {
                 }}
               >
                 <div className="relative z-10 w-full flex items-center">
-                  <h2 className="text-[28px] md:text-[38px] font-normal tracking-tighter leading-none font-outfit truncate pr-4 mt-2">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
+                  <h2 className="text-[28px] md:text-[38px] font-normal tracking-tighter leading-normal font-outfit truncate pr-4 mt-2">Welcome, {user?.name?.split(' ')[0] || 'Maria'}</h2>
                 </div>
                 <div className="relative z-30 self-end w-full md:max-w-[70%] lg:max-w-xl flex-shrink-0 pointer-events-auto group">
                   <input
                     type="text"
                     placeholder="Search laundry shops..."
                     value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onChange={(e) => { setSearchQuery(e.target.value); setSelectedExactId(null); }}
                     onFocus={() => setShowSuggestions(true)}
                     onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
                     className="w-full h-12 md:h-16 bg-white/10 backdrop-blur-2xl border border-white/20 rounded-[24px] md:rounded-[32px] pl-14 md:pl-16 pr-6 text-white text-[14px] md:text-[15px] font-medium shadow-2xl focus:bg-white focus:text-[#1D1D1F] focus:ring-8 focus:ring-black/10 transition-all duration-500 outline-none placeholder:text-white/60 placeholder:font-normal"
@@ -1496,18 +1499,28 @@ export default function ShopsPage() {
                   <div className="absolute left-5 md:left-6 top-1/2 -translate-y-1/2 text-white group-focus-within:text-[#014421] transition-colors pointer-events-none">
                     <Search className="w-4 h-4 md:w-6 md:h-6 drop-shadow-[0_2px_4px_rgba(0,0,0,0.3)]" />
                   </div>
+                  {searchQuery && (
+                    <button 
+                      onClick={() => { setSearchQuery(""); setSelectedExactId(null); }}
+                      className="absolute right-5 md:right-6 top-1/2 -translate-y-1/2 text-white/40 hover:text-white transition-all transform active:scale-95 z-40 bg-white/10 hover:bg-white/20 p-1.5 rounded-full"
+                    >
+                      <X className="w-4 h-4 md:w-5 md:h-5" />
+                    </button>
+                  )}
                   {searchQuery && suggestions.length > 0 && showSuggestions && (
                     <div className="absolute top-full left-0 right-0 mt-3 bg-white rounded-[32px] shadow-2xl border border-black/[0.05] overflow-hidden z-[100] animate-fadeUp">
                       {suggestions.map(s => (
                         <button
                           key={s.id}
-                          onClick={() => { setSearchQuery(s.name); setShowSuggestions(false); }}
+                          onClick={() => { 
+                            setSearchQuery(s.name); 
+                            setSelectedExactId(s.id);
+                            setShowSuggestions(false); 
+                          }}
                           className="w-full px-8 py-5 flex items-center justify-between hover:bg-[#F8F9FA] transition-all border-b border-black/[0.02] last:border-0 group"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-[#1D1D1F]/5 flex items-center justify-center text-[#1D1D1F] group-hover:bg-[#1D1D1F] group-hover:text-white transition-all">
-                              <Store className="w-5 h-5" />
-                            </div>
+
                             <div className="text-left">
                               <p className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{s.name}</p>
                               <p className="text-[12px] font-medium text-[#1D1D1F]/50 truncate max-w-[200px]">{s.address}</p>
@@ -1543,7 +1556,9 @@ export default function ShopsPage() {
                 <div className="flex items-center justify-between">
                   <div className="space-y-1">
                     <h3 className="text-[18px] font-normal text-[#1D1D1F] tracking-tighter font-outfit leading-none">Laundry Shops</h3>
-                    <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate tracking-tighter leading-none">{filteredShops.length} shops found</p>
+                    <p className="text-[12px] font-medium text-[#1D1D1F]/60 truncate tracking-tighter leading-none">
+                      {selectedExactId ? "Selected shop found" : `${filteredShops.length} shops found`}
+                    </p>
                   </div>
                   <div className="flex items-center gap-4 relative">
                     {/* Simplified Sort Dropdown */}
