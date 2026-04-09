@@ -34,9 +34,9 @@ export default function Login() {
             return;
         }
 
-        if (result.role === "admin") navigate("/admin", { replace: true });
-        else if (result.role === "owner") navigate("/owner", { replace: true });
-        else navigate("/shops", { replace: true });
+        if (result.role === "admin") navigate("/admin");
+        else if (result.role === "owner") navigate("/owner");
+        else navigate("/shops");
     };
 
     const roles = [

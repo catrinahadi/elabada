@@ -66,6 +66,26 @@ export default function AdminDashboard() {
     const [currentPage, setCurrentPage] = useState(1);
     const ITEMS_PER_PAGE = 5;
 
+    const isAdminModalOpen = !!viewingPermit || !!confirmingApproval || !!confirmingDelete;
+
+    useEffect(() => {
+        if (isAdminModalOpen) {
+            window.history.pushState({ modalOpen: true }, "");
+        }
+    }, [isAdminModalOpen]);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isAdminModalOpen) {
+                setViewingPermit(null);
+                setConfirmingApproval(null);
+                setConfirmingDelete(null);
+            }
+        };
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [isAdminModalOpen]);
+
     useEffect(() => {
         const handleClickOutside = () => setOpenDropdownId(null);
         window.addEventListener('click', handleClickOutside);
@@ -80,6 +100,9 @@ export default function AdminDashboard() {
         api.get("/admin/stats")
             .then(({ data }) => setStats(data))
             .catch(err => console.error("Failed to load stats:", err.message));
+
+        // Buffer to prevent immediate back-navigation to login
+        window.history.pushState({ base: true }, "");
 
         return () => window.removeEventListener('click', handleClickOutside);
     }, []);

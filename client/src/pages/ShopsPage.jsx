@@ -1154,6 +1154,43 @@ export default function ShopsPage() {
     setActiveImageGallery(null);
   }, [sidebarTab]);
 
+  // Track tab changes in history
+  const isInitialTab = useRef(true);
+  useEffect(() => {
+    if (isInitialTab.current) {
+      window.history.replaceState({ tab: sidebarTab }, "");
+      isInitialTab.current = false;
+    } else {
+      window.history.pushState({ tab: sidebarTab }, "");
+    }
+  }, [sidebarTab]);
+
+  const isAnyModalOpen = !!selectedShop || !!showComputation || surveyStep > 1;
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      window.history.pushState({ modalOpen: true }, "");
+    }
+  }, [isAnyModalOpen, surveyStep]);
+
+  useEffect(() => {
+    const handlePopState = (event) => {
+      if (event.state && event.state.tab) {
+        setSidebarTab(event.state.tab);
+      }
+
+      if (selectedShop) {
+        setSelectedShop(null);
+      } else if (showComputation) {
+        setShowComputation(null);
+      } else if (surveyStep > 1) {
+        setSurveyStep(prev => prev - 1);
+      }
+    };
+    window.addEventListener("popstate", handlePopState);
+    return () => window.removeEventListener("popstate", handlePopState);
+  }, [selectedShop, showComputation, surveyStep]);
+
   // Fetch real road route using OSRM when a shop is selected for routing
   useEffect(() => {
     if (!activeRouteShopId) {

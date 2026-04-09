@@ -479,6 +479,30 @@ export default function OwnerDashboard() {
         }
     };
 
+    // Buffer to prevent immediate back-navigation to login
+    useEffect(() => {
+        window.history.pushState({ base: true }, "");
+    }, []);
+
+    // Handle back button to close modals instead of navigating away
+    useEffect(() => {
+        if (isModalOpen) {
+            window.history.pushState({ modalOpen: true }, "");
+        }
+    }, [isModalOpen]);
+
+    useEffect(() => {
+        const handlePopState = () => {
+            if (isModalOpen) {
+                setShowAddShop(false);
+                setEditingShop(null);
+                setDeletingId(null);
+            }
+        };
+        window.addEventListener("popstate", handlePopState);
+        return () => window.removeEventListener("popstate", handlePopState);
+    }, [isModalOpen]);
+
     useEffect(() => { fetchShops(); }, [user]);
 
     const handleAddShop = async (formData) => {
