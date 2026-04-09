@@ -63,6 +63,8 @@ export default function AdminDashboard() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
     const [openDropdownId, setOpenDropdownId] = useState(null);
     const [confirmingDelete, setConfirmingDelete] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 5;
 
     useEffect(() => {
         const handleClickOutside = () => setOpenDropdownId(null);
@@ -89,6 +91,13 @@ export default function AdminDashboard() {
         if (filterStatus === "all") return shops;
         return shops.filter(s => s.permitStatus === filterStatus);
     }, [shops, filterStatus]);
+
+    const paginatedList = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredList.slice(start, start + ITEMS_PER_PAGE);
+    }, [filteredList, currentPage]);
+
+    const totalPages = Math.ceil(filteredList.length / ITEMS_PER_PAGE);
 
     const handleLogout = () => { logout(); navigate("/"); };
 
@@ -190,7 +199,7 @@ export default function AdminDashboard() {
                                 {['all', 'pending', 'approved', 'rejected'].map((s) => (
                                     <button
                                         key={s}
-                                        onClick={() => setFilterStatus(s)}
+                                        onClick={() => { setFilterStatus(s); setCurrentPage(1); }}
                                         className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${filterStatus === s ? 'bg-[#014421] text-white border-[#014421] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
                                     >
                                         {s === 'all' ? 'Total Shops' : s}
@@ -200,7 +209,7 @@ export default function AdminDashboard() {
 
 
 
-                            <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-72">
+                            <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-10">
                                 {/* Table Header */}
                                 <div className="hidden lg:grid grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
                                     <span>Shop #</span>
@@ -214,13 +223,13 @@ export default function AdminDashboard() {
                                 </div>
 
 
-                                {filteredList.map((shop, idx) => (
+                                {paginatedList.map((shop, idx) => (
                                     <div
                                         key={shop._id}
                                         className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
                                     >
                                         <span className="text-[14px] font-normal text-[#1D1D1F] lg:block hidden tracking-tight tabular-nums truncate">
-                                            {(idx + 1).toString().padStart(2, '0')}
+                                            {((currentPage - 1) * ITEMS_PER_PAGE + idx + 1).toString().padStart(2, '0')}
                                         </span>
 
                                         {/* Name */}
@@ -315,6 +324,27 @@ export default function AdminDashboard() {
                                     </div>
                                 ))}
 
+                                {totalPages > 1 && (
+                                    <div className="flex items-center justify-between px-10 py-8 bg-white rounded-[32px] border border-black/[0.02] mt-4 shadow-sm">
+                                        <span className="text-[14px] font-medium text-[#8E8E93]">Page {currentPage} of {totalPages}</span>
+                                        <div className="flex items-center gap-3">
+                                            <button 
+                                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                disabled={currentPage === 1}
+                                                className="px-6 py-3 rounded-2xl bg-[#F8F9FA] border border-black/5 text-[14px] font-medium text-[#1D1D1F] disabled:opacity-30 transition-all hover:bg-white active:scale-95 shadow-sm"
+                                            >
+                                                Previous
+                                            </button>
+                                            <button 
+                                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                disabled={currentPage === totalPages}
+                                                className="px-6 py-3 rounded-2xl bg-[#F8F9FA] border border-black/5 text-[14px] font-medium text-[#1D1D1F] disabled:opacity-30 transition-all hover:bg-white active:scale-95 shadow-sm"
+                                            >
+                                                Next
+                                            </button>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, memo } from "react";
+import { useState, useEffect, useRef, memo, useMemo } from "react";
 import { MapContainer, TileLayer, Marker, useMap, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -446,6 +446,22 @@ export default function OwnerDashboard() {
     const [successMsg, setSuccessMsg] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
     const [selectedShopId, setSelectedShopId] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 5;
+
+    const filteredShopsList = useMemo(() => {
+        return shops.filter(s => {
+            if (selectedShopId) return s._id === selectedShopId;
+            return statusFilter === "all" ? true : s.permitStatus === statusFilter;
+        });
+    }, [shops, selectedShopId, statusFilter]);
+
+    const paginatedShops = useMemo(() => {
+        const start = (currentPage - 1) * ITEMS_PER_PAGE;
+        return filteredShopsList.slice(start, start + ITEMS_PER_PAGE);
+    }, [filteredShopsList, currentPage]);
+
+    const totalPages = Math.ceil(filteredShopsList.length / ITEMS_PER_PAGE);
 
     const isModalOpen = showAddShop || !!editingShop || !!deletingId;
 
@@ -616,7 +632,7 @@ export default function OwnerDashboard() {
                         ].map((f) => (
                             <button
                                 key={f.id}
-                                onClick={() => { setStatusFilter(f.id); setSelectedShopId(null); }}
+                                onClick={() => { setStatusFilter(f.id); setSelectedShopId(null); setCurrentPage(1); }}
                                 className={`px-6 py-3 rounded-2xl text-[14px] font-normal transition-all capitalize border-2 shrink-0 whitespace-nowrap ${statusFilter === f.id ? 'bg-[#014421] text-white border-[#014421] shadow-xl' : 'bg-white text-[#8E8E93] border-black/[0.05] hover:border-black/20'}`}
                             >
                                 {f.label}
@@ -643,11 +659,11 @@ export default function OwnerDashboard() {
                             <tbody className="divide-y divide-black/[0.02]">
                                 {loadingShops ? (
                                     <tr>
-                                        <td colSpan="8" className="py-32 text-center text-[#8E8E93] text-sm animate-pulse">Loading registries...</td>
+                                        <td colSpan="10" className="py-32 text-center text-[#8E8E93] text-sm animate-pulse">Loading registries...</td>
                                     </tr>
-                                ) : shops.length === 0 ? (
+                                ) : filteredShopsList.length === 0 ? (
                                     <tr>
-                                        <td colSpan="8" className="py-40 text-center">
+                                        <td colSpan="10" className="py-40 text-center">
                                             <div className="flex flex-col items-center justify-center space-y-4">
                                                 <div className="w-20 h-20 bg-[#F8F9FA] rounded-[32px] flex items-center justify-center mx-auto mb-4 opacity-50 shadow-inner">
                                                     <Store className="w-10 h-10 text-[#1D1D1F]" />
@@ -659,78 +675,105 @@ export default function OwnerDashboard() {
                                             </div>
                                         </td>
                                     </tr>
-                                ) : shops.filter(s => {
-                                    if (selectedShopId) return s._id === selectedShopId;
-                                    return statusFilter === "all" ? true : s.permitStatus === statusFilter;
-                                }).map((shop, idx) => (
-                                    <tr key={shop._id} className="group hover:bg-[#F8F9FA]/80 transition-all">
-                                        <td className="py-8 pl-10 pr-4">
-                                            <span className="text-[14px] font-normal text-[#1D1D1F]">{(idx + 1).toString().padStart(2, '0')}</span>
-                                        </td>
-                                        <td className="py-8 px-4">
-                                            <div className="flex items-center gap-4">
-                                                <div className="flex flex-col">
-                                                    <div className="flex items-center gap-1.5">
-                                                        <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{shop.name}</span>
+                                ) : (
+                                    <>
+                                        {paginatedShops.map((shop, idx) => (
+                                            <tr key={shop._id} className="group hover:bg-[#F8F9FA]/80 transition-all">
+                                                <td className="py-8 pl-10 pr-4">
+                                                    <span className="text-[14px] font-normal text-[#1D1D1F] truncate italic opacity-60">{( (currentPage-1) * ITEMS_PER_PAGE + idx + 1).toString().padStart(2, '0')}</span>
+                                                </td>
+                                                <td className="py-8 px-4">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="flex flex-col">
+                                                            <div className="flex items-center gap-1.5">
+                                                                <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">{shop.name}</span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="py-8 px-4">
-                                            <span className="text-[14px] font-medium text-[#1D1D1F]">{user?.name || 'You'}</span>
-                                        </td>
-                                        <td className="py-8 px-4">
-                                            <div className="flex items-center text-[#1D1D1F]">
-                                                <span className="text-[12px] font-medium max-w-[200px] truncate">{shop.address}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-8 px-4 whitespace-nowrap">
-                                            <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">₱{shop.price}<span className="text-[10px] text-[#1D1D1F] ml-0.5 tracking-normal">/kg</span></span>
-                                        </td>
-                                        <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center text-[#1D1D1F]">
-                                                <span className="text-[12px] font-medium">{shop.turnaroundTime} hrs</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center text-[#1D1D1F]">
-                                                <span className="text-[12px] font-medium">{new Date(shop.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-8 px-4 whitespace-nowrap">
-                                            <div className="flex items-center text-[#1D1D1F]">
-                                                <span className="text-[14px] font-medium">{shop.rating || 0}/5</span>
-                                            </div>
-                                        </td>
-                                        <td className="py-8 px-4 pr-10 text-right whitespace-nowrap">
-                                            <div className="flex items-center justify-end gap-3">
-                                                <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-black/[0.03] shadow-sm ${statusColor(shop.permitStatus)}`}>
-                                                    {statusLabel(shop.permitStatus)}
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    {shop.permitStatus !== 'rejected' ? (
-                                                        <>
-                                                            <button
-                                                                onClick={() => setEditingShop(shop)}
-                                                                className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#1D1D1F] hover:bg-black/[0.03] hover:shadow-md transition-all active:scale-95"
-                                                                title="Edit Establishment"
+                                                </td>
+                                                <td className="py-8 px-4">
+                                                    <span className="text-[14px] font-medium text-[#1D1D1F]">{user?.name || 'You'}</span>
+                                                </td>
+                                                <td className="py-8 px-4">
+                                                    <div className="flex items-center text-[#1D1D1F]">
+                                                        <span className="text-[12px] font-medium max-w-[200px] truncate">{shop.address}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-8 px-4 whitespace-nowrap">
+                                                    <span className="text-[14px] font-normal text-[#1D1D1F] tracking-tight">₱{shop.price}<span className="text-[10px] text-[#1D1D1F] ml-0.5 tracking-normal">/kg</span></span>
+                                                </td>
+                                                <td className="py-8 px-4 whitespace-nowrap">
+                                                    <div className="flex items-center text-[#1D1D1F]">
+                                                        <span className="text-[12px] font-medium">{shop.turnaroundTime} hrs</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-8 px-4 whitespace-nowrap">
+                                                    <div className="flex items-center text-[#1D1D1F]">
+                                                        <span className="text-[12px] font-medium">{new Date(shop.updatedAt || Date.now()).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-8 px-4 whitespace-nowrap">
+                                                    <div className="flex items-center text-[#1D1D1F]">
+                                                        <span className="text-[14px] font-medium">{shop.rating || 0}/5</span>
+                                                    </div>
+                                                </td>
+                                                <td className="py-8 px-4 pr-10 text-right whitespace-nowrap">
+                                                    <div className="flex items-center justify-end gap-3">
+                                                        <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-black/[0.03] shadow-sm ${statusColor(shop.permitStatus)}`}>
+                                                            {statusLabel(shop.permitStatus)}
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            {shop.permitStatus !== 'rejected' ? (
+                                                                <>
+                                                                    <button
+                                                                        onClick={() => setEditingShop(shop)}
+                                                                        className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#1D1D1F] hover:bg-black/[0.03] hover:shadow-md transition-all active:scale-95"
+                                                                        title="Edit Establishment"
+                                                                    >
+                                                                        <Edit3 className="w-4 h-4" />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => setDeletingId(shop._id)}
+                                                                        className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#7B1113] hover:bg-[#7B1113]/5 hover:shadow-md transition-all active:scale-95"
+                                                                        title="Delete Establishment"
+                                                                    >
+                                                                        <Trash2 className="w-4 h-4" />
+                                                                    </button>
+                                                                </>
+                                                            ) : null}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+
+                                        {totalPages > 1 && (
+                                            <tr key="pagination">
+                                                <td colSpan="10" className="py-6 px-10 bg-[#F8F9FA]/30 border-t border-black/[0.03]">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[12px] font-medium text-[#8E8E93]">Page {currentPage} of {totalPages}</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <button 
+                                                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                                                disabled={currentPage === 1}
+                                                                className="px-4 py-2 rounded-xl bg-white border border-black/5 text-[12px] font-medium text-[#1D1D1F] disabled:opacity-30 transition-all hover:bg-gray-50 active:scale-95"
                                                             >
-                                                                <Edit3 className="w-4 h-4" />
+                                                                Prev
                                                             </button>
-                                                            <button
-                                                                onClick={() => setDeletingId(shop._id)}
-                                                                className="w-10 h-10 rounded-xl bg-white border border-black/[0.03] shadow-sm flex items-center justify-center text-[#7B1113] hover:bg-[#7B1113]/5 hover:shadow-md transition-all active:scale-95"
-                                                                title="Delete Establishment"
+                                                            <button 
+                                                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                                                disabled={currentPage === totalPages}
+                                                                className="px-4 py-2 rounded-xl bg-white border border-black/5 text-[12px] font-medium text-[#1D1D1F] disabled:opacity-30 transition-all hover:bg-gray-50 active:scale-95"
                                                             >
-                                                                <Trash2 className="w-4 h-4" />
+                                                                Next
                                                             </button>
-                                                        </>
-                                                    ) : null}
-                                                </div>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        )}
+                                    </>
+                                )}
                             </tbody>
                         </table>
                     </div>
