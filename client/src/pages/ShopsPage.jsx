@@ -1084,7 +1084,6 @@ export default function ShopsPage() {
   const [weights, setWeights] = useState({ price: 30, time: 24, distance: 10, rating: 4 });
   const [searchQuery, setSearchQuery] = useState("");
   const [mapSearchQuery, setMapSearchQuery] = useState("");
-  const [mapSelection, setMapSelection] = useState(null);
   const [priorities, setPriorities] = useState(['price', 'time', 'distance', 'rating']);
   const [dragIndex, setDragIndex] = useState(null);
   const [isApplied, setIsApplied] = useState(false);
@@ -1147,10 +1146,8 @@ export default function ShopsPage() {
     refreshLocation();
   }, []);
 
-  // Reset map and modal states when changing tabs
+  // Reset modal and computation states when changing tabs
   useEffect(() => {
-    setActiveRouteShopId(null);
-    setRoutePath([]);
     setSelectedShop(null);
     setShowComputation(null);
     setActiveImageGallery(null);
@@ -1436,17 +1433,17 @@ export default function ShopsPage() {
         </div>
 
         <nav className="flex-1 space-y-3">
-          <button onClick={() => { setSidebarTab("overview"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("overview"); setIsSidebarOpen(false); setActiveRouteShopId(null); setRoutePath([]); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "overview" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <LayoutDashboard className={`w-5 h-5 ${sidebarTab === "overview" ? "text-white" : "text-[#014421]"}`} />
             Overview
           </button>
 
-          <button onClick={() => { setSidebarTab("map"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("map"); setIsSidebarOpen(false); setActiveRouteShopId(null); setRoutePath([]); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "map" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <MapIcon className={`w-5 h-5 ${sidebarTab === "map" ? "text-white" : "text-[#014421]"}`} />
             Location
           </button>
 
-          <button onClick={() => { setSidebarTab("computation"); setIsSidebarOpen(false); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
+          <button onClick={() => { setSidebarTab("computation"); setIsSidebarOpen(false); setActiveRouteShopId(null); setRoutePath([]); }} className={`w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-[14px] transition-all relative group ${sidebarTab === "computation" ? "text-white bg-[#014421] shadow-lg shadow-[#014421]/20" : "text-[#014421] hover:bg-[#014421]/5"}`}>
             <BarChart3 className={`w-5 h-5 ${sidebarTab === "computation" ? "text-white" : "text-[#014421]"}`} />
             Computation
           </button>
@@ -1525,10 +1522,10 @@ export default function ShopsPage() {
                 <div className="absolute top-0 right-0 w-120 h-96 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none z-0" />
               </div>
               <div className="flex flex-col justify-between gap-2 h-[160px]">
-                <button onClick={() => setSidebarTab("computation")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                <button onClick={() => { setSidebarTab("computation"); setActiveRouteShopId(null); setRoutePath([]); }} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#7B1113] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <Calculator className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
-                <button onClick={() => setSidebarTab("map")} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
+                <button onClick={() => { setSidebarTab("map"); setActiveRouteShopId(null); setRoutePath([]); }} className="w-[58px] md:w-[70px] flex-1 rounded-[16px] md:rounded-[20px] bg-[#FF8C00] shadow-lg flex items-center justify-center group transition-all hover:scale-105 shrink-0">
                   <MapIcon className="w-6 h-6 md:w-7 md:h-7 text-white transition-all" />
                 </button>
               </div>
