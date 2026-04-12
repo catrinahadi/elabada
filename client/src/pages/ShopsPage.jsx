@@ -1972,7 +1972,7 @@ export default function ShopsPage() {
                     <div className="flex flex-col gap-8 max-w-full w-full animate-fadeUp">
                       <div className="mb-10 text-left">
                         <h2 className="text-[18px] font-normal tracking-tight text-[#1D1D1F] font-outfit">Rank the factors</h2>
-                        <p className="text-[14px] text-black/40 font-normal">Drag or use arrows to set priority</p>
+                        <p className="text-[14px] text-black/40 font-normal">Use arrows to set priority</p>
                       </div>
 
 
