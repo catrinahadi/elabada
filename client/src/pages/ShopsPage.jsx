@@ -1171,6 +1171,8 @@ export default function ShopsPage() {
   const [showSortDropdown, setShowSortDropdown] = useState(false);
   const [activeImageGallery, setActiveImageGallery] = useState(null); // { images: [], index: 0 }
   const [isMapSheetExpanded, setIsMapSheetExpanded] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const ITEMS_PER_PAGE = 10;
 
 
   // Detect actual user location on mount
@@ -1475,13 +1477,27 @@ export default function ShopsPage() {
 
     // Sorting
     switch (activeSort) {
-      case 'price': return result.sort((a, b) => a.price - b.price);
-      case 'rating': return result.sort((a, b) => b.rating - a.rating);
-      case 'distance': return result.sort((a, b) => a.distance - b.distance);
-      case 'topsis': return result.sort((a, b) => b.score - a.score);
-      default: return result;
+      case 'price': result = result.sort((a, b) => a.price - b.price); break;
+      case 'rating': result = result.sort((a, b) => b.rating - a.rating); break;
+      case 'distance': result = result.sort((a, b) => a.distance - b.distance); break;
+      case 'topsis': result = result.sort((a, b) => b.score - a.score); break;
+      default: break;
     }
+
+    return result;
   }, [rankedShops, searchQuery, activeSort, filters, selectedExactId]);
+
+  const paginatedShops = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredShops.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredShops, currentPage]);
+
+  const totalPages = Math.ceil(filteredShops.length / ITEMS_PER_PAGE);
+
+  // Reset page to 1 when search or filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filters, activeSort, selectedExactId]);
 
   // Suggestions logic
   const suggestions = useMemo(() => {
@@ -1677,8 +1693,8 @@ export default function ShopsPage() {
                   </div>
                 </div>
               </div>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pb-12">
-                {filteredShops.map(s => (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3 md:gap-6 pb-6">
+                {paginatedShops.map(s => (
                   <div
                     key={s.id || s._id}
                     onClick={() => handleSelectShop(s)}
@@ -1768,6 +1784,42 @@ export default function ShopsPage() {
                   </div>
                 ))}
               </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between py-8 border-t border-black/[0.03]">
+                  <span className="text-[13px] font-normal text-[#1D1D1F]/40">
+                    Page <span className="text-[#1D1D1F] font-medium">{currentPage}</span> of <span className="text-[#1D1D1F] font-medium">{totalPages}</span>
+                  </span>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => {
+                        setCurrentPage(p => Math.max(1, p - 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === 1}
+                      className="px-6 py-3 rounded-2xl bg-white border border-black/[0.05] text-[13px] font-normal text-[#1D1D1F] hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-sm"
+                    >
+                      <div className="flex items-center gap-2">
+                        <ChevronLeft className="w-4 h-4" />
+                        Prev
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setCurrentPage(p => Math.min(totalPages, p + 1));
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                      }}
+                      disabled={currentPage === totalPages}
+                      className="px-6 py-3 rounded-2xl bg-[#014421] text-white text-[13px] font-normal hover:bg-[#1D1D1F] disabled:opacity-30 disabled:cursor-not-allowed transition-all active:scale-95 shadow-lg shadow-[#014421]/10"
+                    >
+                      <div className="flex items-center gap-2">
+                        Next
+                        <ChevronRight className="w-4 h-4" />
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
