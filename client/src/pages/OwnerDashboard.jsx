@@ -79,28 +79,6 @@ function ConfirmationModal({ title, message, onConfirm, onCancel }) {
     );
 }
 
-function Toast({ message, onClose }) {
-    useEffect(() => {
-        const timer = setTimeout(onClose, 3000);
-        return () => clearTimeout(timer);
-    }, [onClose]);
-
-    return (
-        <div className="fixed top-8 left-1/2 -translate-x-1/2 lg:top-auto lg:bottom-12 lg:right-12 lg:left-auto lg:translate-x-0 z-[500] animate-fadeUp">
-            <div className="bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.03] p-5 pr-8 flex items-center gap-4 min-w-[320px]">
-                <div className="w-10 h-10 rounded-2xl bg-[#228B2210] flex items-center justify-center shrink-0">
-                    <CheckCircle className="w-5 h-5 text-[#228B22]" />
-                </div>
-                <div>
-                    <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight">{message}</p>
-                </div>
-                <button onClick={onClose} className="absolute right-4 top-1/2 -translate-y-1/2 text-[#1D1D1F]/20 hover:text-[#1D1D1F]">
-                    <X className="w-4 h-4" />
-                </button>
-            </div>
-        </div>
-    );
-}
 
 // Image / file upload box component
 function UploadBox({ label, hint, onFileSelected, preview, small = false, extraClass = "" }) {
@@ -435,7 +413,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
 }
 
 export default function OwnerDashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, setSuccessMsg } = useAuth();
     const navigate = useNavigate();
     const [shops, setShops] = useState([]);
     const [loadingShops, setLoadingShops] = useState(true);
@@ -443,7 +421,6 @@ export default function OwnerDashboard() {
     const [showAddShop, setShowAddShop] = useState(false);
     const [editingShop, setEditingShop] = useState(null);
     const [submitting, setSubmitting] = useState(false);
-    const [successMsg, setSuccessMsg] = useState(null);
     const [statusFilter, setStatusFilter] = useState("all");
     const [selectedShopId, setSelectedShopId] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
@@ -815,9 +792,6 @@ export default function OwnerDashboard() {
                 />
             )}
 
-            {successMsg && (
-                <Toast message={successMsg} onClose={() => setSuccessMsg(null)} />
-            )}
 
             {showAddShop && (
                 <ShopModal

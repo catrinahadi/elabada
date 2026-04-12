@@ -33,31 +33,14 @@ function ConfirmationModal({ isOpen, title, message, onConfirm, onCancel, confir
     );
 }
 
-function Toast({ message, onClose }) {
-    useEffect(() => {
-        const timer = setTimeout(onClose, 3000);
-        return () => clearTimeout(timer);
-    }, [onClose]);
-
-    return (
-        <div className="fixed top-6 right-6 lg:top-auto lg:bottom-12 lg:right-12 z-[500] animate-fadeDown lg:animate-fadeUp">
-            <div className="bg-white rounded-[24px] shadow-[0_20px_50px_rgba(0,0,0,0.15)] border border-black/[0.03] p-5 pr-8 flex items-center gap-4 min-w-[320px]">
-                <div>
-                    <p className="text-[14px] font-normal text-[#1D1D1F] leading-tight">{message}</p>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 export default function AdminDashboard() {
-    const { user, logout } = useAuth();
+    const { user, logout, setSuccessMsg } = useAuth();
     const navigate = useNavigate();
     const [shops, setShops] = useState([]);
     const [stats, setStats] = useState({ shops: {}, users: { total: 0 } });
     const [viewingPermit, setViewingPermit] = useState(null);
     const [confirmingApproval, setConfirmingApproval] = useState(null);
-    const [successMsg, setSuccessMsg] = useState(null);
     const [expandedShops, setExpandedShops] = useState(new Set());
     const [filterStatus, setFilterStatus] = useState("pending");
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -377,9 +360,6 @@ export default function AdminDashboard() {
             {/* MODALS */}
             {viewingPermit && <PermitModal shop={viewingPermit} onClose={() => setViewingPermit(null)} />}
             
-            {successMsg && (
-                <Toast message={successMsg} onClose={() => setSuccessMsg(null)} />
-            )}
             
             <ConfirmationModal 
                 isOpen={!!confirmingApproval}
