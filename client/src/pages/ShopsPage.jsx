@@ -1138,6 +1138,7 @@ export default function ShopsPage() {
   const [shopReviews, setShopReviews] = useState({});
   const [activeRouteShopId, setActiveRouteShopId] = useState(null);
   const [routePath, setRoutePath] = useState([]);
+  const shopListRef = useRef(null);
   const [showWeightManual, setShowWeightManual] = useState(false);
   const [showPriorityManual, setShowPriorityManual] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -1192,6 +1193,22 @@ export default function ShopsPage() {
   useEffect(() => {
     refreshLocation();
   }, []);
+
+  // Auto-scroll to the active shop in the map sidebar list
+  useEffect(() => {
+    if (!activeRouteShopId || sidebarTab !== "map") return;
+    const scrollToShop = () => {
+      const container = shopListRef.current;
+      if (!container) return;
+      const card = container.querySelector(`[data-shop-id="${activeRouteShopId}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    };
+    // Small delay to allow tab transition to complete before scrolling
+    const timer = setTimeout(scrollToShop, 350);
+    return () => clearTimeout(timer);
+  }, [activeRouteShopId, sidebarTab]);
 
   // Reset modal and computation states when changing tabs
   useEffect(() => {
@@ -2360,7 +2377,7 @@ export default function ShopsPage() {
                   </div>
                 </div>
 
-                <div className={`absolute top-0 right-0 h-full pointer-events-none w-full md:w-[460px] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] z-[40] p-4 md:p-10
+                <div className={`absolute top-0 right-0 h-full pointer-events-none w-full md:w-[540px] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)] z-[40] p-4 md:p-10
                   ${activeRouteShopId ? 'translate-x-[calc(100%+40px)] md:translate-x-0' : (isMapSheetExpanded ? 'translate-x-0' : 'translate-y-[calc(100%-100px)] md:translate-y-0')}
                 `}>
                   <div className="w-full h-full pointer-events-auto bg-white/80 backdrop-blur-3xl rounded-[48px] border border-white shadow-[0_32px_80px_-16px_rgba(0,0,0,0.2)] md:ring-1 md:ring-black/5 flex flex-col overflow-hidden">
@@ -2386,7 +2403,7 @@ export default function ShopsPage() {
                             </div>
                           </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto no-scrollbar pointer-events-auto transition-all duration-500">
+                        <div ref={shopListRef} className="flex-1 overflow-y-auto no-scrollbar pointer-events-auto transition-all duration-500">
                           <div className="px-6 py-6 space-y-4">
                             {filtered
                               .map((s, i) => {
@@ -2395,6 +2412,7 @@ export default function ShopsPage() {
                                 return (
                                   <div
                                     key={s.id}
+                                    data-shop-id={s.id}
                                     onClick={() => {
                                       if (isActive && !isMapSheetExpanded) {
                                         setIsMapSheetExpanded(true);
