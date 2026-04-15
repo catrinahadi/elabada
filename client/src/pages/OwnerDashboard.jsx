@@ -403,7 +403,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                             disabled={isLoading}
                             className="w-full py-4 rounded-[20px] bg-[#7B1113] text-white text-[14px] font-normal hover:bg-[#1D1D1F] transition-all shadow-2xl shadow-[#7B1113]/20 flex items-center justify-center gap-3 disabled:opacity-50 active:scale-[0.98]"
                         >
-                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : "Register Establishment"}
+                            {isLoading ? <Loader className="w-5 h-5 animate-spin" /> : initialData ? "Update Shop" : "Register Establishment"}
                         </button>
                     </div>
                 </form>
