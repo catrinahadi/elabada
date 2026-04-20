@@ -28,9 +28,21 @@ export default function Signup() {
         setError("");
         setLoading(true);
 
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,128}$/;
-        if (!passwordRegex.test(password)) {
-            setError("Password must be 8-128 characters long and include at least one uppercase letter, one lowercase letter, one numeric digit, and one special character.");
+        const getMissingRequirements = (pwd) => {
+            const missing = [];
+            if (pwd.length < 8) missing.push("be at least 8 characters");
+            if (pwd.length > 128) missing.push("be at most 128 characters");
+            if (!/[A-Z]/.test(pwd)) missing.push("have at least one uppercase letter");
+            if (!/[a-z]/.test(pwd)) missing.push("have at least one lowercase letter");
+            if (!/\d/.test(pwd)) missing.push("have at least one numeric digit");
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(pwd)) missing.push("have at least one special character");
+            if (/\s/.test(pwd)) missing.push("not have spaces");
+            return missing;
+        };
+
+        const missing = getMissingRequirements(password);
+        if (missing.length > 0) {
+            setError(missing.map(req => `Password must ${req}`));
             setLoading(false);
             return;
         }
@@ -132,7 +144,7 @@ export default function Signup() {
                                     placeholder="Password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
-                                    maxLength={200}
+                                    maxLength={128}
                                     className="w-full h-14 bg-[#F3F4F6] rounded-2xl pl-12 pr-14 text-[14px] font-normal text-[#1D1D1F] border border-transparent focus:bg-white focus:border-[#014421]/10 focus:ring-4 focus:ring-[#014421]/5 outline-none transition-all placeholder:text-[#8E8E93]/60"
                                     required
                                 />
@@ -147,8 +159,18 @@ export default function Signup() {
                         </div>
 
                         {error && (
-                            <div className="p-4 bg-[#7B1113]/5 border border-[#7B1113]/10 rounded-2xl animate-shake">
-                                <p className="text-[14px] font-normal text-[#7B1113] leading-relaxed text-center">{error}</p>
+                            <div className="flex flex-col gap-2">
+                                {Array.isArray(error) ? (
+                                    error.map((err, index) => (
+                                        <div key={index} className="p-3 bg-[#7B1113]/5 border border-[#7B1113]/10 rounded-xl animate-shake">
+                                            <p className="text-[13px] font-normal text-[#7B1113] leading-relaxed text-center">{err}</p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="p-4 bg-[#7B1113]/5 border border-[#7B1113]/10 rounded-2xl animate-shake">
+                                        <p className="text-[14px] font-normal text-[#7B1113] leading-relaxed text-center">{error}</p>
+                                    </div>
+                                )}
                             </div>
                         )}
 
