@@ -53,6 +53,7 @@ const Field = ({ label, value, onChange, type = "text", placeholder, step }) => 
             value={value}
             onChange={onChange}
             placeholder={placeholder}
+            maxLength={200}
             className="w-full h-10 bg-[#F8F9FA] rounded-[12px] px-4 text-[13px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
             required
         />
@@ -277,6 +278,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                             value={form.address}
                                             onChange={e => set("address", e.target.value)}
                                             placeholder="Enter complete address"
+                                            maxLength={200}
                                             className="w-full h-10 bg-[#F8F9FA] rounded-[12px] pl-10 pr-5 text-[13px] font-normal border border-black/5 outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 transition-all font-outfit"
                                         />
                                     </div>
@@ -349,7 +351,7 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                                         }}
                                                         className={`w-9 h-5 rounded-full transition-all relative cursor-pointer ${form.operatingHours[day].closed ? 'bg-[#7B1113]/10' : 'bg-[#014421]/10'}`}
                                                     >
-                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all shadow-sm ${form.operatingHours[day].closed ? 'bg-[#7B1113] left-4.5' : 'bg-[#014421] left-0.5'}`}></div>
+                                                        <div className={`absolute top-0.5 w-4 h-4 rounded-full transition-all shadow-sm ${form.operatingHours[day].closed ? 'bg-[#7B1113] left-0.5' : 'bg-[#014421] left-[18px]'}`}></div>
                                                     </div>
                                                     <span className={`text-[13px] capitalize tracking-tight ${form.operatingHours[day].closed ? 'text-red-500/60' : 'text-[#1D1D1F]'}`}>{day}</span>
                                                 </div>
@@ -654,6 +656,7 @@ export default function OwnerDashboard() {
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Turnaround Time</th>
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Date Created</th>
                                     <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Rating</th>
+                                    <th className="py-8 px-4 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em]">Status</th>
                                     <th className="py-8 px-4 pr-10 text-[11px] font-black text-[#8E8E93] uppercase tracking-[0.2em] text-right">Actions</th>
                                 </tr>
                             </thead>
@@ -718,11 +721,13 @@ export default function OwnerDashboard() {
                                                         <span className="text-[14px] font-medium">{shop.rating || 0}/5</span>
                                                     </div>
                                                 </td>
+                                                <td className="py-8 px-4 whitespace-nowrap">
+                                                    <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-black/[0.03] shadow-sm w-fit ${statusColor(shop.permitStatus)}`}>
+                                                        {statusLabel(shop.permitStatus)}
+                                                    </div>
+                                                </td>
                                                 <td className="py-8 px-4 pr-10 text-right whitespace-nowrap">
                                                     <div className="flex items-center justify-end gap-3">
-                                                        <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border border-black/[0.03] shadow-sm ${statusColor(shop.permitStatus)}`}>
-                                                            {statusLabel(shop.permitStatus)}
-                                                        </div>
                                                         <div className="flex items-center gap-2">
                                                             {shop.permitStatus !== 'rejected' ? (
                                                                 <>

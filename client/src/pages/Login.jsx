@@ -88,6 +88,7 @@ export default function Login() {
                                     placeholder="Username"
                                     value={username}
                                     onChange={(e) => setUsername(e.target.value)}
+                                    maxLength={200}
                                     className="w-full h-14 bg-[#F3F4F6] rounded-2xl pl-12 pr-6 text-[14px] font-normal text-[#1D1D1F] border border-transparent focus:bg-white focus:border-[#014421]/10 focus:ring-4 focus:ring-[#014421]/5 outline-none transition-all placeholder:text-[#8E8E93]/60"
                                     required
                                 />
@@ -99,6 +100,7 @@ export default function Login() {
                                     placeholder="Password"
                                     value={password}
                                     onChange={(e) => setPassword(e.target.value)}
+                                    maxLength={200}
                                     className="w-full h-14 bg-[#F3F4F6] rounded-2xl pl-12 pr-14 text-[14px] font-normal text-[#1D1D1F] border border-transparent focus:bg-white focus:border-[#014421]/10 focus:ring-4 focus:ring-[#014421]/5 outline-none transition-all placeholder:text-[#8E8E93]/60"
                                     required
                                 />

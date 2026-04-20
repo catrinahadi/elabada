@@ -217,7 +217,7 @@ export default function AdminDashboard() {
 
                             <div className="flex flex-col gap-3 overflow-x-auto lg:overflow-visible no-scrollbar pb-10">
                                 {/* Table Header */}
-                                <div className="hidden lg:grid grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
+                                <div className="hidden lg:grid grid-cols-[80px_1.8fr_1.2fr_1.5fr_0.8fr_1fr_1.2fr_1.2fr_1.5fr] items-center px-12 py-3 mb-2 text-[11px] font-bold text-[#8E8E93] uppercase tracking-[0.2em]">
                                     <span>Shop #</span>
                                     <span>Name</span>
                                     <span>Owner</span>
@@ -225,6 +225,7 @@ export default function AdminDashboard() {
                                     <span>Price</span>
                                     <span>Turnaround Time</span>
                                     <span>Date Created</span>
+                                    <span>Status</span>
                                     <span className="text-right">Actions</span>
                                 </div>
 
@@ -232,7 +233,7 @@ export default function AdminDashboard() {
                                 {paginatedList.map((shop, idx) => (
                                     <div
                                         key={shop._id}
-                                        className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_1.8fr_1.2fr_1.8fr_0.8fr_1fr_1.2fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
+                                        className={`bg-white rounded-[32px] px-10 py-6 shadow-[0_4px_20px_rgba(0,0,0,0.02)] border border-black/[0.02] flex flex-col lg:grid lg:grid-cols-[80px_1.8fr_1.2fr_1.5fr_0.8fr_1fr_1.2fr_1.2fr_1.5fr] items-start lg:items-center gap-4 lg:gap-0 group hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300 relative ${openDropdownId === shop._id ? 'z-50' : 'z-0'}`}
                                     >
                                         <span className="text-[14px] font-normal text-[#1D1D1F] lg:block hidden tracking-tight tabular-nums truncate">
                                             {((currentPage - 1) * ITEMS_PER_PAGE + idx + 1).toString().padStart(2, '0')}
@@ -278,6 +279,17 @@ export default function AdminDashboard() {
                                             <div className="flex items-center text-[14px] font-normal text-[#1D1D1F]">
                                                 <span>{shop.createdAt ? new Date(shop.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'}</span>
                                             </div>
+                                        </div>
+
+                                        {/* Status */}
+                                        <div className="flex flex-col">
+                                            <span className={`px-3 py-1 rounded-full text-[12px] font-bold uppercase tracking-wider w-fit ${
+                                                shop.permitStatus === 'approved' ? 'bg-[#228B22]/10 text-[#228B22]' :
+                                                shop.permitStatus === 'rejected' ? 'bg-[#800000]/10 text-[#800000]' :
+                                                'bg-[#F59E0B]/10 text-[#F59E0B]'
+                                            }`}>
+                                                {shop.permitStatus}
+                                            </span>
                                         </div>
 
                                         <div className="flex items-center justify-end gap-4 w-full lg:w-auto mt-4 lg:mt-0">

@@ -60,6 +60,14 @@ exports.signup = async (req, res) => {
             return res.status(403).json({ message: "Cannot register as admin." });
         }
 
+        // Filter password complexity
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*(),.?":{}|<>]).{8,128}$/;
+        if (!passwordRegex.test(password)) {
+            return res.status(400).json({
+                message: "Password must be 8-128 characters long and include at least one uppercase letter, one lowercase letter, one numeric digit, and one special character."
+            });
+        }
+
         // Check if user exists already in any collection in parallel
         const [existingAdmin, existingOwner, existingCust] = await Promise.all([
             Admin.findOne({ email }),
