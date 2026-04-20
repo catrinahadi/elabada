@@ -3,7 +3,9 @@ const Shop = require("../models/Shop");
 // GET all approved shops (customer view)
 exports.getApprovedShops = async (req, res) => {
     try {
-        const shops = await Shop.find({ permitStatus: "approved" });
+        // Exclude internal fields like permitImage and rejectionReason for list view
+        const shops = await Shop.find({ permitStatus: "approved" })
+            .select("-permitImage -rejectionReason -__v");
         res.json(shops);
     } catch (err) {
         res.status(500).json({ message: "Server error", error: err.message });

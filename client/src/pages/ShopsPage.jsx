@@ -1299,26 +1299,24 @@ export default function ShopsPage() {
   // Fetch reviews whenever a shop modal opens
   const handleSelectShop = (shop) => {
     setShowComputation(null);
-    
-    // In Computation results, we show details beside the list, not in a popup
-    if (sidebarTab === "computation" && surveyStep === 3) {
-      setMatchPreview(shop);
-      const shopId = shop._id || shop.id;
-      if (shopId) {
-        api.get(`/reviews/${shopId}`)
-          .then(({ data }) => setShopReviews(prev => ({ ...prev, [shopId]: data })))
-          .catch(() => { });
-      }
-      return;
-    }
-
-    setSelectedShop(shop);
     const shopId = shop._id || shop.id;
-    if (shopId) {
+
+    if (!shopId) return;
+    
+    // Optimization: Only fetch reviews if they aren't already in our local memory
+    if (!shopReviews[shopId]) {
       api.get(`/reviews/${shopId}`)
         .then(({ data }) => setShopReviews(prev => ({ ...prev, [shopId]: data })))
         .catch(() => { });
     }
+
+    // In Computation results, we show details beside the list, not in a popup
+    if (sidebarTab === "computation" && surveyStep === 3) {
+      setMatchPreview(shop);
+      return;
+    }
+
+    setSelectedShop(shop);
   };
 
   // Post a new review then refresh

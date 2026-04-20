@@ -35,4 +35,8 @@ const shopSchema = new mongoose.Schema({
   amenities: { type: [String], default: [] }, // e.g., ["Pickup", "Delivery", "Folding", "Ironing"]
 }, { timestamps: true });
 
+// Optimize lookups with indexes
+shopSchema.index({ ownerId: 1 });
+shopSchema.index({ permitStatus: 1 });
+
 module.exports = mongoose.model("Shop", shopSchema);

@@ -12,4 +12,7 @@ const reviewSchema = new mongoose.Schema({
     actualTimeTaken: { type: Number }, // in hours
 }, { timestamps: true });
 
+// Optimize review lookups by shop
+reviewSchema.index({ shopId: 1 });
+
 module.exports = mongoose.model("Review", reviewSchema);

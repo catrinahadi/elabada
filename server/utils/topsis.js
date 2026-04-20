@@ -15,14 +15,14 @@ function calculateTopsis(shops) {
 
   const columns = matrix[0].length;
 
+  // Step 1: Pre-calculate identifiers for normalization (avoid O(N^2) loop)
+  const columnDenominators = Array(columns).fill(0).map((_, j) => {
+    return Math.sqrt(matrix.reduce((sum, r) => sum + Math.pow(r[j], 2), 0)) || 1;
+  });
+
   // Step 1: Normalize
   const normalized = matrix.map((row) =>
-    row.map((value, j) => {
-      const denominator = Math.sqrt(
-        matrix.reduce((sum, r) => sum + Math.pow(r[j], 2), 0)
-      );
-      return value / denominator;
-    })
+    row.map((value, j) => value / columnDenominators[j])
   );
 
   // Step 2: Apply weights

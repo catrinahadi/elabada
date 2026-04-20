@@ -1,10 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./context/AuthContext";
-import ShopsPage from "./pages/ShopsPage";
-import LoginPage from "./pages/Login";
-import SignupPage from "./pages/Signup";
-import AdminDashboard from "./pages/AdminDashboard";
-import OwnerDashboard from "./pages/OwnerDashboard";
+import { lazy, Suspense } from "react";
+const ShopsPage = lazy(() => import("./pages/ShopsPage"));
+const LoginPage = lazy(() => import("./pages/Login"));
+const SignupPage = lazy(() => import("./pages/Signup"));
+const AdminDashboard = lazy(() => import("./pages/AdminDashboard"));
+const OwnerDashboard = lazy(() => import("./pages/OwnerDashboard"));
 import "./index.css";
 
 function ProtectedRoute({ role, element }) {
@@ -44,15 +45,21 @@ function AppRoutes() {
   return (
     <>
       <GlobalToast />
-      <Routes>
-        <Route path="/" element={<LoginPage />} />
-        <Route path="/shops" element={<ShopsPage />} />
-        <Route path="/login" element={<Navigate to="/" replace />} />
-        <Route path="/signup" element={<SignupPage />} />
-        <Route path="/admin" element={<ProtectedRoute role="admin" element={<AdminDashboard />} />} />
-        <Route path="/owner" element={<ProtectedRoute role="owner" element={<OwnerDashboard />} />} />
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
+      <Suspense fallback={
+        <div className="min-h-screen flex items-center justify-center bg-white">
+          <div className="w-10 h-10 border-4 border-[#014421]/20 border-t-[#014421] rounded-full animate-spin"></div>
+        </div>
+      }>
+        <Routes>
+          <Route path="/" element={<LoginPage />} />
+          <Route path="/shops" element={<ShopsPage />} />
+          <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/admin" element={<ProtectedRoute role="admin" element={<AdminDashboard />} />} />
+          <Route path="/owner" element={<ProtectedRoute role="owner" element={<OwnerDashboard />} />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Suspense>
     </>
   );
 }
