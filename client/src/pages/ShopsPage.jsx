@@ -1165,7 +1165,7 @@ export default function ShopsPage() {
   const [filters, setFilters] = useState({
     rating: 0,
     price: 100,
-    distance: 50,
+    distance: 20,
     openNow: false
   });
   const [showFilterPanel, setShowFilterPanel] = useState(false);
@@ -1349,7 +1349,7 @@ export default function ShopsPage() {
     price: 100,
     time: 72,
     rating: 5,
-    distance: 50
+    distance: 20
   };
 
   const handleLogout = () => { logout(); navigate("/"); };
@@ -1478,7 +1478,7 @@ export default function ShopsPage() {
     // Applying Filters
     if (filters.rating > 0) result = result.filter(s => s.rating >= filters.rating);
     if (filters.price < 100) result = result.filter(s => s.price <= filters.price);
-    if (filters.distance < 50) result = result.filter(s => s.distance <= filters.distance);
+    if (filters.distance < 20) result = result.filter(s => s.distance <= filters.distance);
     if (filters.openNow) result = result.filter(s => isShopOpen(s.operatingHours));
 
     const query = searchQuery.toLowerCase().trim();
@@ -1922,10 +1922,10 @@ export default function ShopsPage() {
 
                       <div className="space-y-12">
                         {[
-                          { id: "distance", label: "Distance (km)", sub: "Maximum distance you'd travel", min: 1, max: 20, unit: "km", stateKey: "distance" },
-                          { id: "price", label: "Price (₱/kg)", sub: "Maximum affordable price per kg", min: 10, max: 100, unit: "₱", stateKey: "price" },
-                          { id: "time", label: "Turnaround time (hrs)", sub: "Maximum acceptable waiting time", min: 6, max: 72, unit: "hrs", stateKey: "time" },
-                          { id: "rating", label: "Ratings", sub: "Minimum acceptable star rating", min: 1, max: 5, step: 0.5, unit: "stars", stateKey: "rating" }
+                          { id: "distance", label: "Distance (km)", sub: "Maximum distance you'd travel (Max 20km)", min: 1, max: 20, unit: "km", stateKey: "distance" },
+                          { id: "price", label: "Price (₱/kg)", sub: "Budget range per kilogram (₱10 - ₱100)", min: 10, max: 100, unit: "₱", stateKey: "price" },
+                          { id: "time", label: "Turnaround time (hrs)", sub: "Acceptable service duration (6 - 72 hrs)", min: 6, max: 72, unit: "hrs", stateKey: "time" },
+                          { id: "rating", label: "Ratings", sub: "Minimum acceptable star rating (1-5 stars)", min: 1, max: 5, step: 0.5, unit: "stars", stateKey: "rating" }
                         ].map((q) => {
                           const val = weights[q.stateKey];
                           const percent = ((val - q.min) / (q.max - q.min)) * 100;

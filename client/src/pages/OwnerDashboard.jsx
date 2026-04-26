@@ -44,7 +44,7 @@ const MemoizedMap = memo(({ position, onPositionChange }) => {
 // Using baseURL from services/api.js instead of hardcoded strings
 
 
-const Field = ({ label, value, onChange, type = "text", placeholder, step }) => (
+const Field = ({ label, value, onChange, type = "text", placeholder, step, error }) => (
     <div className="space-y-1">
         <label className="block text-[12px] font-medium text-[#1D1D1F] px-1">{label}</label>
         <input
@@ -54,9 +54,10 @@ const Field = ({ label, value, onChange, type = "text", placeholder, step }) => 
             onChange={onChange}
             placeholder={placeholder}
             maxLength={200}
-            className="w-full h-10 bg-[#F8F9FA] rounded-[12px] px-4 text-[13px] font-normal text-[#1D1D1F] border border-black/[0.05] outline-none focus:ring-2 focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20 focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit"
+            className={`w-full h-10 bg-[#F8F9FA] rounded-[12px] px-4 text-[13px] font-normal text-[#1D1D1F] border ${error ? 'border-red-500 ring-2 ring-red-500/10' : 'border-black/[0.05]'} outline-none focus:ring-2 ${error ? 'focus:ring-red-500/20 focus:border-red-500/40' : 'focus:ring-[#7B1113]/10 focus:border-[#7B1113]/20'} focus:bg-white placeholder:text-[#1D1D1F]/40 transition-all font-outfit`}
             required
         />
+        {error && <p className="text-[11px] font-medium text-red-500 px-1 animate-fadeUp">{error}</p>}
     </div>
 );
 
@@ -176,8 +177,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
     const [shopImagePreview, setShopImagePreview] = useState(initialData?.image || "");
     const [permitPreview, setPermitPreview] = useState(initialData?.permitImage || "");
     const [uploading, setUploading] = useState(false);
+    const [errors, setErrors] = useState({});
 
-    const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+    const set = (k, v) => {
+        setForm(f => ({ ...f, [k]: v }));
+        // Clear error when user changes the field
+        if (errors[k]) {
+            setErrors(prev => {
+                const next = { ...prev };
+                delete next[k];
+                return next;
+            });
+        }
+    };
 
     const pickShopImage = (file) => {
         setShopImageFile(file);
@@ -209,6 +221,19 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
         const hasOpenDay = Object.values(form.operatingHours).some(d => !d.closed);
         if (!hasOpenDay) {
             alert("Please set operating hours for at least one day (Toggle a day to open it).");
+            return;
+        }
+
+        let newErrors = {};
+        if (Number(form.price) < 10 || Number(form.price) > 100) {
+            newErrors.price = "Price must be between ₱10 and ₱100.";
+        }
+        if (Number(form.turnaroundTime) < 6 || Number(form.turnaroundTime) > 72) {
+            newErrors.turnaroundTime = "Turnaround time must be between 6 and 72 hours.";
+        }
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             return;
         }
         
@@ -324,16 +349,34 @@ function ShopModal({ onClose, onSubmit, loading, initialData = null }) {
                                 <Field
                                     label={<>Price per Kilo <span className="text-[#8E8E93]">(₱)</span></>}
                                     value={form.price}
-                                    onChange={e => set("price", e.target.value)}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        set("price", val);
+                                        if (val !== "" && (Number(val) < 10 || Number(val) > 100)) {
+                                            setErrors(prev => ({ ...prev, price: "Price must be between ₱10 and ₱100" }));
+                                        } else {
+                                            setErrors(prev => ({ ...prev, price: null }));
+                                        }
+                                    }}
                                     type="number"
                                     placeholder="45.00"
+                                    error={errors.price}
                                 />
                                 <Field
                                     label={<>Turnaround Time <span className="text-[#8E8E93]">(hrs)</span></>}
                                     value={form.turnaroundTime}
-                                    onChange={e => set("turnaroundTime", e.target.value)}
+                                    onChange={e => {
+                                        const val = e.target.value;
+                                        set("turnaroundTime", val);
+                                        if (val !== "" && (Number(val) < 6 || Number(val) > 72)) {
+                                            setErrors(prev => ({ ...prev, turnaroundTime: "Time must be between 6 and 72 hours" }));
+                                        } else {
+                                            setErrors(prev => ({ ...prev, turnaroundTime: null }));
+                                        }
+                                    }}
                                     type="number"
                                     placeholder="24"
+                                    error={errors.turnaroundTime}
                                 />
                                 <div className="space-y-4 pt-2">
                                     <label className="block text-[14px] font-normal text-[#1D1D1F] border-b border-black/5 pb-2">

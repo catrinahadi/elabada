@@ -6,7 +6,7 @@ const shopSchema = new mongoose.Schema({
   ownerName: { type: String, default: "" },
   phone: { type: String, default: "" },
   address: { type: String, required: true },
-  price: { type: Number, default: 0 },
+  price: { type: Number, default: 10, min: 10, max: 100 },
   operatingHours: {
     type: Map,
     of: {
@@ -16,7 +16,7 @@ const shopSchema = new mongoose.Schema({
     },
     required: true
   },
-  turnaroundTime: { type: Number, default: 24 },
+  turnaroundTime: { type: Number, default: 24, min: 6, max: 72 },
   permitStatus: {
     type: String,
     enum: ["pending", "approved", "rejected"],

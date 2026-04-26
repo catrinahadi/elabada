@@ -40,6 +40,15 @@ exports.createShop = async (req, res) => {
         if (!name || !address) {
             return res.status(400).json({ message: "Name and address are required." });
         }
+        
+        if (Number(price) < 10 || Number(price) > 100) {
+            return res.status(400).json({ message: "Price must be between ₱10 and ₱100 per kilo." });
+        }
+        
+        if (Number(turnaroundTime) < 6 || Number(turnaroundTime) > 72) {
+            return res.status(400).json({ message: "Turnaround time must be between 6 and 72 hours." });
+        }
+
         const shop = await Shop.create({
             name, address, price: Number(price), turnaroundTime: Number(turnaroundTime), phone,
             operatingHours,
