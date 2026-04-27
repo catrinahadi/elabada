@@ -1780,13 +1780,13 @@ export default function ShopsPage() {
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center gap-1.5 shrink-0">
-                          <Clock className={`w-3.5 h-3.5 ${s.actualTurnaroundTime >= s.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`} />
-                          <span className={`text-[12px] font-medium lowercase ${s.actualTurnaroundTime >= s.turnaroundTime + 0.5 ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`}>
+                         <div className="flex items-center gap-1.5 shrink-0">
+                          <Clock className={`w-3.5 h-3.5 ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`} />
+                          <span className={`text-[12px] font-medium lowercase ${s.actualTurnaroundTime > s.turnaroundTime ? 'text-[#7B1113]' : 'text-[#1D1D1F]'}`}>
                             {s.turnaroundTime} hrs
                           </span>
                         </div>
-                        {s.actualTurnaroundTime >= s.turnaroundTime + 0.5 && (
+                        {s.actualTurnaroundTime > s.turnaroundTime && (
                           <div className="relative group/badge">
                             <div className="flex items-center px-1.5 py-[2px] rounded bg-[#FFF5F5] border border-[#7B1113]/25 shadow-sm cursor-help transition-all">
                               <span className="text-[10px] font-bold text-[#7B1113] uppercase tracking-wide leading-[1] whitespace-nowrap pt-[0.5px]">Delays Reported</span>
