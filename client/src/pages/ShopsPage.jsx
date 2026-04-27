@@ -825,7 +825,15 @@ function ShopDetailModal({ shop, reviews = [], onClose, onPosted, onShowComputat
 function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
   const conclusionText = useMemo(() => {
     if (!shop || !shop.details) return "";
-    const sortedByWeight = [...shop.details].sort((a, b) => b.weight - a.weight);
+    
+    // Calculate a performance rating (0-1) for each criterion based on distance to ideal
+    const detailsWithRating = shop.details.map(d => {
+      const denom = Math.abs(d.idealBest - d.idealWorst);
+      const rating = denom === 0 ? 1 : Math.abs(d.weightedValue - d.idealWorst) / denom;
+      return { ...d, rating };
+    });
+
+    const sortedByWeight = [...detailsWithRating].sort((a, b) => b.weight - a.weight);
     const topFactor = sortedByWeight[0];
     const labels = {
       price: 'affordable pricing',
@@ -855,7 +863,7 @@ function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
   }, [shop]);
 
   const getExplanation = (detail) => {
-    const { criterion, rating, actualValue, isBenefit, weight } = detail;
+    const { criterion, rawValue, isBenefit, weight, idealBest, idealWorst, weightedValue } = detail;
     const labels = {
       price: 'Price',
       turnaroundTime: 'Turnaround Time',
@@ -863,17 +871,21 @@ function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
       distance: 'Distance'
     };
 
+    // Calculate rating for the gauge/percentage
+    const denom = Math.abs(idealBest - idealWorst);
+    const rating = denom === 0 ? 1 : Math.abs(weightedValue - idealWorst) / denom;
+
     const isDelay = criterion === 'turnaroundTime' && shop.actualTurnaroundTime > shop.turnaroundTime;
 
     const percentage = Math.round(rating * 100);
     const weightPercent = Math.round(weight * 100);
     
-    // Format actual value for display
-    let formattedValue = actualValue;
-    if (criterion === 'price') formattedValue = `₱${actualValue}`;
-    else if (criterion === 'rating') formattedValue = `${actualValue} / 5`;
+    // Format raw value for display
+    let formattedValue = rawValue;
+    if (criterion === 'price') formattedValue = `₱${rawValue}`;
+    else if (criterion === 'rating') formattedValue = `${rawValue} / 5`;
     else if (criterion === 'turnaroundTime') {
-      formattedValue = isDelay ? `~${shop.actualTurnaroundTime}` : `${shop.turnaroundTime}`;
+      formattedValue = isDelay ? `~${shop.actualTurnaroundTime}` : `${rawValue}`;
     }
 
     return { 
@@ -881,7 +893,7 @@ function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
       percentage, 
       weightPercent,
       actualValue: formattedValue,
-      promisedValue: criterion === 'turnaroundTime' ? shop.turnaroundTime : null,
+      promisedValue: criterion === 'turnaroundTime' ? rawValue : null,
       isDelay,
       icon: criterion === 'price' ? DollarSign :
             criterion === 'turnaroundTime' ? Timer :
@@ -998,23 +1010,21 @@ function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
               <div className="absolute -top-20 -right-20 w-40 h-40 bg-[#04e672]/5 rounded-full blur-3xl pointer-events-none" />
               
               <div className="mb-6 relative z-10">
-                <h6 className="text-[16px] font-bold text-[#1D1D1F]">Impact on Score</h6>
-                <p className="text-[14px] font-normal text-[#014421]/70 mt-0.5">How each factor shaped your final match result</p>
+                <h6 className="text-[16px] font-bold text-[#1D1D1F]">Priority Weighting</h6>
+                <p className="text-[14px] font-normal text-[#014421]/70 mt-0.5">The importance of each factor based on your ranking</p>
               </div>
               
               <div className="flex-1 flex flex-col gap-3 relative z-10">
                 <div className="flex justify-between text-[11px] font-bold text-[#014421]/40 uppercase tracking-[0.1em] px-2 mb-2">
                   <span>Shop Data</span>
-                  <span>Impact on Score</span>
+                  <span>Priority Rank</span>
                 </div>
                 
                 {/* Sorted by weight to show mathematical dominance, but labeled by User's Rank if available */}
                 {[...shop.details].sort((a, b) => b.weight - a.weight).map((detail, idx) => {
                   const info = getExplanation(detail);
                   
-                  // Label them based on the User's explicit priority rank from Step 2
-                  const userRank = priorities ? priorities.indexOf(detail.criterion) + 1 : (idx + 1);
-                  const priorityText = idx === 0 ? 'Highest Impact' : idx === 1 ? 'Significant' : idx === 2 ? 'Moderate' : 'Minor Impact';
+                  const weightPercent = Math.round(detail.weight * 100);
                   const labels = { price: 'Price', turnaroundTime: 'Time', distance: 'Distance', rating: 'Rating' };
                   
                   return (
@@ -1026,8 +1036,8 @@ function ComputationDetailsModal({ shop, weights, priorities, onClose }) {
                         <span className="text-[13px] text-[#014421]/80 font-normal">{labels[detail.criterion]}</span>
                       </div>
                       <div className="text-right">
-                         <span className="text-[13px] md:text-[14px] font-normal text-[#014421] bg-[#E4EFE7]/50 px-3 py-1.5 rounded-full shadow-[0_2px_10px_rgba(1,68,33,0.04)] border border-[#014421]/15 whitespace-nowrap">
-                           {priorityText}
+                         <span className="text-[14px] md:text-[16px] font-normal text-[#014421] bg-[#E4EFE7]/50 px-3 py-1.5 rounded-full shadow-sm border border-[#014421]/15 whitespace-nowrap">
+                            {weightPercent}%
                          </span>
                       </div>
                     </div>
@@ -1434,12 +1444,11 @@ export default function ShopsPage() {
   const combinedWeights = useMemo(() => {
     const w = {};
     priorities.forEach((key, i) => {
-      // Multiply the slider weight by the priority-based multiplier
-      // This ensures both values influence the final decision
-      w[key] = (weights[key] || 1) * POSITION_WEIGHTS[i];
+      // Use strict position weights: 1st=40%, 2nd=30%, 3rd=20%, 4th=10%
+      w[key] = POSITION_WEIGHTS[i];
     });
     return w;
-  }, [priorities, weights]);
+  }, [priorities]);
 
   const shopsWithDistance = useMemo(() => {
     return shops.map(s => ({
